@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .contact-hero {
   background-color: #f8f9fa;
   
@@ -27,8 +29,9 @@
     border-color: #FFAB40;
     
     &:hover {
-      background-color: darken(#FFAB40, 10%);
-      border-color: darken(#FFAB40, 10%);
+background-color: color.adjust(#FFAB40, $lightness: -10%);
+border-color: color.adjust(#FFAB40, $lightness: -10%);
+
     }
   }
 }

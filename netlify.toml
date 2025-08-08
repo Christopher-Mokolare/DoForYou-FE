@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist/do-for-you"
+  functions = "netlify/functions"  # Only needed if adding serverless functions later
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,11 +1,12 @@
 // Import Bootstrap
 
 // Import global styles
-@import './assets/styles/variables';
+@use 'assets/styles/variables';
+@use "sass:color";
 
 // Custom styles
 body {
-  font-family: $font-family-base;
+  font-family: variables.$font-family-base;
   padding-top: 56px; // For fixed navbar
 }
 
