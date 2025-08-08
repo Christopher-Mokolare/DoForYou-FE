@@ -4,9 +4,11 @@
       <strong class="brand-text">DoForYou</strong>
       <span class="text-primary"><b class="dot">.</b></span>
     </a>
-    <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<button class="navbar-toggler gsap-hamburger" type="button" (click)="isMenuCollapsed = !isMenuCollapsed; animateHamburger()">
+  <div class="hamburger-box">
+    <div class="hamburger-inner"></div>
+  </div>
+</button>
     <div class="collapse navbar-collapse" [class.collapse]="!isMenuCollapsed" >
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">

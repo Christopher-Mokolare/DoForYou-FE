@@ -10,6 +10,7 @@
 
       .text-primary {
         color: #ffab40;
+        font-family: "Special Elite", serif;
       }
       .brand-text {
         font-family: "Special Elite", serif;
@@ -23,6 +24,17 @@
       }
     }
   }
+
+  .footer-bottom{
+      font-family: "Special Elite", serif;
+
+  }
+  .dot {
+        color: #ffab40;
+        font-size: 2.2rem;
+        line-height: 0.7;
+        margin-left: 2px;
+      }
 
   .social-links {
     a {

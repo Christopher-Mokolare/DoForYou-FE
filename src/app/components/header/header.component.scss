@@ -54,4 +54,56 @@
   .btn-info {
     font-weight: 600;
   }
+  .gsap-hamburger {
+  border: none;
+  background: transparent;
+  padding: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  
+  .hamburger-box {
+    width: 24px;
+    height: 18px;
+    display: inline-block;
+    position: relative;
+  }
+  
+  .hamburger-inner {
+    display: block;
+    top: 50%;
+    margin-top: -1px;
+    
+    &, &:before, &:after {
+      width: 24px;
+      height: 2px;
+      background-color: var(--text-color);
+      border-radius: 1px;
+      position: absolute;
+      transition-property: transform;
+      transition-duration: 0.15s;
+      transition-timing-function: ease;
+    }
+    
+    &:before, &:after {
+      content: "";
+      display: block;
+    }
+    
+    &:before {
+      top: -6px;
+    }
+    
+    &:after {
+      bottom: -6px;
+    }
+  }
+  
+  &:hover {
+    .hamburger-inner,
+    .hamburger-inner:before,
+    .hamburger-inner:after {
+      background-color: var(--primary-color);
+    }
+  }
+}
 }
