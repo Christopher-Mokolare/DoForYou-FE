@@ -1,0 +1,34 @@
+.contact-hero {
+  background-color: #f8f9fa;
+  
+  h1 {
+    font-weight: 700;
+  }
+}
+
+.contact-form-section {
+  .form-control {
+    padding: 1rem;
+    border-radius: 0;
+    border: 1px solid #dee2e6;
+    
+    &:focus {
+      box-shadow: none;
+      border-color: #FFAB40;
+    }
+  }
+  
+  textarea {
+    min-height: 200px;
+  }
+  
+  .btn-primary {
+    background-color: #FFAB40;
+    border-color: #FFAB40;
+    
+    &:hover {
+      background-color: darken(#FFAB40, 10%);
+      border-color: darken(#FFAB40, 10%);
+    }
+  }
+}

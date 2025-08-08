@@ -1,0 +1,20 @@
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+  border: none;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  .card-title {
+    color: #FFAB40;
+    font-weight: 600;
+    min-height: 3rem;
+  }
+
+  .card-footer {
+    padding-top: 0;
+  }
+}

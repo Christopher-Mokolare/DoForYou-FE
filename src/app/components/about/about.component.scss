@@ -1,0 +1,31 @@
+.about-hero {
+  background-color: #f8f9fa;
+  
+  h1 {
+    font-weight: 700;
+  }
+}
+
+.about-content {
+  img {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-orange {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.team-section {
+  .team-card {
+    transition: transform 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-10px);
+    }
+    
+    img {
+      border: 3px solid #FFAB40;
+    }
+  }
+}

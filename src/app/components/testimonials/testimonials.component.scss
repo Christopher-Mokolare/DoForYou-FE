@@ -1,0 +1,42 @@
+.testimonials-section {
+  .section-title {
+    position: relative;
+    padding-bottom: 1rem;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+  }
+
+  .testimonial-card {
+    transition: transform 0.3s ease;
+    border-top: 3px solid var(--primary-color);
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    p {
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      strong {
+        display: block;
+        color: var(--primary-color);
+      }
+      
+      span {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+    }
+  }
+}

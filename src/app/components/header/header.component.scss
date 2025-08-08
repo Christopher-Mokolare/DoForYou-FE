@@ -1,0 +1,55 @@
+.navbar {
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  backdrop-filter: blur(10px); // optional for frosted glass effect
+  -webkit-backdrop-filter: blur(10px); // for Safari
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-size: 1.8rem;
+
+    .brand-text {
+      font-family: "Special Elite", serif;
+      font-weight: normal;
+    }
+
+    .text-primary {
+      color: var(--primary-color);
+    }
+
+    .dot {
+      color: #ffab40;
+      font-size: 2.2rem;
+      line-height: 0.7;
+      margin-left: 4px;
+    }
+  }
+
+  .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    color: var(--text-color);
+    font-family: "Special Elite", serif;
+    &.active,
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .btn-orange {
+    background-color: var(--primary-color);
+    border-color: darken(#ffab40, 5%);
+    font-weight: 600;
+    margin-top: -5px;
+
+    &:hover {
+      background-color:(#f99d24, 10%);
+    }
+  }
+
+  .btn-info {
+    font-weight: 600;
+  }
+}

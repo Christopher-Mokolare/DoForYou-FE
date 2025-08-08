@@ -1,1 +1,31 @@
-/* You can add global styles to this file, and also import other style files */
+// Import Bootstrap
+
+// Import global styles
+@import './assets/styles/variables';
+
+// Custom styles
+body {
+  font-family: $font-family-base;
+  padding-top: 56px; // For fixed navbar
+}
+
+.btn-orange {
+  background-color: var(--primary-color);
+  // border-color: darken(#FFAB40, 5%);
+  color: white;
+
+  &:hover {
+    // background-color: darken(#FFAB40, 10%);
+    // border-color: darken(#FFAB40, 15%);
+    color: white;
+  }
+}
+
+// Import component styles
+// @import '../app/app.component';
+// @import '../app/components/header/header.component';
+// @import '../app/components/footer/footer.component';
+// @import '../app/components/home/home.component';
+// @import '../app/components/about/about.component';
+// @import '../app/components/contact/contact.component';
+// @import '../app/components/testimonials/testimonials.component';
