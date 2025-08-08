@@ -76,7 +76,7 @@
     &, &:before, &:after {
       width: 24px;
       height: 2px;
-      background-color: var(--text-color);
+      background-color: var(--primary-color);
       border-radius: 1px;
       position: absolute;
       transition-property: transform;
@@ -94,6 +94,7 @@
     }
     
     &:after {
+      
       bottom: -6px;
     }
   }
@@ -102,7 +103,8 @@
     .hamburger-inner,
     .hamburger-inner:before,
     .hamburger-inner:after {
-      background-color: var(--primary-color);
+      background-color: #138496;
+
     }
   }
 }
