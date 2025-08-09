@@ -210,4 +210,18 @@ color: white;}
         order: 2;
         margin-top: 2rem;
     }
+    .runner-section {
+  position: relative;
+  
+  .formed-logo {
+    font-family: "Special Elite", serif;
+    font-size: 2rem;
+    position: absolute;
+    opacity: 0;
+    
+    .dot {
+      color: var(--primary-color);
+    }
+  }
+}
 }
