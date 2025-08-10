@@ -1,60 +1,75 @@
-// errands.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of } from 'rxjs'; // Add 'of' for mock data
+import { Observable, catchError, map, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Errand {
   timestamp: string;
   name_and_surname: string;
   contact_number: string;
-  task_description: string;
-  area_suburb: string;
+  task_description?: string;
+  area_suburb?: string;
   date_time_needed: string;
-  budget: string;
+  budget?: string;
+  taskid: string;
+  status: string;
   payment_verified: string;
+  notes?: string;
+  helper_details?: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ErrandsService {
-  private apiUrl = 'YOUR_APPS_SCRIPT_URL?apiKey=YOUR_SECRET_KEY';
+  private readonly apiEndpoint = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  // Updated to use mock data if API fails
-  getErrands(): Observable<Errand[]> {
-    return this.http.get<Errand[]>(this.apiUrl).pipe(
-      // Add error handling to return mock data if API fails
+  getVerifiedTasks(): Observable<Errand[]> {
+    return this.http.jsonp(
+      `${this.apiEndpoint}?apiKey=${environment.apiKey}`,
+      'callback' // this must match the parameter name in your script (e.parameter.callback)
+    ).pipe(
+      map((response: any) => this.processTasks(response)),
       catchError(error => {
-        console.error('API failed, using mock data', error);
-        return of(this.getMockData());
+        console.error('JSONP API Error:', error);
+        return of([]);
       })
     );
   }
 
-  private getMockData(): Errand[] {
-    return [
-      {
-        timestamp: new Date().toISOString(),
-        name_and_surname: 'Test User',
-        contact_number: '27781234567',
-        task_description: 'Help me assemble IKEA furniture',
-        area_suburb: 'Johannesburg',
-        date_time_needed: new Date(Date.now() + 86400000).toISOString(),
-        budget: '350',
-        payment_verified: 'YES'
-      },
-      {
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        name_and_surname: 'Another User',
-        contact_number: '27823334455',
-        task_description: 'Need a ride to the airport',
-        area_suburb: 'Pretoria',
-        date_time_needed: new Date(Date.now() + 172800000).toISOString(),
-        budget: '150',
-        payment_verified: 'YES'
-      }
-    ];
+  private processTasks(response: any): Errand[] {
+    if (!response) return [];
+
+    const tasks = Array.isArray(response) ? response : [response];
+
+    return tasks
+      .filter((task: any) => {
+        const status = task.status ? task.status.toString().toUpperCase() : '';
+        const paymentVerified = task.payment_verified ? task.payment_verified.toString().toUpperCase() : '';
+        const helper = task.helper || task.helper_details || '';
+
+        return paymentVerified.includes('YES') &&
+               (status.includes('VERIFIED') || status.includes('OPEN')) &&
+               (!helper || helper.toString().trim() === '');
+      })
+      .map((task: any) => this.normalizeTask(task));
   }
+
+private normalizeTask(task: any): Errand {
+  return {
+    timestamp: task.timestamp || '',
+    name_and_surname: task.name_and_surname || task.name || '',
+    contact_number: task.contact_number || task.contact || '',
+    task_description: task['task_description_(include_as_much_detail_as_possible)'] || '',
+    area_suburb: task['area/suburb'] || '',
+    date_time_needed: task['date_&_time_needed'] || '',
+    budget: task['budget_(please_send_pop_to_dfy_on_0795258611)_'] || '0',
+    taskid: task.taskid || task.taskId || '',
+    status: task.status || '',
+    payment_verified: task.payment_verified || 'NO',
+    notes: task.notes || task['optional_notes'] || '',
+    helper_details: task.helper_details || task.helper || ''
+  };
+}
+
 }

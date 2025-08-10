@@ -2,7 +2,12 @@
   <div class="row mb-4">
     <div class="col-12 text-center">
       <h1 class="mb-3">Available Tasks</h1>
-      <p class="lead">Browse and accept tasks that match your skills</p>
+      <p class="lead" *ngIf="lastUpdated">
+        Last updated: {{ lastUpdated | date:'mediumTime' }}
+        <button (click)="refreshErrands()" class="btn btn-sm btn-link">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </p>
     </div>
   </div>
 
@@ -11,10 +16,12 @@
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
+    <p class="mt-2">Loading available tasks...</p>
   </div>
 
   <!-- Error State -->
   <div *ngIf="error" class="alert alert-danger">
+    <i class="fas fa-exclamation-circle me-2"></i>
     {{ error }}
     <button (click)="loadErrands()" class="btn btn-sm btn-outline-danger ms-3">
       Retry
@@ -22,21 +29,29 @@
   </div>
 
   <!-- Errands List -->
-  <div class="row g-4">
-    <div *ngFor="let errand of errands" class="col-lg-4 col-md-6">
+  <div class="row g-4" *ngIf="!isLoading && !error">
+    <div *ngFor="let errand of errands; trackBy: trackByErrand" class="col-lg-4 col-md-6">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">{{ errand.task_description }}</h5>
+          <h5 class="card-title">
+            {{ errand.task_description || "" | truncate:100 }}
+            <span *ngIf="errand.payment_verified === 'YES'" class="badge bg-success ms-2">
+              <i class="fas fa-check-circle"></i> Verified
+            </span>
+          </h5>
           <div class="card-text">
             <p><strong>Location:</strong> {{ errand.area_suburb }}</p>
             <p><strong>When Needed:</strong> {{ errand.date_time_needed | date:'medium' }}</p>
-            <p><strong>Budget:</strong> R{{ errand.budget }}</p>
+            <p><strong>Budget:</strong> {{ errand.budget || '0' }}</p>
             <p><strong>Posted:</strong> {{ errand.timestamp | date:'medium' }}</p>
+            <p *ngIf="errand.notes"><strong>Notes:</strong> {{ errand.notes }}</p>
           </div>
         </div>
         <div class="card-footer bg-white border-0">
           <button (click)="acceptErrand(errand)" 
-                  class="btn btn-orange w-100">
+                  class="btn btn-orange w-100"
+                  [disabled]="!errand.contact_number">
+            <i class="fas fa-handshake me-2"></i>
             Accept Task
           </button>
         </div>
@@ -44,14 +59,13 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoading && errands.length === 0" class="col-12">
+    <div *ngIf="errands.length === 0" class="col-12">
       <div class="card">
         <div class="card-body text-center py-5">
           <h5>No available tasks at the moment</h5>
           <p>Check back later or post your own errand!</p>
-          <a href="https://bit.ly/DFYTaskRequest" 
-             target="_blank"
-             class="btn btn-orange">
+          <a [href]="taskRequestForm" target="_blank" class="btn btn-orange">
+            <i class="fas fa-plus-circle me-2"></i>
             Post an Errand
           </a>
         </div>

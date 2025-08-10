@@ -1,3 +1,4 @@
+// src/app/pipes/truncate.pipe.ts
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
@@ -5,15 +6,13 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class TruncatePipe implements PipeTransform {
-  transform(value: string, limit = 50, completeWords = true, ellipsis = '...'): string {
+  transform(value: string, limit = 100, completeWords = true, ellipsis = '...'): string {
     if (!value) return '';
     if (value.length <= limit) return value;
 
     if (completeWords) {
       limit = value.substr(0, limit).lastIndexOf(' ');
-      if (limit === -1) return value; // No spaces found
     }
-
     return `${value.substr(0, limit)}${ellipsis}`;
   }
 }
