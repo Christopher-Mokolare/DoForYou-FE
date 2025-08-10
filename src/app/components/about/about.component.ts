@@ -15,10 +15,10 @@ export class AboutComponent {
       position: 'Founder and CEO',
       image: 'assets/images/ashwin.PNG'
     },
-    {
-      name: 'Whoopi Dinko',
-      position: 'Customer Relations and Success',
-      image: 'assets/images/dinko.PNG'
-    },
+    // {
+    //   name: 'Whoopi Dinko',
+    //   position: 'Customer Relations and Success',
+    //   image: 'assets/images/dinko.PNG'
+    // },
   ];
 }
