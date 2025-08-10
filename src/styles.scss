@@ -1,32 +1,197 @@
-// Import Bootstrap
-
-// Import global styles
-@use 'assets/styles/variables';
+// styles.scss - Global styles
 @use "sass:color";
 
-// Custom styles
+// Variables
+:root {
+  --primary: #FF6B35;
+  --primary-color: #FFAB40;
+  --secondary: #17a2b8;
+  --secondary-color: #f8f9fa;
+  --dark: #292929;
+  --text-color: #212529;
+  --light: #f8f9fa;
+  --light-color: #ffffff;
+  --dark-color: #343a40;
+  --gray: #6c757d;
+  --orange: #FFAB40;
+}
+
+// Fonts
+$font-family-base: 'Work Sans', sans-serif;
+$font-family-special: 'Special Elite', serif;
+
+// Base styles
 body {
-  font-family: variables.$font-family-base;
+  font-family: $font-family-base;
+  color: var(--text-color);
+  line-height: 1.6;
   padding-top: 56px; // For fixed navbar
 }
 
-.btn-orange {
-  background-color: var(--primary-color);
-  // border-color: darken(#FFAB40, 5%);
-  color: white;
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  font-family: $font-family-special;
+}
 
-  &:hover {
-    // background-color: darken(#FFAB40, 10%);
-    // border-color: darken(#FFAB40, 15%);
+// Utility classes
+.brand-font {
+  font-family: $font-family-special;
+}
+
+.dot {
+  color: var(--primary-color);
+  font-size: 2.2rem;
+  line-height: 0.7;
+  margin-left: 4px;
+}
+
+// Buttons
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: $font-family-special;
+  
+  &-orange {
+    background-color: var(--orange);
+    border-color: color.adjust(#ffab40, $lightness: -5%);
     color: white;
+    font-weight: 600;
+
+    &:hover {
+      background-color: color.adjust(#ffab40, $lightness: -10%);
+      border-color: color.adjust(#ffab40, $lightness: -10%);
+      color: white;
+      transform: translateY(-2px);
+    }
+  }
+
+  &-info {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+
+    &:hover {
+      background-color: #138496;
+      border-color: #138496;
+      color: white;
+      transform: translateY(-2px);
+    }
   }
 }
 
-// Import component styles
-// @import '../app/app.component';
-// @import '../app/components/header/header.component';
-// @import '../app/components/footer/footer.component';
-// @import '../app/components/home/home.component';
-// @import '../app/components/about/about.component';
-// @import '../app/components/contact/contact.component';
-// @import '../app/components/testimonials/testimonials.component';
+// Section titles
+.section-title {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-family: $font-family-special;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: var(--primary);
+  }
+}
+
+// Cards
+.card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Navbar
+.navbar {
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-size: 1.8rem;
+
+    .brand-text {
+      font-family: $font-family-special;
+      font-weight: normal;
+    }
+  }
+
+  .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    color: var(--text-color);
+    font-family: $font-family-special;
+    
+    &.active,
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+}
+
+// Hero section
+.hero-section {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    background-blend-mode: multiply;
+    z-index: -1;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 992px) {
+  .hero-section h1 {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    text-align: center;
+    
+    p {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}

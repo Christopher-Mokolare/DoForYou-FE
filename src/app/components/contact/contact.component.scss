@@ -1,7 +1,5 @@
-@use "sass:color";
-
 .contact-hero {
-  background-color: #f8f9fa;
+  background-color: var(--secondary-color);
   
   h1 {
     font-weight: 700;
@@ -16,22 +14,11 @@
     
     &:focus {
       box-shadow: none;
-      border-color: #FFAB40;
+      border-color: var(--primary-color);
     }
   }
   
   textarea {
     min-height: 200px;
-  }
-  
-  .btn-primary {
-    background-color: #FFAB40;
-    border-color: #FFAB40;
-    
-    &:hover {
-background-color: color.adjust(#FFAB40, $lightness: -10%);
-border-color: color.adjust(#FFAB40, $lightness: -10%);
-
-    }
   }
 }

@@ -1,50 +1,100 @@
-<footer class="site-footer py-5 bg-dark text-white">
+<footer class="site-footer">
   <div class="container">
-    <div class="row">
-      <div class="col-lg-4">
-        <h2 class="footer-heading mb-4">
-          <div class="site-logo">
-    <a routerLink="/">
-      <strong class="brand-text">DoForYou</strong>
-      <span class="text-primary"><b class="dot">.</b></span>
-    </a>          </div>
-        </h2>
-        <p>We are a Freelance Platform that allows ordinary South Africans to perform tasks for each other,
-          providing an opportunity for you to earn extra cash</p>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="site-logo">
+          <a routerLink="/" class="logo-link">
+            <strong class="brand-text">DoForYou</strong>
+            <span class="text-primary"><b class="dot">.</b></span>
+          </a>
+        </div>
+        <p class="brand-description">
+          Connecting South Africans through meaningful tasks and opportunities
+        </p>
+
         <div class="social-links">
-          <a href="https://twitter.com/DoForYouSouthA1" class="text-white me-3"><i class="bi bi-twitter"></i></a>
-          <a href="https://web.facebook.com/doforyousoutha1" class="text-white me-3"><i class="bi bi-facebook"></i></a>
-          <a href="https://www.instagram.com/doforyou_za/" class="text-white"><i class="bi bi-instagram"></i></a>
+          <a
+            href="https://twitter.com/DoForYouSouthA1"
+            class="social-icon"
+            aria-label="Twitter"
+          >
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a
+            href="https://web.facebook.com/doforyousoutha1"
+            class="social-icon"
+            aria-label="Facebook"
+          >
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a
+            href="https://www.instagram.com/doforyou_za/"
+            class="social-icon"
+            aria-label="Instagram"
+          >
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a
+            href="https://wa.me/27614317474"
+            class="social-icon"
+            aria-label="WhatsApp"
+          >
+            <i class="fab fa-whatsapp"></i>
+          </a>
         </div>
       </div>
-      <div class="col-lg-7 ms-auto">
-        <div class="row">
-          <div class="col-lg-6">
-            <h2 class="footer-heading mb-4">Quick Links</h2>
-            <ul class="list-unstyled">
-              <li><a href="#" class="text-white pb-1 d-block">Our privacy policy</a></li>
-              <li><a href="#" class="text-white pb-1 d-block">Terms of service</a></li>
-              <li><a routerLink="/browse-errands" class="text-white pb-1 d-block">Browse errands</a></li>
-              <li><a routerLink="/post-errand" class="text-white pb-1 d-block">Post an errand</a></li>
-            </ul>
-          </div>
-          <div class="col-lg-6">
-            <h2 class="footer-heading mb-4">Quick Support</h2>
-            <p>Contact us on any of the channels below and we will get back to you ASAP!</p>
-            <!-- <h5><a href="mailto:info@doforyou.co.za" class="text-white"><i class="bi bi-envelope me-2"></i>info@doforyou.co.za</a></h5> -->
-            <h5><a href="https://wa.me/27614317474" class="text-white"><i class="bi bi-whatsapp me-2"></i>+2761 431 7474</a></h5>
+
+      <div class="footer-links">
+        <div class="links-column">
+          <h3 class="footer-heading">Quick Links</h3>
+          <ul class="footer-menu">
+            <li><a routerLink="/about" class="footer-link">About Us</a></li>
+            <li><a routerLink="/contact" class="footer-link">Contact</a></li>
+            <li>
+              <a routerLink="/browse-errands" class="footer-link"
+                >Browse Errands</a
+              >
+            </li>
+            <li>
+              <a routerLink="/post-errand" class="footer-link"
+                >Post an Errand</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="links-column">
+          <h3 class="footer-heading">Legal</h3>
+          <ul class="footer-menu">
+            <li><a href="#" class="footer-link">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link">Terms of Service</a></li>
+            <li><a href="#" class="footer-link">Cookie Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="links-column">
+          <h3 class="footer-heading">Support</h3>
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-phone-alt contact-icon"></i>
+              <span>+27 61 431 7474</span>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-envelope contact-icon"></i>
+              <span>help&#64;doforyou.co.za</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="row pt-5 mt-5 text-center">
-      <div class="col-md-12">
-        <div class="border-top pt-5">
-          <p class="mb-0 text-white">
-            Copyright &copy; {{currentYear}} All rights reserved |
-            <strong class="footer-bottom">DoForYou</strong><span ><b class="dot">.</b></span>
-          </p>
-        </div>
+
+    <div class="footer-bottom">
+      <div class="copyright">
+        &copy; {{ currentYear }} DoForYou<span class="dot">.</span> All rights
+        reserved.
+      </div>
+      <div class="made-with-love">
+        Made with <i class="fas fa-heart heart-icon"></i> in South Africa
       </div>
     </div>
   </div>
