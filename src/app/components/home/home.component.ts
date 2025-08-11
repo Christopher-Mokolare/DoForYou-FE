@@ -25,19 +25,19 @@ export class HomeComponent implements AfterViewInit {
       title: 'Post an errand',
       description:
         'Need it done? We have people lined to do your errand at a price set by YOU! Post your errand today and have it done by a verified DFY Runner!',
-      image: 'assets/images/step1@2x.png',
+      image: 'assets/images/image3.jpeg',
     },
     {
       title: 'Run an errand',
       description:
         'Browse errands and if you are happy with the job, price and location, simply select the errand, run the errand and get paid for your efforts.',
-      image: 'assets/images/feature2.jpg',
+      image: 'assets/images/image2.jpeg',
     },
     {
       title: 'It goes both ways',
       description:
         "You can both run and post errands, as many times as you want! You set the fees and you get paid. You're your own boss!",
-      image: 'assets/images/feature3.jpg',
+      image: 'assets/images/image1.jpeg',
     },
   ];
 
