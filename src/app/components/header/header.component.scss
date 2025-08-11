@@ -22,7 +22,7 @@
     }
 
     .dot {
-      color:var(--primary-color);
+      color: var(--primary-color);
       font-size: 3rem;
       line-height: 0.7;
       margin-left: 4px;
@@ -34,7 +34,7 @@
     padding: 0.5rem 1rem;
     color: var(--text-color);
     font-family: "Special Elite", serif;
-    
+
     &.active,
     &:hover {
       color: var(--primary-color);
@@ -45,6 +45,10 @@
       color: var(--primary-color) !important;
       text-align: center;
       padding: 0.75rem 1rem;
+
+      &.active {
+        color: #138496 !important;
+      }
     }
   }
 
@@ -114,24 +118,23 @@
       margin: 0.5rem auto;
       display: block;
       width: 80%;
-      
-      
+
       &:before {
         border-color: var(--primary-color);
       }
-      
+
       .pulse-dot {
         background-color: var(--primary-color);
       }
-      
+
       &:hover {
         color: var(--primary-color) !important;
-        
+
         &:before {
           border-color: var(--primary-color);
           transform: none;
         }
-        
+
         .pulse-dot {
           background-color: var(--primary-color);
         }
@@ -210,6 +213,7 @@
     box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
   }
 }
+
 @media (max-width: 992px) {
   .navbar {
     background-color: rgba(255, 255, 255, 0.85);

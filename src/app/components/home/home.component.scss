@@ -76,42 +76,34 @@ h1, h2, h3, h4, h5 {
 
 /* Buttons */
 .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    font-family: "Special Elite", serif;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .btn-orange {
-    background-color: var(--orange);
-    border-color: var(--orange);
-    color: white;
-        border-color: #e6912a;
-
+  background-color: var(--orange);
+  border-color: var(--orange);
+  color: white;
 }
 
 .btn-orange:hover {
-    background-color: #e6912a;
-        border-color: #138496;
-    color: white;
-    transform: translateY(-2px);
+  background-color: #e6912a;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .btn-info {
-    background-color: var(--secondary);
-    border-color: var(--secondary);
-    color: white;
-        border-color: #138496;
-
+  background-color: var(--secondary);
+  border-color: var(--secondary);
+  color: white;
 }
 
 .btn-info:hover {
-    background-color: #138496;
-        border-color: #e6912a;
-    color: white;
-    transform: translateY(-2px);
-
+  background-color: #138496;
+  color: white;
+  transform: translateY(-2px);
 }
 
 /* Video Section */
