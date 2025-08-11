@@ -21,6 +21,7 @@
 
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
+      gap: 2rem;
     }
   }
 
@@ -33,7 +34,7 @@
         align-items: center;
         text-decoration: none;
         color: white;
-        font-size: 1.8rem;
+        font-size: clamp(1.5rem, 2vw, 1.8rem);
         transition: all 0.3s ease;
 
         &:hover {
@@ -47,7 +48,7 @@
 
         .dot {
           color: var(--primary-color);
-          font-size: 2.2rem;
+          font-size: clamp(1.8rem, 2.2vw, 2.2rem);
           line-height: 0.7;
           margin-left: 4px;
         }
@@ -58,25 +59,33 @@
       color: rgba(white, 0.7);
       margin-bottom: 2rem;
       line-height: 1.6;
+      font-size: clamp(0.9rem, 1.05vw, 1rem);
     }
   }
 
   .social-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
 
     .social-icon {
       color: white;
-      font-size: 1.2rem;
+      font-size: 1rem;
       transition: all 0.3s ease;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: rgba(white, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
+
+      @media (min-width: 576px) {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
 
       &:hover {
         color: white;
@@ -89,14 +98,42 @@
   .footer-links {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    gap: 1.5rem;
 
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-areas: 
+        "quicklinks legal"
+        "support support";
+    }
+
+    @media (max-width: 576px) {
+      display: flex;
+      flex-direction: column;
     }
   }
 
   .links-column {
+    &:first-child {
+      @media (max-width: 768px) {
+        grid-area: quicklinks;
+      }
+    }
+
+    &:nth-child(2) {
+      @media (max-width: 768px) {
+        grid-area: legal;
+      }
+    }
+
+    &:last-child {
+      @media (max-width: 768px) {
+        grid-area: support;
+        text-align: center;
+        margin-top: 2rem;
+      }
+    }
+
     h3.footer-heading {
       color: white;
       font-size: 1.1rem;
@@ -112,10 +149,8 @@
         width: 40px;
         height: 2px;
         background: var(--primary-color);
-            cursor: pointer;
       }
     }
-    
   }
 
   .footer-menu {
@@ -132,11 +167,11 @@
       text-decoration: none;
       transition: all 0.3s ease;
       font-size: 0.95rem;
+      display: inline-block;
 
       &:hover {
         color: var(--primary-color);
         padding-left: 5px;
-        cursor: pointer;
       }
     }
   }
@@ -148,13 +183,19 @@
       margin-bottom: 1rem;
       color: rgba(white, 0.7);
       font-size: 0.95rem;
+      line-height: 1.4;
+      word-break: break-all;
 
       .contact-icon {
         margin-right: 0.75rem;
         color: var(--primary-color);
-        width: 20px;
+        min-width: 20px;
         text-align: center;
       }
+
+      // .fa-whatsapp {
+      //   color: #25D366; // WhatsApp brand color
+      // }
     }
   }
 
@@ -171,11 +212,17 @@
     @media (min-width: 576px) {
       flex-direction: row;
       justify-content: space-between;
+      text-align: left;
     }
 
     .copyright {
       color: rgba(white, 0.6);
       font-size: 0.9rem;
+      order: 2;
+
+      @media (min-width: 576px) {
+        order: 1;
+      }
 
       .dot {
         color: var(--primary-color);
@@ -185,6 +232,11 @@
     .made-with-love {
       color: rgba(white, 0.6);
       font-size: 0.9rem;
+      order: 1;
+
+      @media (min-width: 576px) {
+        order: 2;
+      }
 
       .heart-icon {
         color: var(--primary-color);
