@@ -1,3 +1,5 @@
+@import "src/styles.scss";
+
 .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 8px;
@@ -17,4 +19,17 @@
   .card-footer {
     padding-top: 0;
   }
+}
+
+/* Spinner & Refresh icon color */
+.spin {
+  color: var(--primary);
+}
+
+.btn-link{
+color: var(--primary);
+}
+
+.spinner-border.spin {
+  border-color: var(--primary) transparent transparent transparent !important;
 }

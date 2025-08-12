@@ -6,8 +6,8 @@
         <p class="lead mb-5">We are a Freelance Platform that allows ordinary South Africans to perform
           tasks for each other, providing an opportunity for you to earn extra cash</p>
         <div class="d-flex gap-3">
-          <a routerLink="/browse-errands" class="btn btn-info btn-sm text-white">Browse Errands</a>
-          <a  (click)="postErrand()" class="btn btn-orange btn-sm text-white">Post An Errand</a>
+          <a routerLink="/browse-errands" class="btn btn-info btn-sm text-white" (click)="scrollToTop()">Browse Errands</a>
+          <a  (click)="postErrand()" class="btn btn-orange btn-sm text-white" >Post An Errand</a>
         </div>
       </div>
       <div class="col-lg-6">
@@ -68,7 +68,7 @@
       <div class="col-lg-6">
         <h2 >Become a runner</h2>
         <h4 class="mb-4">Start running errands and getting paid</h4>
-        <a routerLink="/browse-errands" class="btn btn-orange btn-lg text-white">Browse Errands</a>
+        <a routerLink="/browse-errands"  class="btn btn-orange btn-lg text-white" (click)="scrollToTop()" >Browse Errands</a>
       </div>
     </div>
   </div>

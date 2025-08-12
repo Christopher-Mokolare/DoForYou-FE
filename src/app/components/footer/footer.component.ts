@@ -12,8 +12,8 @@ import { RouterLink,Router } from '@angular/router';
 export class FooterComponent {
   isMenuCollapsed = true;
   currentYear = new Date().getFullYear();
-    constructor(private router: Router) {}
-
+  constructor(private router: Router) {}
+  
  scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

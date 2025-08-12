@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DataService } from '../../services/data.service';
 import { TestimonialsComponent } from '../testimonials/testimonials.component';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +19,16 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild('runnerSection') runnerSection!: ElementRef;
   @ViewChild('runnerImage') runnerImage!: ElementRef;
   @ViewChild('runnerContent') runnerContent!: ElementRef;
+
+ scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  navigateTo(route: string) {
+    this.router.navigate([route]).then(() => {
+      this.scrollToTop();
+    });
+  }
 
   features = [
     {
@@ -41,7 +51,7 @@ export class HomeComponent implements AfterViewInit {
     },
   ];
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService,private router: Router) {}
 
   ngAfterViewInit() {
     this.setupVideoIntersectionObserver();
