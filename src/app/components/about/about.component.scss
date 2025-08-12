@@ -1,27 +1,263 @@
+@import "src/styles.scss";
+
+/* ========== ROOT VARIABLES ========== */
+:root {
+  --primary: #FF6B35;
+  --secondary: #17a2b8;
+  --primary-rgb: 255, 107, 53;
+  --secondary-rgb: 23, 162, 184;
+  --dark: #292929;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --gray: #6c757d;
+  --orange: #FFAB40;
+}
+
+/* ========== BASE STYLES ========== */
+.about-hero,
+.about-mission,
+.about-story,
+.milestones-section,
+.team-section,
+.cta-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.py-6 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.min-vh-60 {
+  min-height: 60vh;
+}
+
+.rounded-4 {
+  border-radius: 1rem;
+}
+
+.z-index-1 {
+  z-index: 1;
+}
+
+/* ========== HERO SECTION ========== */
 .about-hero {
-  background-color: var(--secondary-color);
-  
+  background-color: var(--primary); /* Fallback color */
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.7), 
+      rgba(0, 0, 0, 0.7)
+    ), 
+    url('/assets/public/banner2.jpg'); /* need a fiiting image for the about-hero */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+    background-attachment: fixed;
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg, 
+      rgba(var(--primary-rgb), 0.3) 0%, 
+      rgba(var(--secondary-rgb), 0.3) 100%
+    );
+    z-index: 0;
+  }
+
   h1 {
-    font-weight: 700;
+    color: var(--white);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .lead {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  @media (max-width: 768px) {
+    background-attachment: scroll;
+    h1 {
+      font-size: 2.5rem;
+    }
   }
 }
 
-.about-content {
-  img {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  }
-}
+/* ========== MISSION SECTION ========== */
+.about-mission {
+  background-color: var(--light);
 
-.team-section {
-  .team-card {
-    transition: transform 0.3s ease;
+  .mission-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: var(--white);
     
     &:hover {
-      transform: translateY(-10px);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
+  }
+  
+  .icon-box {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(var(--primary));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: red 2px solid rgba(var(--primary-rgb), 0.1);
+    
+    i {
+      color: var(--primary);
+      font-size: 2rem;
+    }
+  }
+}
+
+/* ========== STORY SECTION ========== */
+.section-with-image {
+  position: relative;
+  background: var(--light); // section background
+  overflow: hidden;
+
+  .bg-image {
+    position: absolute;
+    inset: 0; // cover entire section
+    background: 
+      linear-gradient(to bottom, rgba(255, 255, 255, 0) 70%, var(--light) 100%),
+      url('/assets/images/your-image.jpg') center/cover no-repeat;
+    z-index: 0;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 2rem;
+  }
+}
+
+/* ========== TEAM SECTION ========== */
+.team-section {
+  .team-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: var(--white);
+    border-radius: 1rem;
+    overflow: hidden;
+    
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  .team-image-wrapper {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    padding: 5px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    margin: 0 auto 1.5rem;
     
     img {
-      border: 3px solid var(--primary-color);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: 3px solid var(--white);
+      border-radius: 50%;
+      
+      /* Fallback if image missing */
+      &:after {
+        content: "\f007"; /* User icon */
+        font-family: "Font Awesome 6 Free";
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--light);
+        color: var(--primary);
+      }
     }
+  }
+  
+  .social-links {
+    margin-top: 1rem;
+    
+    a {
+      color: var(--primary);
+      transition: all 0.3s ease;
+      margin: 0 0.5rem;
+      display: inline-block;
+      
+      &:hover {
+        color: var(--primary);
+        transform: translateY(-3px);
+      }
+    }
+  }
+}
+
+/* ========== CTA SECTION ========== */
+.cta-section {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: var(--white);
+  
+  .btn-light {
+    background-color: var(--primary);
+    color: var(--white);
+    transition: all 0.3s ease;
+    font-weight: 600;
+    
+    &:hover {
+      background-color:transparent;
+      transform: translateY(-3px);
+      border: var(--primary) 2px solid;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* ========== ANIMATION FALLBACKS ========== */
+.animate-section {
+  opacity: 1 !important; /* Override any GSAP initial states */
+  transform: none !important;
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== FONT AWESOME FALLBACK ========== */
+/* Add this if you're not loading Font Awesome globally */
+.fas {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  color: var(--primary);
+}
+
+/* ========== RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 992px) {
+  .py-6 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .team-image-wrapper {
+    width: 150px !important;
+    height: 150px !important;
   }
 }
