@@ -60,10 +60,10 @@
         <div class="links-column">
           <h3 class="footer-heading">Quick Links</h3>
           <ul class="footer-menu">
-            <li><a routerLink="/about" class="footer-link">About Us</a></li>
-            <li><a routerLink="/contact" class="footer-link">Contact</a></li>
+            <li><a routerLink="/about" class="footer-link" (click)="scrollToTop()">About Us</a></li>
+            <li><a routerLink="/contact" class="footer-link" (click)="scrollToTop()">Contact</a></li>
             <li>
-              <a routerLink="/browse-errands" class="footer-link"
+              <a routerLink="/browse-errands" class="footer-link" (click)="scrollToTop()"
                 >Browse Errands</a
               >
             </li>
