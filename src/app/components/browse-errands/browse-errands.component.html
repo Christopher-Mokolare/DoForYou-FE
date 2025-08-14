@@ -4,8 +4,9 @@
       <h1 class="mb-3">Available Tasks</h1>
       <p class="lead" *ngIf="lastUpdated">
         Last updated: {{ lastUpdated | date:'mediumTime' }}
-        <button (click)="refreshErrands()" class="btn btn-sm btn-link">
-          <i class="fas fa-sync-alt spin"></i> Refresh
+        <button (click)="refreshErrands()" class="btn btn-sm btn-link" [disabled]="isLoading">
+          <i class="fas fa-sync-alt" [class.spin]="isLoading"></i>
+          {{ isLoading ? 'Refreshing...' : 'Refresh' }}
         </button>
       </p>
     </div>
@@ -34,25 +35,27 @@
       <div class="card h-100 shadow-sm">
         <div class="card-body">
           <h5 class="card-title">
-            {{ errand.task_description || "" | truncate:100 }}
-            <span *ngIf="errand.payment_verified === 'YES'" class="badge bg-success ms-2">
+            {{ errand.task_description || "No description" | truncate:100 }}
+            <span *ngIf="errand.status?.toUpperCase()?.includes('VERIFIED')" class="badge bg-success ms-2">
               <i class="fas fa-check-circle"></i> Verified
             </span>
           </h5>
           <div class="card-text">
-            <p><strong>Location:</strong> {{ errand.area_suburb }}</p>
-            <p><strong>When Needed:</strong> {{ errand.date_time_needed | date:'medium' }}</p>
-            <p><strong>Budget:</strong> {{ errand.budget || '0' }}</p>
+            <p><strong>Task ID:</strong> {{ errand.taskID || errand.taskid || 'N/A' }}</p>
+            <p><strong>Location:</strong> {{ errand.area_suburb || 'Not specified' }}</p>
+            <p><strong>When Needed:</strong> {{ errand.date_time_needed }}</p>
+            <p><strong>Budget:</strong> R{{ errand.budget || '0' }}</p>
             <p><strong>Posted:</strong> {{ errand.timestamp | date:'medium' }}</p>
             <p *ngIf="errand.notes"><strong>Notes:</strong> {{ errand.notes }}</p>
+            <p><strong>Status:</strong> {{ errand.status || 'Unknown' }}</p>
           </div>
         </div>
         <div class="card-footer bg-white border-0">
           <button (click)="acceptErrand(errand)" 
                   class="btn btn-orange w-100"
-                  [disabled]="!errand.contact_number">
+                  [disabled]="!errand.contact_number || errand.status.toUpperCase().includes('PENDING')">
             <i class="fas fa-handshake me-2"></i>
-            Accept Task
+            {{ errand.status.toUpperCase().includes('PENDING') ? 'Awaiting Verification' : 'Accept Task' }}
           </button>
         </div>
       </div>
@@ -70,6 +73,48 @@
           </a>
         </div>
       </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="errands.length > 0" class="col-12 mt-4">
+      <nav aria-label="Errands pagination">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <span class="me-2">Items per page:</span>
+            <select class="form-select form-select-sm" style="width: auto;" 
+                    [(ngModel)]="itemsPerPage" (change)="onPageSizeChange(itemsPerPage)">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{size}}</option>
+            </select>
+          </div>
+          
+          <div>
+            <span class="me-3">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - 
+              {{ currentPage * itemsPerPage > totalItems ? totalItems : currentPage * itemsPerPage }}
+              of {{ totalItems }} tasks
+            </span>
+          </div>
+
+          <ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" (click)="onPageChange(currentPage - 1)" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            
+            <li *ngFor="let page of getPageNumbers()" 
+                class="page-item" [class.active]="currentPage === page">
+              <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+            </li>
+            
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" (click)="onPageChange(currentPage + 1)" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
     </div>
   </div>
 </div>
