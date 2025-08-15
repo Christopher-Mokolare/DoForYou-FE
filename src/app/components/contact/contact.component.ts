@@ -13,7 +13,7 @@ export class ContactComponent implements OnInit {
     {
       icon: 'fas fa-map-marker-alt',
       title: 'Our Location',
-      content: '69 General Hertzog Rd<br>Three Rivers, Vereeniging 1934'
+      content: ' Cnr General Hertzog Road &, Nile Dr,<br> Three Rivers, Vereeniging, 1935'
     },
     {
       icon: 'fas fa-phone-alt',
