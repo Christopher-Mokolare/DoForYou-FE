@@ -1,8 +1,8 @@
+// services/errands.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, retry, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-
 
 export interface Errand {
   timestamp: string;
@@ -17,6 +17,8 @@ export interface Errand {
   status: string;
   notes?: string;
   helper_details?: string;
+  category?: string;
+  priority?: string;
 }
 
 export interface PaginatedResponse {
@@ -27,6 +29,7 @@ export interface PaginatedResponse {
   totalPages: number;
   tasks: Errand[];
   timestamp: string;
+  filters?: any;
 }
 
 export type ErrandsResponse = PaginatedResponse | Errand[];
@@ -34,81 +37,88 @@ export type ErrandsResponse = PaginatedResponse | Errand[];
 @Injectable({ providedIn: 'root' })
 export class ErrandsService {
   private readonly apiEndpoint = environment.apiUrl;
-  private cachedErrands: Errand[] = [];
-  private lastFetchTime: number = 0;
+  private cache: Map<string, { data: any, timestamp: number }> = new Map();
+  private readonly CACHE_DURATION = 30000; // 30 seconds
 
   constructor(private http: HttpClient) {}
 
-  getVerifiedTasks(page: number = 1, pageSize: number = 10): Observable<ErrandsResponse> {
-    const now = Date.now();
-    const cacheExpiry = 30000; // 30 seconds cache
-    
-    if (this.cachedErrands.length > 0 && (now - this.lastFetchTime) < cacheExpiry) {
-      return of(this.cachedErrands);
+  getVerifiedTasks(page: number = 1, pageSize: number = 10, filters: any = {}): Observable<PaginatedResponse> {
+    const cacheKey = this.generateCacheKey('tasks', page, pageSize, filters);
+    const cachedData = this.getFromCache(cacheKey);
+
+    if (cachedData) {
+      return of(cachedData);
     }
 
-    return this.http.jsonp(
-      `${this.apiEndpoint}?apiKey=${environment.apiKey}&page=${page}&pageSize=${pageSize}`,
+    const params = this.buildQueryParams(page, pageSize, filters);
+
+    return this.http.jsonp<PaginatedResponse>(
+      `${this.apiEndpoint}?${params}`,
       'callback'
     ).pipe(
-      map((response: any) => {
-        console.log('Raw API response:', response);
-        
-        // Check if this is a paginated response
-        if (response && response.tasks !== undefined) {
-          // Paginated response
-          return {
-            success: response.success !== undefined ? response.success : true,
-            count: response.count || 0,
-            page: response.page || 1,
-            pageSize: response.pageSize || pageSize,
-            totalPages: response.totalPages || 1,
-            tasks: this.processTasks(response.tasks),
-            timestamp: response.timestamp || new Date().toISOString()
-          };
-        } else {
-          // Non-paginated response (fallback)
-          const tasks = this.processTasks(response);
-          return {
-            success: true,
-            count: tasks.length,
-            page: 1,
-            pageSize: tasks.length,
-            totalPages: 1,
-            tasks: tasks,
-            timestamp: new Date().toISOString()
-          };
-        }
-      }),
-      catchError(error => {
-        console.error('API Error:', error);
-        return of({
-          success: false,
-          count: 0,
-          page: 1,
-          pageSize: 10,
-          totalPages: 0,
-          tasks: [],
-          timestamp: new Date().toISOString()
-        });
-      })
+      retry(2),
+      map(response => this.processResponse(response)),
+      tap(data => this.setCache(cacheKey, data)),
+      catchError(error => this.handleError(error))
     );
   }
 
-  private processTasks(response: any): Errand[] {
-    if (!response) return [];
+  private buildQueryParams(page: number, pageSize: number, filters: any): string {
+    const params = new URLSearchParams();
+    params.set('page', page.toString());
+    params.set('pageSize', pageSize.toString());
+    
+    // Add filters
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) {
+        params.set(key, filters[key]);
+      }
+    });
 
-    const tasks = Array.isArray(response) ? response : [response];
+    return params.toString();
+  }
+
+  private processResponse(response: any): PaginatedResponse {
+    if (response && response.tasks !== undefined) {
+      return {
+        success: response.success !== false,
+        count: response.count || 0,
+        page: response.page || 1,
+        pageSize: response.pageSize || 10,
+        totalPages: response.totalPages || 1,
+        tasks: this.normalizeTasks(response.tasks),
+        timestamp: response.timestamp || new Date().toISOString(),
+        filters: response.filters || {}
+      };
+    }
+
+    // Fallback for non-paginated responses
+    const tasks = this.normalizeTasks(response);
+    return {
+      success: true,
+      count: tasks.length,
+      page: 1,
+      pageSize: tasks.length,
+      totalPages: 1,
+      tasks: tasks,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  private normalizeTasks(tasks: any[]): Errand[] {
+    if (!Array.isArray(tasks)) return [];
 
     return tasks
-      .filter((task: any) => {
-        const status = task.status ? task.status.toString().toUpperCase() : '';
-        const helper = task.helper_details || task.helper || '';
-        
-        return (status.includes('VERIFIED') || status.includes('OPEN')) &&
-               (!helper || helper.toString().trim() === '');
-      })
-      .map((task: any) => this.normalizeTask(task));
+      .filter(task => this.isValidTask(task))
+      .map(task => this.normalizeTask(task));
+  }
+
+  private isValidTask(task: any): boolean {
+    const status = (task.status || '').toString().toUpperCase();
+    const helper = (task.helper_details || task.helper || '').toString().trim();
+    
+    return (status.includes('VERIFIED') || status.includes('OPEN')) && 
+           (!helper || helper === '');
   }
 
   private normalizeTask(task: any): Errand {
@@ -125,7 +135,46 @@ export class ErrandsService {
       taskID: task.taskID || task.taskid || '',
       status: task.status || '',
       notes: task.notes || task.optional_notes || '',
-      helper_details: task.helper_details || task.helper || ''
+      helper_details: task.helper_details || task.helper || '',
+      category: task.category || task.area || '',
+      priority: task.priority || 'normal'
     };
+  }
+
+  private generateCacheKey(...args: any[]): string {
+    return args.join('_');
+  }
+
+  private getFromCache(key: string): any {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setCache(key: string, data: any): void {
+    this.cache.set(key, {
+      data: data,
+      timestamp: Date.now()
+    });
+  }
+
+  private handleError(error: any): Observable<PaginatedResponse> {
+    console.error('API Error:', error);
+    return of({
+      success: false,
+      count: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0,
+      tasks: [],
+      timestamp: new Date().toISOString(),
+      error: error.message || 'Unknown error occurred'
+    });
+  }
+
+  clearCache(): void {
+    this.cache.clear();
   }
 }

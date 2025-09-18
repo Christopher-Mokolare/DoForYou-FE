@@ -1,60 +1,60 @@
+// browse-errands.component.scss
 @import "src/styles.scss";
 
 .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
+  overflow: hidden;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
   }
 
   .card-title {
-    color: #FFAB40;
+    color: var(--primary);
     font-weight: 600;
     min-height: 3rem;
+    line-height: 1.4;
   }
 
   .card-footer {
-    padding-top: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, #f8f9fa, #ffffff);
   }
 }
 
-/* Spinner & Refresh icon color */
-.spin {
-  color: var(--primary);
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
 }
 
-.btn-link{
-color: var(--primary);
-}
-
-.spinner-border.spin {
-  border-color: var(--primary) transparent transparent transparent !important;
-}
-
-/* browse-errands.component.scss */
 .btn-orange {
-  background-color: #fd7e14;
+  // background: linear-gradient(45deg, var(--orange), darken(var(--orange), 10%));
+  border: none;
   color: white;
-  border-color: #fd7e14;
+  font-weight: 500;
+  transition: all 0.3s ease;
   
   &:hover {
-    background-color: darken(#fd7e14, 10%);
-    border-color: darken(#fd7e14, 10%);
+    // background: linear-gradient(45deg, darken(var(--orange), 5%), darken(var(--orange), 15%));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--orange-rgb), 0.3);
   }
   
   &:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    opacity: 0.65;
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
   }
 }
 
 .pagination {
   .page-item {
     cursor: pointer;
+    margin: 0 0.25rem;
     
     &.disabled {
       cursor: not-allowed;
@@ -62,28 +62,97 @@ color: var(--primary);
     }
     
     &.active .page-link {
-      background-color: #fd7e14;
-      border-color: #fd7e14;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      border-color: var(--primary);
       color: white;
     }
   }
   
   .page-link {
-    color: #fd7e14;
+    color: var(--primary);
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    min-width: 40px;
+    text-align: center;
     
     &:hover {
       background-color: #f8f9fa;
+      border-color: var(--primary);
     }
   }
 }
 
-select.form-select-sm {
-  width: auto;
-  display: inline-block;
+.filter-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+  
+  .form-label {
+    font-weight: 600;
+    color: var(--dark);
+  }
+  
+  .form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+    }
+  }
 }
 
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.25em;
+}
+
+.alert {
+  border-radius: 12px;
+  border: none;
+  
+  &.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+  }
+}
+
+// Status badge colors
+.badge {
+  &.bg-success { background: linear-gradient(45deg, #28a745, #20c997); }
+  &.bg-warning { background: linear-gradient(45deg, #ffc107, #fd7e14); }
+  &.bg-info { background: linear-gradient(45deg, #17a2b8, #20c997); }
+  &.bg-secondary { background: linear-gradient(45deg, #6c757d, #495057); }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    
+    .page-item {
+      margin: 0.25rem;
+    }
+  }
+  
+  .filter-card .row {
+    > div {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+// Animation for refresh icon
 .fa-spin {
-  animation: fa-spin 2s infinite linear;
+  animation: fa-spin 1s infinite linear;
 }
 
 @keyframes fa-spin {
@@ -91,11 +160,14 @@ select.form-select-sm {
   100% { transform: rotate(360deg); }
 }
 
-.card {
-  transition: transform 0.2s;
+// Hover effects
+.btn-link {
+  color: var(--primary);
+  text-decoration: none;
+  transition: all 0.3s ease;
   
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    // color: darken(var(--primary), 15%);
+    transform: rotate(180deg);
   }
 }

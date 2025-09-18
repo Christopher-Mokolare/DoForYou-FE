@@ -1,3 +1,4 @@
+<!-- browse-errands.component.html -->
 <div class="container py-5">
   <div class="row mb-4">
     <div class="col-12 text-center">
@@ -5,16 +6,58 @@
       <p class="lead" *ngIf="lastUpdated">
         Last updated: {{ lastUpdated | date:'mediumTime' }}
         <button (click)="refreshErrands()" class="btn btn-sm btn-link" [disabled]="isLoading">
-          <i class="fas fa-sync-alt" [class.spin]="isLoading"></i>
+          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
           {{ isLoading ? 'Refreshing...' : 'Refresh' }}
         </button>
       </p>
     </div>
   </div>
 
+  <!-- Filters Section -->
+  <div class="row mb-4" *ngIf="!isLoading && !error">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Search</label>
+           <input type="text" class="form-control" placeholder="Search tasks..." 
+       [(ngModel)]="searchTerm" (input)="onSearchChange($any($event.target).value)">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Status</label>
+              <select class="form-select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+                <option value="">All Statuses</option>
+                <option value="verified">Verified</option>
+                <option value="open">Open</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Category</label>
+              <select class="form-select" [(ngModel)]="categoryFilter" (change)="onFilterChange()">
+                <option value="">All Categories</option>
+                <option value="delivery">Delivery</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="repair">Repair</option>
+                <!-- Add more categories as needed -->
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">&nbsp;</label>
+              <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading State -->
   <div *ngIf="isLoading" class="text-center py-5">
-    <div class="spinner-border spin" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
     <p class="mt-2">Loading available tasks...</p>
@@ -34,28 +77,36 @@
     <div *ngFor="let errand of errands; trackBy: trackByErrand" class="col-lg-4 col-md-6">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">
-            {{ errand.task_description || "No description" | truncate:100 }}
-            <span *ngIf="errand.status?.toUpperCase()?.includes('VERIFIED')" class="badge bg-success ms-2">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="card-title mb-0">
+              {{ errand.task_description || "No description" | truncate:100 }}
+            </h5>
+            <span *ngIf="errand.status?.toUpperCase()?.includes('VERIFIED')" 
+                  class="badge bg-success ms-2">
               <i class="fas fa-check-circle"></i> Verified
             </span>
-          </h5>
+          </div>
+          
           <div class="card-text">
-            <!-- <p><strong>Task ID:</strong> {{ errand.taskID || errand.taskid || 'N/A' }}</p> -->
             <p><strong>Location:</strong> {{ errand.area_suburb || 'Not specified' }}</p>
             <p><strong>When Needed:</strong> {{ errand.date_time_needed }}</p>
             <p><strong>Budget:</strong> R{{ errand.budget || '0' }}</p>
             <p><strong>Posted:</strong> {{ errand.timestamp | date:'medium' }}</p>
             <p *ngIf="errand.notes"><strong>Notes:</strong> {{ errand.notes }}</p>
-            <p><strong>Status:</strong> {{ errand.status || 'Unknown' }}</p>
+            <p><strong>Status:</strong> 
+              <span [class]="'badge bg-' + getStatusClass(errand.status)">
+                {{ errand.status || 'Unknown' }}
+              </span>
+            </p>
           </div>
         </div>
         <div class="card-footer bg-white border-0">
           <button (click)="acceptErrand(errand)" 
                   class="btn btn-orange w-100"
-                  [disabled]="!errand.contact_number || errand.status.toUpperCase().includes('PENDING')">
+                  [disabled]="!errand.contact_number || errand.status.toUpperCase().includes('PENDING')"
+                  [title]="getButtonTooltip(errand)">
             <i class="fas fa-handshake me-2"></i>
-            {{ errand.status.toUpperCase().includes('PENDING') ? 'Awaiting Verification' : 'Accept Task' }}
+            {{ getButtonText(errand) }}
           </button>
         </div>
       </div>
@@ -78,7 +129,7 @@
     <!-- Pagination Controls -->
     <div *ngIf="errands.length > 0" class="col-12 mt-4">
       <nav aria-label="Errands pagination">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <div class="d-flex align-items-center">
             <span class="me-2">Items per page:</span>
             <select class="form-select form-select-sm" style="width: auto;" 
@@ -87,7 +138,7 @@
             </select>
           </div>
           
-          <div>
+          <div class="text-center">
             <span class="me-3">
               Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - 
               {{ currentPage * itemsPerPage > totalItems ? totalItems : currentPage * itemsPerPage }}
