@@ -1,0 +1,101 @@
+@import "src/styles.scss";
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  
+  .card-body {
+    padding: 2.5rem;
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+  }
+  
+  &.is-invalid {
+    border-color: #dc3545;
+  }
+}
+
+.btn-orange {
+  background: linear-gradient(45deg, var(--primary), var(--orange));
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.alert-info {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  
+  .alert-heading {
+    color: var(--secondary);
+    font-weight: 600;
+  }
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .display-5 {
+    font-size: 2rem;
+  }
+}
+
+// Animation for form elements
+.form-group {
+  transition: all 0.3s ease;
+}
+
+.invalid-feedback {
+  display: block;
+}
+
+// Custom styling for datetime input
+input[type="datetime-local"] {
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 4px;
+  }
+}

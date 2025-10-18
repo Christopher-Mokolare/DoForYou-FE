@@ -1,7 +1,8 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
+
 
 @Component({
   selector: 'app-header',
@@ -14,9 +15,14 @@ export class HeaderComponent implements AfterViewInit {
   isMenuCollapsed = false;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
-
+  constructor(
+    private router: Router
+  ){}
   ngAfterViewInit() {
     this.initializeHamburger();
+  }
+ scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   initializeHamburger() {
@@ -56,10 +62,7 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   postErrand() {
-    window.open('https://docs.google.com/forms/d/e/1FAIpQLSd_uoW_FP3Q3qTSZmDpsR1aqqXK35Os2EWCKJrKnQKoPUeTrg/viewform', '_blank', 'noopener,noreferrer');
-    this.isMenuCollapsed = true;
-    if (this.hamburgerInitialized && !this.isMenuCollapsed) {
-      this.hamburgerAnimation.reverse();
-    }
+  this.router.navigate(['/post-errand']);
+    this.scrollToTop();
   }
 }

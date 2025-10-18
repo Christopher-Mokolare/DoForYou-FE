@@ -1,4 +1,3 @@
-// browse-errands.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -17,7 +16,6 @@ import { environment } from '../../../environments/environment';
   templateUrl: './browse-errands.component.html',
   styleUrls: ['./browse-errands.component.scss'],
   providers: [LoadingService]
-
 })
 export class BrowseErrandsComponent implements OnInit, OnDestroy {
   errands: Errand[] = [];
@@ -93,7 +91,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     if (this.searchTerm) filters.search = this.searchTerm;
     if (this.statusFilter) filters.status = this.statusFilter;
     if (this.categoryFilter) filters.category = this.categoryFilter;
-    if (this.locationFilter) filters.location = this.locationFilter;
+    if (this.locationFilter) filters.area = this.locationFilter;
 
     return filters;
   }
@@ -138,12 +136,14 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   acceptErrand(errand: Errand): void {
-    if (!errand.contact_number || errand.status.toUpperCase().includes('PENDING')) {
+    const contact = errand.contact || errand.contact_number;
+    
+    if (!contact || errand.status.toUpperCase().includes('PENDING')) {
       return;
     }
 
-    const message = `I'd like to help with Task ID ${errand.taskID || errand.taskid || '(missing)'}: ${errand.task_description || 'your task'}`;
-    const whatsappUrl = `https://wa.me/${this.whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const message = `I'd like to help with Task ID ${errand.taskId || errand.taskid || '(missing)'}: ${errand.task_description || 'your task'}`;
+    const whatsappUrl = `https://wa.me/${contact}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   }
@@ -155,7 +155,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   trackByErrand(index: number, errand: Errand): string {
-    return errand.taskID || errand.taskid || `${errand.timestamp}-${index}`;
+    return errand.taskId || errand.taskid || `${errand.timestamp}-${index}`;
   }
 
   refreshErrands(): void {
@@ -196,26 +196,30 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   // Utility methods for status handling
-getStatusClass(status: string): string {
-  const statusUpper = status.toUpperCase();
-  if (statusUpper.includes('VERIFIED')) return 'success';
-  if (statusUpper.includes('PENDING')) return 'warning';
-  if (statusUpper.includes('OPEN')) return 'info';
-  if (statusUpper.includes('COMPLETED')) return 'secondary';
-  return 'secondary';
-}
+  getStatusClass(status: string): string {
+    const statusUpper = status.toUpperCase();
+    if (statusUpper.includes('VERIFIED')) return 'success';
+    if (statusUpper.includes('PENDING')) return 'warning';
+    if (statusUpper.includes('OPEN')) return 'info';
+    if (statusUpper.includes('COMPLETED')) return 'secondary';
+    return 'secondary';
+  }
 
-getButtonText(errand: Errand): string {
-  const statusUpper = errand.status.toUpperCase();
-  if (statusUpper.includes('PENDING')) return 'Awaiting Verification';
-  if (!errand.contact_number) return 'Contact Unavailable';
-  return 'Accept Task';
-}
+  getButtonText(errand: Errand): string {
+    const statusUpper = errand.status.toUpperCase();
+    const contact = errand.contact || errand.contact_number;
+    
+    if (statusUpper.includes('PENDING')) return 'Awaiting Verification';
+    if (!contact) return 'Contact Unavailable';
+    return 'Accept Task';
+  }
 
-getButtonTooltip(errand: Errand): string {
-  const statusUpper = errand.status.toUpperCase();
-  if (statusUpper.includes('PENDING')) return 'This task is awaiting payment verification';
-  if (!errand.contact_number) return 'Contact information is not available for this task';
-  return 'Click to contact via WhatsApp';
-}
+  getButtonTooltip(errand: Errand): string {
+    const statusUpper = errand.status.toUpperCase();
+    const contact = errand.contact || errand.contact_number;
+    
+    if (statusUpper.includes('PENDING')) return 'This task is awaiting payment verification';
+    if (!contact) return 'Contact information is not available for this task';
+    return 'Click to contact via WhatsApp';
+  }
 }

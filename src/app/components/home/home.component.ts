@@ -200,12 +200,8 @@ export class HomeComponent implements AfterViewInit {
     });
   }
 
-  postErrand() {
-    window.open(
-      'https://docs.google.com/forms/d/e/1FAIpQLSd_uoW_FP3Q3qTSZmDpsR1aqqXK35Os2EWCKJrKnQKoPUeTrg/viewform',
-      '_blank',
-      'noopener,noreferrer'
-    );
-    this.isMenuCollapsed = true;
+ postErrand(): void {
+    this.router.navigate(['/post-errand']);
+    this.scrollToTop();
   }
 }
