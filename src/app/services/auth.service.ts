@@ -41,20 +41,21 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, registerData);
   }
 
-  login(loginData: LoginModel): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
-      .pipe(
-        tap(response => {
-          console.log('Login response:', response);
-          if (response.success && response.token && response.user) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('currentUser', JSON.stringify(response.user));
-            this.currentUserSubject.next(response.user);
-            console.log('User logged in and stored:', response.user.email);
-          }
-        })
-      );
-  }
+login(loginData: LoginModel): Observable<AuthResponse> {
+  return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
+    .pipe(
+      tap(response => {
+        console.log('Complete login response:', response);
+        console.log('User object from backend:', response.user);
+        if (response.success && response.token && response.user) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+          console.log('All user properties:', Object.keys(response.user));
+        }
+      })
+    );
+}
 
   logout(): void {
     localStorage.removeItem('token');

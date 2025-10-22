@@ -22,6 +22,9 @@ export interface User {
   completedTasks: number;
   createdAt: string;
   lastLoginAt?: string;
+
+  roles?: string[];
+  isAdmin?: boolean; 
 }
 
 export interface AuthResponse {

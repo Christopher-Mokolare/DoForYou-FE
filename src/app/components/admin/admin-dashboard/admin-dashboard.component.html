@@ -1,0 +1,162 @@
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Admin Dashboard</h1>
+        <button class="btn btn-outline-primary" (click)="refreshDashboard()" [disabled]="isLoading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading dashboard data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button (click)="loadDashboard()" class="btn btn-sm btn-outline-danger ms-3">Retry</button>
+  </div>
+
+  <!-- Dashboard Stats -->
+  <div *ngIf="stats && !isLoading" class="row">
+    
+    <!-- Task Statistics -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Total Tasks
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.totalTasks }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-tasks fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Verification -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                Pending Verification
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.pendingVerification }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-clock fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                Total Revenue
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                R{{ stats.totalRevenue | number:'1.2-2' }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unclaimed Tasks -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                Unclaimed Tasks
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.unclaimedTasks }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-handshake fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="stats && !isLoading" class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <a routerLink="/admin/tasks" class="btn btn-warning w-100" 
+                 [class.disabled]="stats.pendingVerification === 0">
+                <i class="fas fa-check-circle me-2"></i>
+                Verify Payments
+                <span class="badge bg-danger ms-2" *ngIf="stats.pendingVerification > 0">
+                  {{ stats.pendingVerification }}
+                </span>
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a routerLink="/admin/tasks" class="btn btn-info w-100">
+                <i class="fas fa-list me-2"></i>
+                Manage Tasks
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a routerLink="/admin/users" class="btn btn-success w-100">
+                <i class="fas fa-users me-2"></i>
+                Manage Users
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a routerLink="/admin/payments" class="btn btn-primary w-100">
+                <i class="fas fa-chart-bar me-2"></i>
+                View Payments
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
