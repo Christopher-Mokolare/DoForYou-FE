@@ -20,8 +20,8 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label">Search</label>
-           <input type="text" class="form-control" placeholder="Search tasks..." 
-       [(ngModel)]="searchTerm" (input)="onSearchChange($any($event.target).value)">
+              <input type="text" class="form-control" placeholder="Search tasks..." 
+                     [(ngModel)]="searchTerm" (input)="onSearchChange($any($event.target).value)">
             </div>
             <div class="col-md-3">
               <label class="form-label">Status</label>
@@ -78,7 +78,7 @@
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <h5 class="card-title mb-0">
-              {{ errand.task_description || "No description" | truncate:100 }}
+              {{ (errand.task_description || "No description") | truncate:100 }}
             </h5>
             <span *ngIf="errand.status?.toUpperCase()?.includes('VERIFIED')" 
                   class="badge bg-success ms-2">
@@ -88,9 +88,9 @@
           
           <div class="card-text">
             <p><strong>Location:</strong> {{ errand.area_suburb || 'Not specified' }}</p>
-            <p><strong>When Needed:</strong> {{ errand.date_time_needed }}</p>
+            <p><strong>When Needed:</strong> {{ errand.date_time_needed || 'Not specified' }}</p>
             <p><strong>Budget:</strong> R{{ errand.budget || '0' }}</p>
-            <p><strong>Posted:</strong> {{ errand.timestamp | date:'medium' }}</p>
+            <p><strong>Posted:</strong> {{ (errand.timestamp | date:'medium') || 'Unknown' }}</p>
             <p *ngIf="errand.notes"><strong>Notes:</strong> {{ errand.notes }}</p>
             <p><strong>Status:</strong> 
               <span [class]="'badge bg-' + getStatusClass(errand.status)">
@@ -102,7 +102,7 @@
         <div class="card-footer bg-white border-0">
           <button (click)="acceptErrand(errand)" 
                   class="btn btn-orange w-100"
-                  [disabled]="!errand.contact_number || errand.status.toUpperCase().includes('PENDING')"
+                  [disabled]="!errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING')"
                   [title]="getButtonTooltip(errand)">
             <i class="fas fa-handshake me-2"></i>
             {{ getButtonText(errand) }}

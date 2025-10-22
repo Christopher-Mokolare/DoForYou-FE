@@ -137,12 +137,15 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   acceptErrand(errand: Errand): void {
     const contact = errand.contact || errand.contact_number;
+    const status = errand.status || '';
     
-    if (!contact || errand.status.toUpperCase().includes('PENDING')) {
+    if (!contact || status.toUpperCase().includes('PENDING')) {
       return;
     }
 
-    const message = `I'd like to help with Task ID ${errand.taskId || errand.taskid || '(missing)'}: ${errand.task_description || 'your task'}`;
+    const taskId = errand.taskId || errand.taskid || '(missing)';
+    const taskDescription = errand.task_description || 'your task';
+    const message = `I'd like to help with Task ID ${taskId}: ${taskDescription}`;
     const whatsappUrl = `https://wa.me/${contact}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
@@ -155,7 +158,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   trackByErrand(index: number, errand: Errand): string {
-    return errand.taskId || errand.taskid || `${errand.timestamp}-${index}`;
+    return errand.taskId || errand.taskid || `${errand.timestamp}-${index}` || `errand-${index}`;
   }
 
   refreshErrands(): void {
@@ -196,7 +199,9 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   // Utility methods for status handling
-  getStatusClass(status: string): string {
+  getStatusClass(status?: string): string {
+    if (!status) return 'secondary';
+    
     const statusUpper = status.toUpperCase();
     if (statusUpper.includes('VERIFIED')) return 'success';
     if (statusUpper.includes('PENDING')) return 'warning';
@@ -206,18 +211,20 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   getButtonText(errand: Errand): string {
-    const statusUpper = errand.status.toUpperCase();
+    const status = errand.status || '';
     const contact = errand.contact || errand.contact_number;
     
+    const statusUpper = status.toUpperCase();
     if (statusUpper.includes('PENDING')) return 'Awaiting Verification';
     if (!contact) return 'Contact Unavailable';
     return 'Accept Task';
   }
 
   getButtonTooltip(errand: Errand): string {
-    const statusUpper = errand.status.toUpperCase();
+    const status = errand.status || '';
     const contact = errand.contact || errand.contact_number;
     
+    const statusUpper = status.toUpperCase();
     if (statusUpper.includes('PENDING')) return 'This task is awaiting payment verification';
     if (!contact) return 'Contact information is not available for this task';
     return 'Click to contact via WhatsApp';

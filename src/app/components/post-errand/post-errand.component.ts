@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ErrandsService, CreateTaskData } from '../../services/errands.service';
+import { AuthService } from '../../services/auth.service';
+import { LoadingService } from '../../services/loading.service';
 
 @Component({
   selector: 'app-post-errand',
@@ -15,38 +17,38 @@ export class PostErrandComponent implements OnInit {
   taskForm: FormGroup;
   isSubmitting = false;
   submitted = false;
-  showOtherCategoryInput = false;
+  currentUser: any;
 
   constructor(
     private fb: FormBuilder,
     private errandsService: ErrandsService,
+    private authService: AuthService,
+    private loadingService: LoadingService,
     private router: Router
   ) {
-    this.taskForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      contact: ['', [Validators.required, Validators.pattern(/^(\+27|0)[1-9][0-9]{8}$/)]],
+    this.taskForm = this.createForm();
+  }
+
+  ngOnInit(): void {
+    // Get current user for context
+    this.currentUser = this.authService.getCurrentUser();
+    
+    if (this.currentUser) {
+      console.log('Current user:', this.currentUser);
+    }
+  }
+
+  // UPDATED: Form without name and contact fields
+  private createForm(): FormGroup {
+    return this.fb.group({
+      // REMOVED: name and contact fields - they come from user profile
       taskDescription: ['', [Validators.required, Validators.minLength(10)]],
       area: ['', [Validators.required]],
-      category: ['', [Validators.required]],
-      otherCategory: [''],
+      priority: ['standard', [Validators.required]], // NEW: Priority field
       dateNeeded: ['', [Validators.required, this.futureDateValidator]],
       budget: ['', [Validators.required, Validators.min(0)]],
       notes: [''],
       termsAccepted: [false, [Validators.requiredTrue]]
-    });
-  }
-
-  ngOnInit(): void {
-    this.taskForm.get('category')?.valueChanges.subscribe(value => {
-      this.showOtherCategoryInput = value === 'other';
-      
-      if (value === 'other') {
-        this.taskForm.get('otherCategory')?.setValidators([Validators.required]);
-      } else {
-        this.taskForm.get('otherCategory')?.clearValidators();
-        this.taskForm.get('otherCategory')?.setValue('');
-      }
-      this.taskForm.get('otherCategory')?.updateValueAndValidity();
     });
   }
 
@@ -66,52 +68,59 @@ export class PostErrandComponent implements OnInit {
   onSubmit(): void {
     this.submitted = true;
     
-    if (this.taskForm.valid) {
+    if (this.taskForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
+      this.loadingService.show();
       
+      // UPDATED: Create task data without name and contact
       const formData: CreateTaskData = {
-        name: this.taskForm.value.name,
-        contact: this.taskForm.value.contact,
         taskDescription: this.taskForm.value.taskDescription,
         area: this.taskForm.value.area,
-        category: this.taskForm.value.category === 'other' 
-          ? this.taskForm.value.otherCategory 
-          : this.taskForm.value.category,
+        priority: this.taskForm.value.priority, // NEW
         dateNeeded: new Date(this.taskForm.value.dateNeeded).toISOString(),
         budget: parseFloat(this.taskForm.value.budget),
         notes: this.taskForm.value.notes || undefined,
         termsAccepted: this.taskForm.value.termsAccepted
       };
 
-      console.log('Submitting task data:', formData);
+      console.log('Submitting task with new structure:', formData);
 
       this.errandsService.createTask(formData).subscribe({
         next: (response) => {
+          this.loadingService.hide();
           this.isSubmitting = false;
           
           if (response.success) {
+            console.log('Task created successfully:', response);
             alert('Task posted successfully! Please make payment to get your task published.');
-            this.router.navigate(['/']);
+            this.taskForm.reset({ priority: 'standard' }); // Reset with default priority
+            this.router.navigate(['/browse-errands']);
           } else {
-            alert('Failed to post task: ' + (response.error || 'Unknown error'));
+            alert('Failed to post task: ' + (response.error || response.message || 'Unknown error'));
           }
         },
         error: (error) => {
+          this.loadingService.hide();
           this.isSubmitting = false;
           console.error('Error creating task:', error);
-          alert('Error posting task. Please try again. ' + error.message);
+          alert('Error posting task. Please try again. ' + (error.message || ''));
         }
       });
     } else {
-      Object.keys(this.taskForm.controls).forEach(key => {
-        this.taskForm.get(key)?.markAsTouched();
-      });
+      this.markFormGroupTouched();
       
       const firstInvalidControl = document.querySelector('.is-invalid');
       if (firstInvalidControl) {
         firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.taskForm.controls).forEach(key => {
+      const control = this.taskForm.get(key);
+      control?.markAsTouched();
+    });
   }
 
   // Helper method to check field validity
@@ -129,7 +138,6 @@ export class PostErrandComponent implements OnInit {
     
     if (errors['required']) return 'This field is required';
     if (errors['minlength']) return `Minimum ${errors['minlength'].requiredLength} characters required`;
-    if (errors['pattern']) return 'Please enter a valid South African phone number';
     if (errors['min']) return 'Budget must be at least R0';
     if (errors['futureDate']) return 'Please select a future date';
     if (errors['requiredTrue']) return 'You must accept the terms and conditions';

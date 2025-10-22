@@ -3,16 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, retry, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+// NEW: Updated interface without name and contact
 export interface CreateTaskData {
-  name: string;
-  contact: string;
   taskDescription: string;
   area: string;
   dateNeeded: string;
   budget: number;
   notes?: string;
   termsAccepted: boolean;
-  category: string;
+  priority: string; // NEW: Added priority
 }
 
 export interface CreateTaskResponse {
@@ -22,24 +21,32 @@ export interface CreateTaskResponse {
   error?: string;
 }
 
+// NEW: Updated Errand interface with dual status system
 export interface Errand {
   id?: number;
   taskId: string;
   timestamp: string;
-  name: string;
-  contact: string;
+  userName: string; // NEW: From user profile
+  userContact: string; // NEW: From user profile
+  createdByUserId: number; // NEW: User relationship
   taskDescription: string;
   area: string;
   dateNeeded: string;
   budget: number;
   notes?: string;
-  status: string;
+  paymentStatus: string; // NEW: Dual status system
+  taskStatus: string; // NEW: Dual status system
   helperName?: string;
   helperContact?: string;
-  category: string;
   priority: string;
   createdAt: string;
-  // Legacy field mappings
+  completedAt?: string; // NEW: Completion timestamp
+  
+  // Legacy field mappings for backward compatibility
+  name?: string;
+  contact?: string;
+  status?: string;
+  category?: string;
   name_and_surname?: string;
   contact_number?: string;
   task_description?: string;
@@ -66,15 +73,16 @@ export class ErrandsService {
 
   constructor(private http: HttpClient) {}
 
-  // Create a new task
+  // Create a new task (requires authentication)
   createTask(taskData: CreateTaskData): Observable<CreateTaskResponse> {
     const url = `${this.apiBaseUrl}/api/Tasks`;
     
-    console.log('Creating task with data:', taskData);
+    console.log('Creating task with new structure:', taskData);
     
     return this.http.post<CreateTaskResponse>(url, taskData).pipe(
       tap(response => {
         console.log('Task creation response:', response);
+        this.clearCache(); // Clear cache when new task is created
       }),
       catchError(error => {
         console.error('Error creating task:', error);
@@ -97,10 +105,10 @@ export class ErrandsService {
       .set('Page', page.toString())
       .set('PageSize', pageSize.toString());
 
-    // Add filters
+    // Add filters - UPDATED for new status system
     if (filters.search) params = params.set('Search', filters.search);
-    if (filters.status) params = params.set('Status', filters.status);
-    if (filters.category) params = params.set('Category', filters.category);
+    if (filters.paymentStatus) params = params.set('PaymentStatus', filters.paymentStatus);
+    if (filters.taskStatus) params = params.set('TaskStatus', filters.taskStatus);
     if (filters.area) params = params.set('Area', filters.area);
 
     console.log('Making API call to:', url);
@@ -111,6 +119,41 @@ export class ErrandsService {
       map(response => this.processResponse(response)),
       tap(data => this.setCache(cacheKey, data)),
       catchError(error => this.handleError(error))
+    );
+  }
+
+  // Get user's own tasks (requires authentication)
+  getUserTasks(): Observable<PaginatedResponse> {
+    const url = `${this.apiBaseUrl}/api/Tasks`;
+    return this.http.get<PaginatedResponse>(url).pipe(
+      map(response => this.processResponse(response)),
+      catchError(error => this.handleError(error))
+    );
+  }
+
+  // Accept/claim a task (requires authentication)
+  claimTask(taskId: string, helperName: string, helperContact: string): Observable<any> {
+    const claimData = {
+      helperName: helperName,
+      helperContact: helperContact
+    };
+    
+    return this.http.patch(`${this.apiBaseUrl}/api/Tasks/${taskId}/claim`, claimData).pipe(
+      tap(() => this.clearCache()), // Clear cache when task is claimed
+      catchError(error => {
+        console.error('Error claiming task:', error);
+        return throwError(() => new Error('Failed to claim task. Please try again.'));
+      })
+    );
+  }
+
+  // Get single task details
+  getTask(taskId: string): Observable<any> {
+    return this.http.get(`${this.apiBaseUrl}/api/Tasks/${taskId}`).pipe(
+      catchError(error => {
+        console.error('Error fetching task:', error);
+        return throwError(() => new Error('Failed to fetch task details.'));
+      })
     );
   }
 
@@ -129,6 +172,21 @@ export class ErrandsService {
       };
     }
 
+    // Handle case where response is the direct data array
+    if (response && Array.isArray(response.data)) {
+      const tasks = response.data.map((task: any) => this.normalizeTask(task));
+      
+      return {
+        success: response.success !== false,
+        count: response.pagination?.totalCount || response.data.length,
+        page: response.pagination?.page || 1,
+        pageSize: response.pagination?.pageSize || 10,
+        totalPages: response.pagination?.totalPages || 1,
+        tasks: tasks,
+        timestamp: response.timestamp || new Date().toISOString()
+      };
+    }
+
     return {
       success: true,
       count: 0,
@@ -140,41 +198,40 @@ export class ErrandsService {
     };
   }
 
+  // UPDATED: Normalize task for new dual status system
   private normalizeTask(task: any): Errand {
     return {
       id: task.id,
       taskId: task.taskId,
       timestamp: task.timestamp || task.createdAt,
-      name: task.name,
-      contact: task.contact,
+      userName: task.userName || task.name, // Map from backend
+      userContact: task.userContact || task.contact, // Map from backend
+      createdByUserId: task.createdByUserId,
       taskDescription: task.taskDescription,
       area: task.area,
       dateNeeded: task.dateNeeded,
       budget: task.budget,
       notes: task.notes,
-      status: task.status,
+      paymentStatus: task.paymentStatus, // NEW: Dual status
+      taskStatus: task.taskStatus, // NEW: Dual status
       helperName: task.helperName,
       helperContact: task.helperContact,
-      category: task.category,
       priority: task.priority,
       createdAt: task.createdAt,
-      name_and_surname: task.name,
-      contact_number: task.contact, 
+      completedAt: task.completedAt,
+      
+      // Legacy field mappings for backward compatibility
+      name: task.userName || task.name,
+      contact: task.userContact || task.contact,
+      status: task.taskStatus, // Map to new taskStatus
+      category: task.category,
+      name_and_surname: task.userName || task.name,
+      contact_number: task.userContact || task.contact, 
       task_description: task.taskDescription,
       area_suburb: task.area,
       date_time_needed: task.dateNeeded,
       taskid: task.taskId
     };
-  }
-
-  // Accept/claim a task
-  claimTask(taskId: string): Observable<any> {
-    return this.http.patch(`${this.apiBaseUrl}/api/Tasks/${taskId}/claim`, {});
-  }
-
-  // Get single task details
-  getTask(taskId: string): Observable<any> {
-    return this.http.get(`${this.apiBaseUrl}/api/Tasks/${taskId}`);
   }
 
   private generateCacheKey(...args: any[]): string {

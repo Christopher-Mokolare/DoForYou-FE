@@ -1,8 +1,9 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
-
+import { AuthService } from '../../services/auth.service';
+import { User } from '../../models/auth.models';
 
 @Component({
   selector: 'app-header',
@@ -11,17 +12,30 @@ import { gsap } from 'gsap';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent implements AfterViewInit, OnInit {
   isMenuCollapsed = false;
+  isLoggedIn = false;
+  currentUser: User | null = null;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
+
   constructor(
-    private router: Router
-  ){}
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+      this.currentUser = user;
+    });
+  }
+
   ngAfterViewInit() {
     this.initializeHamburger();
   }
- scrollToTop() {
+
+  scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -62,7 +76,19 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   postErrand() {
-  this.router.navigate(['/post-errand']);
+    if (this.isLoggedIn) {
+      this.router.navigate(['/post-errand']);
+    } else {
+      this.router.navigate(['/login'], { 
+        queryParams: { returnUrl: '/post-errand' } 
+      });
+    }
+    this.scrollToTop();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
     this.scrollToTop();
   }
 }

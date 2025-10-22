@@ -26,19 +26,45 @@
           >
         </li>
         <li class="nav-item">
+          <a class="nav-link" routerLink="/browse-errands" routerLinkActive="active"
+            >Browse Errands</a
+          >
+        </li>
+        <li class="nav-item">
           <a class="nav-link" routerLink="/contact" routerLinkActive="active"
             >Contact</a
           >
         </li>
+        
+        <!-- Authentication Links -->
+        <ng-container *ngIf="!isLoggedIn; else userMenu">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/register" routerLinkActive="active">Register</a>
+          </li>
+        </ng-container>
+
+        <ng-template #userMenu>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              {{ currentUser?.name }}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
+              <li><a class="dropdown-item" href="#">My Profile</a></li>
+              <li><a class="dropdown-item" href="#">My Errands</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="logout()">Logout</a></li>
+            </ul>
+          </li>
+        </ng-template>
+
         <li class="nav-item">
           <a class="nav-link post-errand-link" (click)="postErrand()">
             POST AN ERRAND
             <span class="pulse-dot"></span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/login">
-            <!-- Login -->
           </a>
         </li>
       </ul>
