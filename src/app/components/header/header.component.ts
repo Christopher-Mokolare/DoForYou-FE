@@ -28,6 +28,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.currentUser = user;
+      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user);
     });
   }
 
@@ -76,6 +77,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   postErrand() {
+    console.log('Post errand clicked - Auth status:', this.isLoggedIn);
     if (this.isLoggedIn) {
       this.router.navigate(['/post-errand']);
     } else {
@@ -87,6 +89,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   logout() {
+    console.log('Logging out user');
     this.authService.logout();
     this.router.navigate(['/']);
     this.scrollToTop();

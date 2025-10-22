@@ -8,7 +8,6 @@ import { LoginModel, RegisterModel, AuthResponse, User, ChangePasswordModel } fr
   providedIn: 'root'
 })
 export class AuthService {
-  // FIX: Use the correct endpoint - note the capital 'A' in Authenticate
   private apiUrl = `${environment.apiUrl}/api/Authenticate`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -19,16 +18,22 @@ export class AuthService {
   }
 
   private loadCurrentUser(): void {
-    const token = localStorage.getItem('token');
+    const token = this.getToken();
     const userStr = localStorage.getItem('currentUser');
+    
+    console.log('Loading current user - Token exists:', !!token, 'User exists:', !!userStr);
     
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
-      } catch {
+        console.log('User loaded successfully:', user.email);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
         this.logout();
       }
+    } else {
+      console.log('No user data found in localStorage');
     }
   }
 
@@ -40,10 +45,12 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
       .pipe(
         tap(response => {
+          console.log('Login response:', response);
           if (response.success && response.token && response.user) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('currentUser', JSON.stringify(response.user));
             this.currentUserSubject.next(response.user);
+            console.log('User logged in and stored:', response.user.email);
           }
         })
       );
@@ -54,20 +61,24 @@ export class AuthService {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('refreshToken');
     this.currentUserSubject.next(null);
+    console.log('User logged out');
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    console.log('Retrieving token from storage:', !!token);
+    return token;
   }
 
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
 
-    // Check if token is expired
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp > Date.now() / 1000;
+      const isValid = payload.exp > Date.now() / 1000;
+      console.log('Token valid:', isValid, 'Expires:', new Date(payload.exp * 1000));
+      return isValid;
     } catch {
       return false;
     }
@@ -77,23 +88,26 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/change-password`, changePasswordData);
   }
 
-  // Note: This endpoint doesn't exist in your backend yet
-  updateUserProfile(userId: number, profileData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/profile/${userId}`, profileData)
-      .pipe(
-        tap(() => {
-          // Update current user in local storage
-          const currentUser = this.currentUserSubject.value;
-          if (currentUser) {
-            const updatedUser = { ...currentUser, ...profileData };
-            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-            this.currentUserSubject.next(updatedUser);
-          }
-        })
-      );
-  }
-
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  // Helper method to check token validity with detailed logging
+  isTokenValid(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      console.log('No token found');
+      return false;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const isExpired = payload.exp < (Date.now() / 1000);
+      console.log('Token validation - Expired:', isExpired, 'Expiry:', new Date(payload.exp * 1000));
+      return !isExpired;
+    } catch (error) {
+      console.error('Error parsing token:', error);
+      return false;
+    }
   }
 }
