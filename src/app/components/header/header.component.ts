@@ -1,7 +1,9 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
+import { AuthService } from '../../services/auth.service';
+import { User } from '../../models/auth.models';
 
 @Component({
   selector: 'app-header',
@@ -10,13 +12,31 @@ import { gsap } from 'gsap';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent implements AfterViewInit, OnInit {
   isMenuCollapsed = false;
+  isLoggedIn = false;
+  currentUser: User | null = null;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
 
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+      this.currentUser = user;
+    });
+  }
+
   ngAfterViewInit() {
     this.initializeHamburger();
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   initializeHamburger() {
@@ -56,10 +76,19 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   postErrand() {
-    window.open('https://docs.google.com/forms/d/e/1FAIpQLSd_uoW_FP3Q3qTSZmDpsR1aqqXK35Os2EWCKJrKnQKoPUeTrg/viewform', '_blank', 'noopener,noreferrer');
-    this.isMenuCollapsed = true;
-    if (this.hamburgerInitialized && !this.isMenuCollapsed) {
-      this.hamburgerAnimation.reverse();
+    if (this.isLoggedIn) {
+      this.router.navigate(['/post-errand']);
+    } else {
+      this.router.navigate(['/login'], { 
+        queryParams: { returnUrl: '/post-errand' } 
+      });
     }
+    this.scrollToTop();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+    this.scrollToTop();
   }
 }
