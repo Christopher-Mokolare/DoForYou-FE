@@ -52,16 +52,42 @@
               {{ currentUser?.name }}
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
-              <li><a class="dropdown-item" href="#">My Profile</a></li>
-              <li><a class="dropdown-item" href="#">My Errands</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" (click)="logout()">Logout</a></li>
+              <!-- Regular User Links - Only show for non-admin users -->
+              <div *ngIf="!isAdmin">
+                <li><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
+                <li><a class="dropdown-item" href="#">My Profile</a></li>
+                <li><a class="dropdown-item" href="#">My Errands</a></li>
+                <li><hr class="dropdown-divider"></li>
+              </div>
+
+              <!-- Admin Links - Only show for admin users -->
+              <div *ngIf="isAdmin">
+                <li><h6 class="dropdown-header">Admin Panel</h6></li>
+                <li><a class="dropdown-item" routerLink="/admin/dashboard">
+                  <i class="bi bi-speedometer2"></i> Dashboard
+                </a></li>
+                <li><a class="dropdown-item" routerLink="/admin/users">
+                  <i class="bi bi-people"></i> Manage Users
+                </a></li>
+                <li><a class="dropdown-item" routerLink="/admin/tasks">
+                  <i class="bi bi-list-task"></i> Manage Tasks
+                </a></li>
+                <li><a class="dropdown-item" routerLink="/admin/payments">
+                  <i class="bi bi-credit-card"></i> Manage Payments
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+              </div>
+
+              <!-- Logout - Show for all logged-in users -->
+              <li><a class="dropdown-item" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a></li>
             </ul>
           </li>
         </ng-template>
 
-        <li class="nav-item">
+        <!-- Post Errand Button - Only show for non-admin users -->
+        <li class="nav-item" *ngIf="!isAdmin">
           <a class="nav-link post-errand-link" (click)="postErrand()">
             POST AN ERRAND
             <span class="pulse-dot"></span>

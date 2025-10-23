@@ -15,6 +15,7 @@ import { User } from '../../models/auth.models';
 export class HeaderComponent implements AfterViewInit, OnInit {
   isMenuCollapsed = false;
   isLoggedIn = false;
+  isAdmin = false;
   currentUser: User | null = null;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
@@ -28,6 +29,9 @@ export class HeaderComponent implements AfterViewInit, OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.currentUser = user;
+      // Updated: Use proper role checking
+      this.isAdmin = this.checkIfAdmin(user);
+      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user, 'Is Admin:', this.isAdmin);
     });
   }
 
@@ -76,6 +80,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   postErrand() {
+    console.log('Post errand clicked - Auth status:', this.isLoggedIn);
     if (this.isLoggedIn) {
       this.router.navigate(['/post-errand']);
     } else {
@@ -86,7 +91,35 @@ export class HeaderComponent implements AfterViewInit, OnInit {
     this.scrollToTop();
   }
 
+  // UPDATED: Proper admin check using roles from backend
+  private checkIfAdmin(user: User | null): boolean {
+    if (!user) return false;
+    
+    // Check if user has Admin role
+    if (user.roles && user.roles.includes('Admin')) {
+      return true;
+    }
+    
+    // Check computed isAdmin property
+    if (user.isAdmin) {
+      return true;
+    }
+    
+    // Fallback: Check by name (from your backend seed)
+    if (user.name === 'System Administrator') {
+      return true;
+    }
+    
+    // Fallback: Check by email
+    if (user.email === 'admin@doforyou.co.za') {
+      return true;
+    }
+    
+    return false;
+  }
+
   logout() {
+    console.log('Logging out user');
     this.authService.logout();
     this.router.navigate(['/']);
     this.scrollToTop();

@@ -34,17 +34,18 @@ export class PostErrandComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
     
     if (this.currentUser) {
-      console.log('Current user:', this.currentUser);
+      console.log('Current user loaded:', this.currentUser);
+    } else {
+      console.log('No user found - redirecting to login may be required');
     }
   }
 
-  // UPDATED: Form without name and contact fields
   private createForm(): FormGroup {
     return this.fb.group({
       // REMOVED: name and contact fields - they come from user profile
       taskDescription: ['', [Validators.required, Validators.minLength(10)]],
       area: ['', [Validators.required]],
-      priority: ['standard', [Validators.required]], // NEW: Priority field
+      priority: ['standard', [Validators.required]],
       dateNeeded: ['', [Validators.required, this.futureDateValidator]],
       budget: ['', [Validators.required, Validators.min(0)]],
       notes: [''],
@@ -72,18 +73,23 @@ export class PostErrandComponent implements OnInit {
       this.isSubmitting = true;
       this.loadingService.show();
       
-      // UPDATED: Create task data without name and contact
+      // Create task data WITHOUT name and contact
       const formData: CreateTaskData = {
         taskDescription: this.taskForm.value.taskDescription,
         area: this.taskForm.value.area,
-        priority: this.taskForm.value.priority, // NEW
+        priority: this.taskForm.value.priority,
         dateNeeded: new Date(this.taskForm.value.dateNeeded).toISOString(),
         budget: parseFloat(this.taskForm.value.budget),
         notes: this.taskForm.value.notes || undefined,
         termsAccepted: this.taskForm.value.termsAccepted
       };
 
-      console.log('Submitting task with new structure:', formData);
+      console.log('Submitting task with data:', {
+        formData,
+        currentUser: this.currentUser,
+        isAuthenticated: this.authService.isAuthenticated(),
+        token: this.authService.getToken()
+      });
 
       this.errandsService.createTask(formData).subscribe({
         next: (response) => {
@@ -93,17 +99,29 @@ export class PostErrandComponent implements OnInit {
           if (response.success) {
             console.log('Task created successfully:', response);
             alert('Task posted successfully! Please make payment to get your task published.');
-            this.taskForm.reset({ priority: 'standard' }); // Reset with default priority
+            this.taskForm.reset({ priority: 'standard' });
             this.router.navigate(['/browse-errands']);
           } else {
-            alert('Failed to post task: ' + (response.error || response.message || 'Unknown error'));
+            const errorMsg = response.error || response.message || 'Unknown error';
+            console.error('Failed to post task:', errorMsg);
+            alert('Failed to post task: ' + errorMsg);
           }
         },
         error: (error) => {
           this.loadingService.hide();
           this.isSubmitting = false;
           console.error('Error creating task:', error);
-          alert('Error posting task. Please try again. ' + (error.message || ''));
+          
+          let errorMessage = 'Error posting task. Please try again.';
+          if (error.status === 401) {
+            errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.status === 400) {
+            errorMessage = 'Invalid data. Please check your inputs.';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          alert(errorMessage);
         }
       });
     } else {

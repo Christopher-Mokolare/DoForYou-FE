@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, map, of, retry, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// NEW: Updated interface without name and contact
 export interface CreateTaskData {
   taskDescription: string;
   area: string;
@@ -11,7 +10,7 @@ export interface CreateTaskData {
   budget: number;
   notes?: string;
   termsAccepted: boolean;
-  priority: string; // NEW: Added priority
+  priority: string;
 }
 
 export interface CreateTaskResponse {
@@ -19,28 +18,30 @@ export interface CreateTaskResponse {
   data: any;
   message: string;
   error?: string;
+  taskId?: string;
+  paymentStatus?: string;
+  taskStatus?: string;
 }
 
-// NEW: Updated Errand interface with dual status system
 export interface Errand {
   id?: number;
   taskId: string;
   timestamp: string;
-  userName: string; // NEW: From user profile
-  userContact: string; // NEW: From user profile
-  createdByUserId: number; // NEW: User relationship
+  userName: string;
+  userContact: string;
+  createdByUserId: number;
   taskDescription: string;
   area: string;
   dateNeeded: string;
   budget: number;
   notes?: string;
-  paymentStatus: string; // NEW: Dual status system
-  taskStatus: string; // NEW: Dual status system
+  paymentStatus: string;
+  taskStatus: string;
   helperName?: string;
   helperContact?: string;
   priority: string;
   createdAt: string;
-  completedAt?: string; // NEW: Completion timestamp
+  completedAt?: string;
   
   // Legacy field mappings for backward compatibility
   name?: string;
@@ -77,12 +78,13 @@ export class ErrandsService {
   createTask(taskData: CreateTaskData): Observable<CreateTaskResponse> {
     const url = `${this.apiBaseUrl}/api/Tasks`;
     
-    console.log('Creating task with new structure:', taskData);
+    console.log('Creating task with data:', taskData);
+    console.log('API URL:', url);
     
     return this.http.post<CreateTaskResponse>(url, taskData).pipe(
       tap(response => {
         console.log('Task creation response:', response);
-        this.clearCache(); // Clear cache when new task is created
+        this.clearCache();
       }),
       catchError(error => {
         console.error('Error creating task:', error);
@@ -96,7 +98,7 @@ export class ErrandsService {
     const cachedData = this.getFromCache(cacheKey);
 
     if (cachedData) {
-      console.log('Returning cached data');
+      console.log('Returning cached data for key:', cacheKey);
       return of(cachedData);
     }
 
@@ -117,7 +119,10 @@ export class ErrandsService {
     return this.http.get<PaginatedResponse>(url, { params }).pipe(
       retry(2),
       map(response => this.processResponse(response)),
-      tap(data => this.setCache(cacheKey, data)),
+      tap(data => {
+        console.log('Processed API response:', data);
+        this.setCache(cacheKey, data);
+      }),
       catchError(error => this.handleError(error))
     );
   }
@@ -125,6 +130,8 @@ export class ErrandsService {
   // Get user's own tasks (requires authentication)
   getUserTasks(): Observable<PaginatedResponse> {
     const url = `${this.apiBaseUrl}/api/Tasks`;
+    console.log('Getting user tasks from:', url);
+    
     return this.http.get<PaginatedResponse>(url).pipe(
       map(response => this.processResponse(response)),
       catchError(error => this.handleError(error))
@@ -138,8 +145,14 @@ export class ErrandsService {
       helperContact: helperContact
     };
     
-    return this.http.patch(`${this.apiBaseUrl}/api/Tasks/${taskId}/claim`, claimData).pipe(
-      tap(() => this.clearCache()), // Clear cache when task is claimed
+    const url = `${this.apiBaseUrl}/api/Tasks/${taskId}/claim`;
+    console.log('Claiming task:', url, claimData);
+    
+    return this.http.patch(url, claimData).pipe(
+      tap(() => {
+        console.log('Task claimed successfully:', taskId);
+        this.clearCache();
+      }),
       catchError(error => {
         console.error('Error claiming task:', error);
         return throwError(() => new Error('Failed to claim task. Please try again.'));
@@ -149,7 +162,10 @@ export class ErrandsService {
 
   // Get single task details
   getTask(taskId: string): Observable<any> {
-    return this.http.get(`${this.apiBaseUrl}/api/Tasks/${taskId}`).pipe(
+    const url = `${this.apiBaseUrl}/api/Tasks/${taskId}`;
+    console.log('Getting task details:', url);
+    
+    return this.http.get(url).pipe(
       catchError(error => {
         console.error('Error fetching task:', error);
         return throwError(() => new Error('Failed to fetch task details.'));
@@ -158,6 +174,8 @@ export class ErrandsService {
   }
 
   private processResponse(response: any): PaginatedResponse {
+    console.log('Processing API response:', response);
+
     if (response && response.tasks !== undefined) {
       const tasks = response.tasks.map((task: any) => this.normalizeTask(task));
       
@@ -187,6 +205,7 @@ export class ErrandsService {
       };
     }
 
+    console.warn('Unexpected response format:', response);
     return {
       success: true,
       count: 0,
@@ -200,20 +219,20 @@ export class ErrandsService {
 
   // UPDATED: Normalize task for new dual status system
   private normalizeTask(task: any): Errand {
-    return {
+    const normalizedTask: Errand = {
       id: task.id,
       taskId: task.taskId,
       timestamp: task.timestamp || task.createdAt,
-      userName: task.userName || task.name, // Map from backend
-      userContact: task.userContact || task.contact, // Map from backend
+      userName: task.userName || 'Unknown User',
+      userContact: task.userContact || 'Contact not available',
       createdByUserId: task.createdByUserId,
       taskDescription: task.taskDescription,
       area: task.area,
       dateNeeded: task.dateNeeded,
       budget: task.budget,
       notes: task.notes,
-      paymentStatus: task.paymentStatus, // NEW: Dual status
-      taskStatus: task.taskStatus, // NEW: Dual status
+      paymentStatus: task.paymentStatus,
+      taskStatus: task.taskStatus,
       helperName: task.helperName,
       helperContact: task.helperContact,
       priority: task.priority,
@@ -221,17 +240,20 @@ export class ErrandsService {
       completedAt: task.completedAt,
       
       // Legacy field mappings for backward compatibility
-      name: task.userName || task.name,
-      contact: task.userContact || task.contact,
-      status: task.taskStatus, // Map to new taskStatus
+      name: task.userName,
+      contact: task.userContact,
+      status: task.taskStatus,
       category: task.category,
-      name_and_surname: task.userName || task.name,
-      contact_number: task.userContact || task.contact, 
+      name_and_surname: task.userName,
+      contact_number: task.userContact, 
       task_description: task.taskDescription,
       area_suburb: task.area,
       date_time_needed: task.dateNeeded,
       taskid: task.taskId
     };
+
+    console.log('Normalized task:', normalizedTask);
+    return normalizedTask;
   }
 
   private generateCacheKey(...args: any[]): string {
@@ -267,6 +289,7 @@ export class ErrandsService {
   }
 
   clearCache(): void {
+    console.log('Clearing cache');
     this.cache.clear();
   }
 }

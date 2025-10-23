@@ -17,7 +17,7 @@
         <!-- User Welcome Message -->
         <div *ngIf="currentUser" class="alert alert-success d-inline-block">
           <i class="fas fa-user-check me-2"></i>
-          Welcome back, <strong>{{ currentUser.name }}</strong>! Your contact details will be used from your profile.
+          Welcome back, <strong>{{ currentUser.name }}</strong>! Your contact details ({{ currentUser.contact }}) will be used from your profile.
         </div>
         
         <!-- Not Logged In Warning -->
@@ -33,9 +33,10 @@
           <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
             
             <!-- User Information Notice -->
-            <div class="alert alert-info mb-4">
+            <div class="alert alert-info mb-4" *ngIf="currentUser">
               <i class="fas fa-info-circle me-2"></i>
-              Your contact information (<strong>{{ currentUser.name }}</strong> - {{ currentUser.contact }}) will be automatically shared with helpers.
+              Your profile information will be automatically used: 
+              <strong>{{ currentUser.name }}</strong> ({{ currentUser.contact }})
             </div>
 
             <!-- Task Details -->

@@ -7,6 +7,7 @@ import { Subscription, interval, debounceTime, distinctUntilChanged, Subject } f
 import { ErrandsService, Errand, PaginatedResponse } from '../../services/errands.service';
 import { TruncatePipe } from '../../pipes/truncate.pipe';
 import { LoadingService } from '../../services/loading.service';
+import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -25,6 +26,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   refreshSubscription?: Subscription;
   searchSubject = new Subject<string>();
   searchSubscription?: Subscription;
+  isLoggedIn = false;
 
   // Pagination properties
   currentPage = 1;
@@ -44,7 +46,8 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   constructor(
     private errandsService: ErrandsService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -55,6 +58,12 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     // Subscribe to loading state
     this.loadingService.loading$.subscribe(loading => {
       this.isLoading = loading;
+    });
+
+    // Check authentication status
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+      console.log('Authentication status:', this.isLoggedIn);
     });
   }
 
@@ -69,6 +78,8 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     
     const filters = this.buildFilters();
 
+    console.log('Loading errands with filters:', filters);
+
     this.errandsService.getVerifiedTasks(this.currentPage, this.itemsPerPage, filters).subscribe({
       next: (data: PaginatedResponse) => {
         this.errands = data.tasks;
@@ -76,6 +87,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         this.totalPages = data.totalPages;
         this.lastUpdated = new Date();
         this.loadingService.hide();
+        console.log('Errands loaded successfully:', this.errands.length, 'tasks');
       },
       error: (err) => {
         console.error('Error loading tasks:', err);
@@ -89,7 +101,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     const filters: any = {};
     
     if (this.searchTerm) filters.search = this.searchTerm;
-    if (this.statusFilter) filters.status = this.statusFilter;
+    if (this.statusFilter) filters.taskStatus = this.statusFilter;
     if (this.categoryFilter) filters.category = this.categoryFilter;
     if (this.locationFilter) filters.area = this.locationFilter;
 
@@ -136,18 +148,25 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   acceptErrand(errand: Errand): void {
-    const contact = errand.contact || errand.contact_number;
-    const status = errand.status || '';
+    if (!this.isLoggedIn) {
+      alert('Please log in to accept tasks');
+      return;
+    }
+
+    const contact = errand.userContact || errand.contact_number;
+    const status = errand.taskStatus || errand.status || '';
     
-    if (!contact || status.toUpperCase().includes('PENDING')) {
+    if (!contact || status.toUpperCase().includes('PENDING') || status.toUpperCase().includes('CLAIMED')) {
+      alert('This task cannot be accepted at the moment.');
       return;
     }
 
     const taskId = errand.taskId || errand.taskid || '(missing)';
-    const taskDescription = errand.task_description || 'your task';
+    const taskDescription = errand.taskDescription || errand.task_description || 'your task';
     const message = `I'd like to help with Task ID ${taskId}: ${taskDescription}`;
-    const whatsappUrl = `https://wa.me/${contact}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${this.whatsappNumber}?text=${encodeURIComponent(message)}`;
     
+    console.log('Opening WhatsApp:', whatsappUrl);
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   }
 
@@ -203,29 +222,32 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     if (!status) return 'secondary';
     
     const statusUpper = status.toUpperCase();
-    if (statusUpper.includes('VERIFIED')) return 'success';
+    if (statusUpper.includes('VERIFIED') || statusUpper.includes('POSTED')) return 'success';
     if (statusUpper.includes('PENDING')) return 'warning';
     if (statusUpper.includes('OPEN')) return 'info';
-    if (statusUpper.includes('COMPLETED')) return 'secondary';
+    if (statusUpper.includes('COMPLETED') || statusUpper.includes('PAID')) return 'secondary';
+    if (statusUpper.includes('DRAFT')) return 'light';
     return 'secondary';
   }
 
   getButtonText(errand: Errand): string {
-    const status = errand.status || '';
-    const contact = errand.contact || errand.contact_number;
+    const status = errand.taskStatus || errand.status || '';
+    const contact = errand.userContact || errand.contact_number;
     
     const statusUpper = status.toUpperCase();
     if (statusUpper.includes('PENDING')) return 'Awaiting Verification';
+    if (statusUpper.includes('CLAIMED')) return 'Already Claimed';
     if (!contact) return 'Contact Unavailable';
     return 'Accept Task';
   }
 
   getButtonTooltip(errand: Errand): string {
-    const status = errand.status || '';
-    const contact = errand.contact || errand.contact_number;
+    const status = errand.taskStatus || errand.status || '';
+    const contact = errand.userContact || errand.contact_number;
     
     const statusUpper = status.toUpperCase();
     if (statusUpper.includes('PENDING')) return 'This task is awaiting payment verification';
+    if (statusUpper.includes('CLAIMED')) return 'This task has already been accepted by someone';
     if (!contact) return 'Contact information is not available for this task';
     return 'Click to contact via WhatsApp';
   }
