@@ -1,0 +1,25 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card text-center" *ngIf="!processing">
+        <div class="card-body p-5">
+          <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+          <h2 class="text-success mb-3">Payment Successful!</h2>
+          <p class="lead mb-4">Your payment has been processed successfully.</p>
+          <p class="mb-4">Your task is now being created and will be live shortly.</p>
+          <button class="btn btn-primary btn-lg" (click)="goToDashboard()">
+            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+          </button>
+        </div>
+      </div>
+      
+      <div class="card text-center" *ngIf="processing">
+        <div class="card-body p-5">
+          <i class="fas fa-spinner fa-spin fa-4x text-primary mb-4"></i>
+          <h3>Creating Your Task...</h3>
+          <p>Please wait while we process your payment and create your task.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+<div class="container py-5">
+  <div class="card">
+    <div class="card-header">
+      <h3>User Type & Preferences</h3>
+      <p class="mb-0">Choose how you want to use DoForYou:</p>
+    </div>
+    <div class="card-body">
+      <div class="toggle-container mb-4">
+        <div class="role-option" [class.active]="isTaskCreator">
+          <div class="role-header">
+            <h5>Task Creator</h5>
+            <span class="badge bg-primary" *ngIf="isTaskCreator">Selected</span>
+          </div>
+          <p>Post tasks and hire helpers to complete them</p>
+          <ul class="feature-list">
+            <li>Post unlimited tasks</li>
+            <li>Manage task payments</li>
+            <li>Rate and review helpers</li>
+          </ul>
+        </div>
+        
+        <div class="toggle-switch-wrapper">
+          <label class="toggle-switch">
+            <input type="checkbox" 
+                   [checked]="!isTaskCreator"
+                   (change)="toggleRole()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="role-option" [class.active]="!isTaskCreator">
+          <div class="role-header">
+            <h5>Task Runner</h5>
+            <span class="badge bg-success" *ngIf="!isTaskCreator">Selected</span>
+          </div>
+          <p>Find and complete tasks to earn money</p>
+          <ul class="feature-list">
+            <li>Browse available tasks</li>
+            <li>Earn money by completing tasks</li>
+            <li>Build your reputation</li>
+          </ul>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary btn-lg w-100" (click)="savePreferences()" [disabled]="saving">
+        <i class="fas fa-save me-2"></i>
+        {{ saving ? 'Saving...' : 'Save Preferences' }}
+      </button>
+    </div>
+  </div>
+</div>

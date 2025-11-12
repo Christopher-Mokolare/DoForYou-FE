@@ -1,0 +1,81 @@
+<div class="notifications">
+  <div class="notifications-header">
+    <h2>Notifications</h2>
+    <div class="notification-actions">
+      <button class="btn btn-sm btn-outline-secondary" (click)="markAllAsRead()" 
+              [disabled]="!hasUnreadNotifications">
+        Mark All Read
+      </button>
+      <button class="btn btn-sm btn-outline-danger" (click)="clearAll()">
+        Clear All
+      </button>
+    </div>
+  </div>
+  
+  <div class="role-preferences" *ngIf="currentUser">
+    <h3>Role & Notification Preferences</h3>
+    <div class="preference-toggles">
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="preferences.taskCreator" (change)="updatePreferences()">
+        <div>
+          <span>Task Creator Mode</span>
+          <small>Get notified when your tasks are claimed, completed, etc.</small>
+        </div>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="preferences.taskRunner" (change)="updatePreferences()">
+        <div>
+          <span>Task Runner Mode</span>
+          <small>Get notified about new tasks matching your interests</small>
+        </div>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" [(ngModel)]="preferences.payments" (change)="updatePreferences()">
+        <div>
+          <span>Payment Notifications</span>
+          <small>Get notified about payments and earnings</small>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading notifications...</p>
+  </div>
+
+  <div class="notification-list" *ngIf="!loading && notifications.length > 0; else noNotifications">
+    <div class="notification-item" *ngFor="let notification of notifications" 
+         [ngClass]="{'unread': !notification.read}">
+      <div class="notification-icon" [ngClass]="getIconBgClass(notification.type)">
+        <i class="fas" [ngClass]="getIconClass(notification.type)"></i>
+      </div>
+      <div class="notification-content">
+        <h4>{{notification.title}}</h4>
+        <p>{{notification.message}}</p>
+        <small>{{notification.timestamp | date:'short'}}</small>
+      </div>
+      <div class="notification-actions">
+        <button class="btn btn-sm btn-outline-primary" (click)="markAsRead(notification)" 
+                *ngIf="!notification.read">
+          <i class="fas fa-check"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="viewTask(notification)" 
+                *ngIf="notification.taskId">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="deleteNotification(notification)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noNotifications>
+    <div class="no-notifications">
+      <i class="fas fa-bell-slash"></i>
+      <h3>No notifications yet</h3>
+      <p>You'll see notifications here when there's activity on your tasks.</p>
+    </div>
+  </ng-template>
+</div>

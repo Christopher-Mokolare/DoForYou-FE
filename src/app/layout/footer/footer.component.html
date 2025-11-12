@@ -1,0 +1,118 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="site-logo">
+          <a routerLink="/" class="logo-link">
+            <strong class="brand-text">DoForYou</strong>
+            <span class="text-primary"><b class="dot">.</b></span>
+          </a>
+        </div>
+        <p class="brand-description">
+          Connecting South Africans through meaningful tasks and opportunities
+        </p>
+
+        <div class="social-links">
+          <a
+            href="https://x.com/JoinDoForYou"
+            class="social-icon"
+            aria-label="Twitter"
+            target="_blank"
+          >
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a
+            href="https://web.facebook.com/joinDoForYou/"
+            class="social-icon"
+            aria-label="Facebook"
+            target="_blank"
+          >
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a
+            href="https://www.instagram.com/joindoforyou/"
+            class="social-icon"
+            aria-label="Instagram"
+            target="_blank"
+          >
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a
+            href="https://www.linkedin.com/company/do-for-you/"
+            class="social-icon"
+            aria-label="LinkedIn"
+            target="_blank"
+          >
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a
+            href="https://www.tiktok.com/@doforyoufreelance?lang=en"
+            class="social-icon"
+            aria-label="TikTok"
+            target="_blank"
+          >
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="links-column">
+          <h3 class="footer-heading">Quick Links</h3>
+          <ul class="footer-menu">
+            <li><a routerLink="/about" class="footer-link" (click)="scrollToTop()">About Us</a></li>
+            <li><a routerLink="/contact" class="footer-link" (click)="scrollToTop()">Contact</a></li>
+            <li>
+              <a routerLink="/browse-errands" class="footer-link" (click)="scrollToTop()"
+                >Browse Errands</a
+              >
+            </li>
+            <li>
+                    <a *ngIf="authService.canPostErrands()" (click)="postErrand()" class="footer-link postErrand">Post An Errand</a>
+
+            </li>
+          </ul>
+        </div>
+
+        <div class="links-column">
+          <h3 class="footer-heading">Legal</h3>
+          <ul class="footer-menu">
+            <li><a href="#" class="footer-link">Privacy Policy</a></li>
+            <li><a href="#" class="footer-link">Terms of Service</a></li>
+            <li><a href="#" class="footer-link">Cookie Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="links-column">
+          <h3 class="footer-heading">Support</h3>
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fab fa-whatsapp contact-icon"></i>
+              <a href="https://wa.me/27795258611" target="_blank"
+                >+27 79 525 8611</a
+              >
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-envelope contact-icon"></i>
+              <a href="mailto:help@doforyou.co.za">info&#64;doforyou.co.za</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="copyright">
+        &copy; {{ currentYear }} DoForYou<span class="dot">.</span> All rights
+        reserved.
+      </div>
+      <div class="made-with-love">
+        Made with <i class="fas fa-heart heart-icon"></i> in South Africa
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative elements -->
+  <div class="footer-shape footer-shape-1"></div>
+  <div class="footer-shape footer-shape-2"></div>
+</footer>

@@ -1,0 +1,83 @@
+.container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 3rem !important;
+}
+
+.fa-times-circle {
+  color: #ffc107;
+  animation: shake 0.6s ease-in-out;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B35, #FF8A65);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+  }
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+  }
+}
+
+.d-flex {
+  display: flex;
+  
+  &.gap-3 {
+    gap: 1rem;
+  }
+  
+  &.justify-content-center {
+    justify-content: center;
+  }
+}
+
+.lead {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}

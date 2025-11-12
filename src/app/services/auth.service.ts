@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LoginModel, RegisterModel, AuthResponse, User, ChangePasswordModel } from '../models/auth.models';
 
@@ -27,7 +27,7 @@ export class AuthService {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
-        console.log('User loaded successfully:', user.email);
+        console.log('User loaded successfully');
       } catch (error) {
         console.error('Error parsing user data:', error);
         this.logout();
@@ -45,14 +45,35 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
     .pipe(
       tap(response => {
-        console.log('Complete login response:', response);
-        console.log('User object from backend:', response.user);
+        console.log('Login response received');
         if (response.success && response.token && response.user) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
-          console.log('All user properties:', Object.keys(response.user));
+          
+          // Set default preferences for new users
+          if (!localStorage.getItem('userPreferences')) {
+            const defaultPreferences = {
+              canCreateTasks: true,
+              canAcceptTasks: false,
+              taskCreatorNotifications: true,
+              taskRunnerNotifications: true,
+              paymentNotifications: true,
+              emailNotifications: true,
+              smsNotifications: false
+            };
+            localStorage.setItem('userPreferences', JSON.stringify(defaultPreferences));
+          }
+          
+          console.log('User logged in successfully');
         }
+      }),
+      catchError(error => {
+        console.error('Login failed with status:', error?.status || 'unknown');
+        if (error.status === 0) {
+          console.error('Backend connection failed');
+        }
+        return throwError(() => error);
       })
     );
 }
@@ -78,7 +99,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isValid = payload.exp > Date.now() / 1000;
-      console.log('Token valid:', isValid, 'Expires:', new Date(payload.exp * 1000));
+      console.log('Token validation completed');
       return isValid;
     } catch {
       return false;
@@ -93,6 +114,69 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     return this.currentUserSubject.value;
   }
 
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.roles?.includes('Admin') || false;
+  }
+
+  canPostErrands(): boolean {
+    if (!this.isAuthenticated() || this.isAdmin()) {
+      return false;
+    }
+    
+    const preferences = this.getUserPreferences();
+    return preferences?.canCreateTasks === true;
+  }
+
+  canAcceptTasks(): boolean {
+    if (!this.isAuthenticated() || this.isAdmin()) {
+      return false;
+    }
+    
+    const preferences = this.getUserPreferences();
+    return preferences?.canAcceptTasks === true;
+  }
+
+  private getUserPreferences() {
+    const saved = localStorage.getItem('userPreferences');
+    return saved ? JSON.parse(saved) : { canCreateTasks: true, canAcceptTasks: false };
+  }
+
+  refreshCurrentUser(): void {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.currentUserSubject.next(user);
+      } catch (error) {
+        console.error('Error refreshing user data:', error);
+      }
+    }
+  }
+
+  isProfileComplete(): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    
+    const preferences = this.getUserPreferences();
+    const hasBasicInfo = user.name && user.email && user.contact;
+    const hasUserType = preferences && (preferences.canCreateTasks || preferences.canAcceptTasks);
+    
+    return hasBasicInfo && hasUserType;
+  }
+
+  updateProfile(profileData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/update-profile`, profileData);
+  }
+
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/profile`);
+  }
+
+  getUserStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/stats`);
+  }
+
   // Helper method to check token validity with detailed logging
   isTokenValid(): boolean {
     const token = this.getToken();
@@ -104,7 +188,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = payload.exp < (Date.now() / 1000);
-      console.log('Token validation - Expired:', isExpired, 'Expiry:', new Date(payload.exp * 1000));
+      console.log('Token validation completed');
       return !isExpired;
     } catch (error) {
       console.error('Error parsing token:', error);

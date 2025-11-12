@@ -24,7 +24,9 @@ export interface User {
   lastLoginAt?: string;
 
   roles?: string[];
-  isAdmin?: boolean; 
+  isAdmin?: boolean;
+  canCreateTasks?: boolean;
+  canAcceptTasks?: boolean;
 }
 
 export interface AuthResponse {

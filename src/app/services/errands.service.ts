@@ -78,12 +78,11 @@ export class ErrandsService {
   createTask(taskData: CreateTaskData): Observable<CreateTaskResponse> {
     const url = `${this.apiBaseUrl}/api/Tasks`;
     
-    console.log('Creating task with data:', taskData);
-    console.log('API URL:', url);
+    console.log('Creating task');
     
     return this.http.post<CreateTaskResponse>(url, taskData).pipe(
-      tap(response => {
-        console.log('Task creation response:', response);
+      tap(() => {
+        console.log('Task created successfully');
         this.clearCache();
       }),
       catchError(error => {
@@ -98,7 +97,7 @@ export class ErrandsService {
     const cachedData = this.getFromCache(cacheKey);
 
     if (cachedData) {
-      console.log('Returning cached data for key:', cacheKey);
+      console.log('Returning cached data');
       return of(cachedData);
     }
 
@@ -113,14 +112,13 @@ export class ErrandsService {
     if (filters.taskStatus) params = params.set('TaskStatus', filters.taskStatus);
     if (filters.area) params = params.set('Area', filters.area);
 
-    console.log('Making API call to:', url);
-    console.log('With params:', params.toString());
+    console.log('Making API call for available tasks');
 
     return this.http.get<PaginatedResponse>(url, { params }).pipe(
       retry(2),
       map(response => this.processResponse(response)),
       tap(data => {
-        console.log('Processed API response:', data);
+        console.log('API response processed');
         this.setCache(cacheKey, data);
       }),
       catchError(error => this.handleError(error))
@@ -130,7 +128,7 @@ export class ErrandsService {
   // Get user's own tasks (requires authentication)
   getUserTasks(): Observable<PaginatedResponse> {
     const url = `${this.apiBaseUrl}/api/Tasks`;
-    console.log('Getting user tasks from:', url);
+    console.log('Getting user tasks');
     
     return this.http.get<PaginatedResponse>(url).pipe(
       map(response => this.processResponse(response)),
@@ -146,11 +144,11 @@ export class ErrandsService {
     };
     
     const url = `${this.apiBaseUrl}/api/Tasks/${taskId}/claim`;
-    console.log('Claiming task:', url, claimData);
+    console.log('Claiming task');
     
     return this.http.patch(url, claimData).pipe(
       tap(() => {
-        console.log('Task claimed successfully:', taskId);
+        console.log('Task claimed successfully');
         this.clearCache();
       }),
       catchError(error => {
@@ -163,7 +161,7 @@ export class ErrandsService {
   // Get single task details
   getTask(taskId: string): Observable<any> {
     const url = `${this.apiBaseUrl}/api/Tasks/${taskId}`;
-    console.log('Getting task details:', url);
+    console.log('Getting task details');
     
     return this.http.get(url).pipe(
       catchError(error => {
@@ -174,7 +172,7 @@ export class ErrandsService {
   }
 
   private processResponse(response: any): PaginatedResponse {
-    console.log('Processing API response:', response);
+    console.log('Processing API response');
 
     if (response && response.tasks !== undefined) {
       const tasks = response.tasks.map((task: any) => this.normalizeTask(task));
@@ -205,7 +203,7 @@ export class ErrandsService {
       };
     }
 
-    console.warn('Unexpected response format:', response);
+    console.warn('Unexpected response format received');
     return {
       success: true,
       count: 0,
@@ -252,7 +250,7 @@ export class ErrandsService {
       taskid: task.taskId
     };
 
-    console.log('Normalized task:', normalizedTask);
+    // Task normalized successfully
     return normalizedTask;
   }
 
@@ -276,7 +274,7 @@ export class ErrandsService {
   }
 
   private handleError(error: any): Observable<PaginatedResponse> {
-    console.error('API Error:', error);
+    console.error('API request failed with status:', error?.status || 'unknown');
     return of({
       success: false,
       count: 0,
@@ -286,6 +284,22 @@ export class ErrandsService {
       tasks: [],
       timestamp: new Date().toISOString()
     });
+  }
+
+  // Generate PayFast payment URL for task
+  generatePaymentUrl(taskId: string): Observable<any> {
+    const url = `${this.apiBaseUrl}/api/Payment/generate-payment-url/${taskId}`;
+    console.log('Generating payment URL');
+    
+    return this.http.post(url, {}).pipe(
+      tap(() => {
+        console.log('Payment URL generated successfully');
+      }),
+      catchError(error => {
+        console.error('Error generating payment URL:', error);
+        return throwError(() => new Error('Failed to generate payment URL.'));
+      })
+    );
   }
 
   clearCache(): void {

@@ -1,0 +1,120 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2 class="brand-font">Join DoForYou</h2>
+      <p>Create your account to start posting errands</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="form-control"
+          placeholder="Enter your full name"
+          [class.is-invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+        <div class="invalid-feedback" *ngIf="registerForm.get('name')?.errors?.['required']">
+          Name is required
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('name')?.errors?.['minlength']">
+          Name must be at least 2 characters
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          placeholder="Enter your email"
+          [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+        <div class="invalid-feedback" *ngIf="registerForm.get('email')?.errors?.['required']">
+          Email is required
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('email')?.errors?.['email']">
+          Please enter a valid email
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contact">Contact Number</label>
+        <input
+          type="tel"
+          id="contact"
+          formControlName="contact"
+          class="form-control"
+          placeholder="Enter your contact number"
+          [class.is-invalid]="registerForm.get('contact')?.invalid && registerForm.get('contact')?.touched">
+        <div class="invalid-feedback" *ngIf="registerForm.get('contact')?.errors?.['required']">
+          Contact number is required
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('contact')?.errors?.['pattern']">
+          Please enter a valid contact number
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-input">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            class="form-control"
+            placeholder="Enter your password"
+            [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
+            <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('password')?.errors?.['required']">
+          Password is required
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('password')?.errors?.['minlength']">
+          Password must be at least 6 characters
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="password-input">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            class="form-control"
+            placeholder="Confirm your password"
+            [class.is-invalid]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+          <button type="button" class="password-toggle" (click)="showConfirmPassword = !showConfirmPassword">
+            <i class="fas" [class.fa-eye]="!showConfirmPassword" [class.fa-eye-slash]="showConfirmPassword"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
+          Please confirm your password
+        </div>
+        <div class="invalid-feedback" *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched">
+          Passwords do not match
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="registerForm.invalid">
+        Create Account
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login" class="auth-link">Sign in</a></p>
+    </div>
+  </div>
+</div>

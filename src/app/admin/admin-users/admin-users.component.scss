@@ -1,0 +1,163 @@
+.admin-users {
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .admin-users {
+    padding: 2rem;
+  }
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+}
+
+.page-header h1 {
+  color: #FF6B35;
+  margin: 0;
+}
+
+.header-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .header-stats {
+    justify-content: flex-end;
+  }
+}
+
+.filters-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .filters-card {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.filters-card label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  background: #f8f9fa;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FF6B35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.contact-info {
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.activity-stats small {
+  font-size: 0.8rem;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.dropdown-menu {
+  min-width: 120px;
+}
+
+.bg-admin { background-color: #dc3545 !important; }
+.bg-user { background-color: #17a2b8 !important; }
+.bg-helper { background-color: #28a745 !important; }
+
+.mobile-user-card .card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-user-card .user-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 767px) {
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .filters-card .row > div {
+    margin-bottom: 1rem;
+  }
+  
+  .pagination {
+    font-size: 0.875rem;
+  }
+  
+  .pagination .page-link {
+    padding: 0.375rem 0.5rem;
+  }
+}

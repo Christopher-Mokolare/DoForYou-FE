@@ -1,0 +1,43 @@
+<div class="task-details">
+  <div class="task-header">
+    <h1>{{task?.taskDescription || 'Task Details'}}</h1>
+    <span class="status-badge" [ngClass]="'status-' + task?.taskStatus">{{task?.taskStatus}}</span>
+  </div>
+
+  <div class="task-content">
+    <div class="task-info">
+      <h3>Description</h3>
+      <p>{{task?.taskDescription}}</p>
+      
+      <div class="task-meta">
+        <div class="meta-item">
+          <strong>Budget:</strong> R{{task?.budget}}
+        </div>
+        <div class="meta-item">
+          <strong>Location:</strong> {{task?.area}}
+        </div>
+        <div class="meta-item">
+          <strong>Due Date:</strong> {{task?.dateNeeded | date}}
+        </div>
+        <div class="meta-item">
+          <strong>Posted By:</strong> {{task?.userName}}
+        </div>
+        <div class="meta-item">
+          <strong>Priority:</strong> {{task?.priority}}
+        </div>
+        <div class="meta-item" *ngIf="task?.notes">
+          <strong>Notes:</strong> {{task?.notes}}
+        </div>
+      </div>
+    </div>
+
+    <div class="task-actions">
+      <button class="btn btn-primary" *ngIf="canClaim" (click)="claimTask()">
+        <i class="fas fa-hand-paper"></i> Claim Task
+      </button>
+      <button class="btn btn-success" *ngIf="canComplete" (click)="markComplete()">
+        <i class="fas fa-check"></i> Mark Complete
+      </button>
+    </div>
+  </div>
+</div>

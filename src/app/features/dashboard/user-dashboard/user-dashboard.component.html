@@ -1,0 +1,74 @@
+<div class="user-dashboard">
+  <div class="dashboard-header">
+    <h1>My Dashboard</h1>
+    <p>Welcome back! Here's an overview of your task activity.</p>
+  </div>
+
+  <div class="stats-grid" *ngIf="canCreateTasks">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{stats.active}}</h3>
+        <p>Active Tasks</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon bg-success">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{stats.completed}}</h3>
+        <p>Completed</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon bg-warning">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{stats.pending}}</h3>
+        <p>Pending</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="runner-section" *ngIf="canAcceptTasks && (runnerStats.claimed > 0 || runnerStats.inProgress > 0)">
+    <h2>My Runner Activity</h2>
+    <div class="runner-stats">
+      <div class="stat-card">
+        <div class="stat-icon bg-info">
+          <i class="fas fa-hand-paper"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{runnerStats.claimed}}</h3>
+          <p>Tasks Claimed</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-primary">
+          <i class="fas fa-cog"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{runnerStats.inProgress}}</h3>
+          <p>In Progress</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <a routerLink="/post-errand" class="btn btn-primary" *ngIf="canCreateTasks">
+      <i class="fas fa-plus"></i> Post New Task
+    </a>
+    <a routerLink="/browse-errands" class="btn btn-outline-primary" *ngIf="canAcceptTasks">
+      <i class="fas fa-search"></i> Find Tasks
+    </a>
+    <a routerLink="/profile" class="btn btn-outline-secondary" *ngIf="!canCreateTasks && !canAcceptTasks">
+      <i class="fas fa-cog"></i> Set Up Profile
+    </a>
+  </div>
+</div>

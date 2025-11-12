@@ -1,0 +1,172 @@
+<div class="profile">
+  <h2>My Profile</h2>
+  <div class="profile-status" *ngIf="!isProfileComplete()">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Please complete your profile to access all features</span>
+  </div>
+  
+  <div class="profile-sections">
+    <div class="profile-card">
+      <h3>Personal Information</h3>
+      <form (ngSubmit)="updateProfile()">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" [(ngModel)]="profile.email" name="email" readonly>
+          <small class="text-muted">Email cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" class="form-control" [(ngModel)]="profile.phone" name="phone" required>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.username" name="username">
+          <small class="text-muted">Optional display name</small>
+        </div>
+        <div class="form-group">
+          <label>ID Number</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.idNumber" name="idNumber" maxlength="13" (input)="onIdNumberChange()" [readonly]="verificationStatus.idNumberVerified">
+          <small class="text-muted" *ngIf="!verificationStatus.idNumberVerified">South African ID number for verification</small>
+          <small class="text-muted" *ngIf="verificationStatus.idNumberVerified">
+            <i class="fas fa-check-circle text-success"></i> ID verified - cannot be changed
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Address *</label>
+          <textarea class="form-control" [(ngModel)]="profile.address" name="address" rows="3" placeholder="e.g. 123 Main Street, Sandton, Johannesburg, 2196" required (blur)="validateAddress()"></textarea>
+          <small class="text-muted">Full address including street, suburb, city, and postal code</small>
+          <small class="text-danger" *ngIf="addressError">{{addressError}}</small>
+        </div>
+        <div class="form-group">
+          <label>Date of Birth</label>
+          <input type="date" class="form-control" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth">
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="updating">Update Profile</button>
+      </form>
+    </div>
+
+    <div class="profile-card">
+      <h3>User Type & Preferences</h3>
+      <div class="user-type-section">
+        <p class="section-description">Choose how you want to use DoForYou:</p>
+        
+        <div class="user-type-options">
+          <label class="user-type-option" [class.active]="userType === 'creator'">
+            <input type="radio" name="userType" value="creator" [(ngModel)]="userType" (ngModelChange)="onUserTypeChange()">
+            <div class="option-content">
+              <div class="option-icon creator">
+                <i class="fas fa-plus-circle"></i>
+              </div>
+              <div class="option-details">
+                <h4>Task Creator</h4>
+                <p>Post tasks and hire helpers to complete them</p>
+                <ul>
+                  <li>Post unlimited tasks</li>
+                  <li>Manage task payments</li>
+                  <li>Rate and review helpers</li>
+                </ul>
+              </div>
+            </div>
+          </label>
+
+          <label class="user-type-option" [class.active]="userType === 'runner'">
+            <input type="radio" name="userType" value="runner" [(ngModel)]="userType" (ngModelChange)="onUserTypeChange()">
+            <div class="option-content">
+              <div class="option-icon runner">
+                <i class="fas fa-running"></i>
+              </div>
+              <div class="option-details">
+                <h4>Task Runner</h4>
+                <p>Find and complete tasks to earn money</p>
+                <ul>
+                  <li>Browse available tasks</li>
+                  <li>Earn money by completing tasks</li>
+                  <li>Build your reputation</li>
+                </ul>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card" *ngIf="preferences.canAcceptTasks">
+      <h3>Bank Details</h3>
+      <p class="section-description">Required for receiving payments as a task runner</p>
+      <form (ngSubmit)="updateBankDetails()">
+        <div class="form-group">
+          <label>Bank Name</label>
+          <select class="form-control" [(ngModel)]="profile.bankName" name="bankName" required>
+            <option value="">Select Bank</option>
+            <option value="FNB">FNB</option>
+            <option value="Standard Bank">Standard Bank</option>
+            <option value="ABSA">ABSA</option>
+            <option value="Nedbank">Nedbank</option>
+            <option value="Capitec">Capitec</option>
+            <option value="African Bank">African Bank</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.accountNumber" name="accountNumber" required>
+        </div>
+        <div class="form-group">
+          <label>Branch Code</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.branchCode" name="branchCode" required>
+        </div>
+        <div class="form-group">
+          <label>Account Holder Name</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.accountHolderName" name="accountHolderName" required>
+          <small class="text-muted">Must match your ID document</small>
+        </div>
+        <button type="submit" class="btn btn-success" [disabled]="updating">Update Bank Details</button>
+      </form>
+    </div>
+
+    <div class="profile-card">
+      <h3>Account Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item" *ngIf="preferences.canCreateTasks">
+          <div class="stat-icon creator">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="stat-content">
+            <h4>{{stats.tasksCreated}}</h4>
+            <p>Tasks Created</p>
+          </div>
+        </div>
+        <div class="stat-item" *ngIf="preferences.canAcceptTasks">
+          <div class="stat-icon runner">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h4>{{stats.tasksCompleted}}</h4>
+            <p>Tasks Completed</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-content">
+            <h4>{{stats.rating}}/5</h4>
+            <p>Rating</p>
+          </div>
+        </div>
+        <div class="stat-item" *ngIf="preferences.canAcceptTasks">
+          <div class="stat-icon success">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-content">
+            <h4>R{{stats.totalEarnings}}</h4>
+            <p>Total Earnings</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

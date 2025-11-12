@@ -1,0 +1,82 @@
+<div class="task-tracking">
+  <h2>My Tasks</h2>
+  
+  <div class="task-sections">
+    <div class="task-section">
+      <h3>Tasks I Created</h3>
+      <div class="task-list" *ngIf="createdTasks.length > 0; else noCreatedTasks">
+        <div class="task-card" *ngFor="let task of createdTasks">
+          <div class="task-header">
+            <h4>{{task.taskDescription}}</h4>
+            <span class="status-badge" [ngClass]="'status-' + task.taskStatus">{{task.taskStatus}}</span>
+          </div>
+          <div class="task-details">
+            <p><strong>Budget:</strong> R{{task.budget}}</p>
+            <p><strong>Runner:</strong> {{task.helperName || 'Not assigned'}}</p>
+            <p><strong>Status:</strong> {{getStatusText(task.taskStatus)}}</p>
+          </div>
+          <div class="task-actions" *ngIf="task.taskStatus === 'completed'">
+            <button class="btn btn-success" (click)="confirmTask(task.id, true)">
+              Approve & Pay
+            </button>
+            <button class="btn btn-warning" (click)="requestRevision(task.id)">
+              Request Revision
+            </button>
+          </div>
+        </div>
+      </div>
+      <ng-template #noCreatedTasks>
+        <p class="no-tasks">You haven't created any tasks yet.</p>
+      </ng-template>
+    </div>
+
+    <div class="task-section">
+      <h3>Tasks I'm Running</h3>
+      <div class="task-list" *ngIf="acceptedTasks.length > 0; else noAcceptedTasks">
+        <div class="task-card" *ngFor="let task of acceptedTasks">
+          <div class="task-header">
+            <h4>{{task.taskDescription}}</h4>
+            <span class="status-badge" [ngClass]="'status-' + task.taskStatus">{{task.taskStatus}}</span>
+          </div>
+          <div class="task-details">
+            <p><strong>Payment:</strong> R{{task.budget}}</p>
+            <p><strong>Creator:</strong> {{task.creatorName}}</p>
+            <p><strong>Status:</strong> {{getStatusText(task.taskStatus)}}</p>
+          </div>
+          <div class="task-actions" *ngIf="task.taskStatus === 'claimed'">
+            <button class="btn btn-primary" (click)="completeTask(task.id)">
+              Mark as Complete
+            </button>
+          </div>
+        </div>
+      </div>
+      <ng-template #noAcceptedTasks>
+        <p class="no-tasks">You haven't accepted any tasks yet.</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Complete Task Modal -->
+  <div class="modal" *ngIf="showCompleteModal">
+    <div class="modal-content">
+      <h3>Complete Task</h3>
+      <textarea [(ngModel)]="completionNotes" placeholder="Add completion notes..." rows="4"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="submitCompletion()">Submit</button>
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revision Modal -->
+  <div class="modal" *ngIf="showRevisionModal">
+    <div class="modal-content">
+      <h3>Request Revision</h3>
+      <textarea [(ngModel)]="revisionNotes" placeholder="Explain what needs to be revised..." rows="4"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-warning" (click)="submitRevision()">Request Revision</button>
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
