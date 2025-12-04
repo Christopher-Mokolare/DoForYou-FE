@@ -25,7 +25,6 @@
     "@angular/service-worker": "^19.2.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@microsoft/signalr": "^8.0.0",
-    "@netlify/angular-runtime": "^2.2.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
@@ -49,5 +48,10 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.7.2"
+  },
+  "overrides": {
+    "@angular/core": "^19.2.0",
+    "@angular/common": "^19.2.0",
+    "@angular/platform-browser": "^19.2.0"
   }
 }
