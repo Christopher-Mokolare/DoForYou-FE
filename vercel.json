@@ -1,7 +1,4 @@
 {
-  "framework": "angular",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/do-for-you",
   "rewrites": [
     {
       "source": "/(.*)",
