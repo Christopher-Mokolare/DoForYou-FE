@@ -1,3 +1,4 @@
+// Updated for Railway backend integration
 export const environment = {
   production: true,
   apiUrl: 'https://doforyoubackend-production.up.railway.app',
