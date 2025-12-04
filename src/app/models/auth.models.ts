@@ -4,18 +4,26 @@ export interface LoginModel {
 }
 
 export interface RegisterModel {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  contact: string;
+  phoneNumber: string;
+  userType: string;
+  idNumber?: string;
+  address?: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
 }
 
 export interface User {
   id: number;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   contact: string;
+  phoneNumber?: string;
+  userType?: string;
   isVerified: boolean;
   profileCompleted: boolean;
   rating: number;

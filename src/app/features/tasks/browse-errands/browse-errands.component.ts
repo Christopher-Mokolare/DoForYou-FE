@@ -38,9 +38,11 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   // Filters
   searchTerm = '';
-  statusFilter = '';
   categoryFilter = '';
   locationFilter = '';
+  
+  // Dynamic filter options
+  categoryOptions: any[] = [];
 
   readonly taskRequestForm = environment.taskRequestForm;
   readonly whatsappNumber = environment.whatsappNumber;
@@ -54,6 +56,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.loadFilterOptions();
     this.loadErrands();
     this.setupAutoRefresh();
     this.setupSearch();
@@ -105,13 +108,22 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadFilterOptions(): void {
+    this.errandsService.getFilterOptions().subscribe({
+      next: (options) => {
+        this.categoryOptions = options.categories || [];
+      },
+      error: (error) => {
+        console.error('Failed to load filter options:', error);
+      }
+    });
+  }
+
   private buildFilters(): any {
     const filters: any = {};
     
     if (this.searchTerm) filters.search = this.searchTerm;
-    if (this.statusFilter) filters.taskStatus = this.statusFilter;
-    if (this.categoryFilter) filters.category = this.categoryFilter;
-    if (this.locationFilter) filters.area = this.locationFilter;
+    if (this.categoryFilter && this.categoryFilter !== '') filters.category = this.categoryFilter;
 
     return filters;
   }
@@ -127,6 +139,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     ).subscribe(term => {
       this.searchTerm = term;
       this.currentPage = 1;
+      this.errandsService.clearCache(); // Clear cache on search change
       this.loadErrands();
     });
   }
@@ -202,6 +215,10 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
       next: () => {
         this.modalService.showAlert('Success', 'Task accepted successfully! You can now start working on it.', 'success');
         this.loadErrands(); // Refresh the list
+        // Navigate to dashboard to see accepted tasks
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 2000);
       },
       error: (error) => {
         console.error('Task claim failed');
@@ -241,15 +258,16 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   onFilterChange(): void {
     this.currentPage = 1;
+    this.errandsService.clearCache(); // Clear cache on filter change
     this.loadErrands();
   }
 
   clearFilters(): void {
     this.searchTerm = '';
-    this.statusFilter = '';
     this.categoryFilter = '';
     this.locationFilter = '';
     this.currentPage = 1;
+    this.errandsService.clearCache(); // Clear cache before loading
     this.loadErrands();
   }
 

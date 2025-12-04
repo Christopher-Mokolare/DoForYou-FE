@@ -1,7 +1,11 @@
-.container {
+.container-fluid {
   min-height: 80vh;
   display: flex;
   align-items: center;
+}
+
+.row {
+  width: 100%;
 }
 
 .card {
@@ -12,7 +16,7 @@
 }
 
 .card-body {
-  padding: 3rem !important;
+  padding: 4rem 3rem !important;
 }
 
 .fa-check-circle {

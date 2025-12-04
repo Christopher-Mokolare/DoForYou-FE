@@ -4,11 +4,12 @@ import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/auth.models';
+import { ProfileCompletionModalComponent } from '../../shared/components/profile-completion-modal/profile-completion-modal.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ProfileCompletionModalComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
@@ -17,12 +18,13 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   isLoggedIn = false;
   isAdmin = false;
   currentUser: User | null = null;
+  showProfileModal = false;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -31,7 +33,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
       this.currentUser = user;
       // Updated: Use proper role checking
       this.isAdmin = this.checkIfAdmin(user);
-      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user, 'Is Admin:', this.isAdmin);
+      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user, 'Is Admin:', this.isAdmin, 'UserType:', (user as any)?.userType);
     });
   }
 
@@ -80,22 +82,41 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   postErrand() {
-    // Always check authentication first
     if (!this.authService.isAuthenticated()) {
-      // Redirect to login with return URL
       this.router.navigate(['/login'], { 
         queryParams: { returnUrl: '/post-errand' } 
       });
       return;
     }
     
-    // If authenticated, navigate to post errand page
+    if (!this.authService.canCreateTasks()) {
+      this.router.navigate(['/profile'], {
+        queryParams: { message: 'Enable task creation in your profile to post errands' }
+      });
+      return;
+    }
+    
+    if (this.authService.isProfileIncomplete()) {
+      this.showProfileModal = true;
+      return;
+    }
+    
     this.router.navigate(['/post-errand']);
     this.scrollToTop();
   }
 
   private checkIfAdmin(user: User | null): boolean {
     return this.authService.isAdmin();
+  }
+
+  canShowPostErrand(): boolean {
+    const user = this.authService.getCurrentUser();
+    const userType = (user as any)?.userType;
+    return userType === 'creator' || userType === 'both';
+  }
+
+  onModalClosed() {
+    this.showProfileModal = false;
   }
 
   logout() {

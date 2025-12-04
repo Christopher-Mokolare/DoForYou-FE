@@ -8,7 +8,7 @@ import { LoginModel, RegisterModel, AuthResponse, User, ChangePasswordModel } fr
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/api/Authenticate`;
+  private apiUrl = `${environment.apiUrl}/api/v1/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private http = inject(HttpClient);
@@ -51,11 +51,12 @@ login(loginData: LoginModel): Observable<AuthResponse> {
           localStorage.setItem('currentUser', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
           
-          // Set default preferences for new users
-          if (!localStorage.getItem('userPreferences')) {
+          // Set preferences based on registration userType
+          if (!localStorage.getItem('userPreferences') && response.user) {
+            const userType = response.user.userType;
             const defaultPreferences = {
-              canCreateTasks: true,
-              canAcceptTasks: false,
+              canCreateTasks: userType === 'creator' || userType === 'both',
+              canAcceptTasks: userType === 'runner' || userType === 'both',
               taskCreatorNotifications: true,
               taskRunnerNotifications: true,
               paymentNotifications: true,
@@ -124,6 +125,14 @@ login(loginData: LoginModel): Observable<AuthResponse> {
       return false;
     }
     
+    const user = this.getCurrentUser();
+    const userType = (user as any)?.userType;
+    
+    // Check userType first, then fall back to preferences
+    if (userType) {
+      return userType === 'creator' || userType === 'both';
+    }
+    
     const preferences = this.getUserPreferences();
     return preferences?.canCreateTasks === true;
   }
@@ -133,8 +142,44 @@ login(loginData: LoginModel): Observable<AuthResponse> {
       return false;
     }
     
+    const user = this.getCurrentUser();
+    const userType = (user as any)?.userType;
+    
+    // Check userType first, then fall back to preferences
+    if (userType) {
+      return userType === 'runner' || userType === 'both';
+    }
+    
     const preferences = this.getUserPreferences();
     return preferences?.canAcceptTasks === true;
+  }
+
+  // Business rule: Check if user can create tasks
+  canCreateTasks(): boolean {
+    if (!this.isAuthenticated() || this.isAdmin()) {
+      return false;
+    }
+    
+    const user = this.getCurrentUser();
+    const userType = (user as any)?.userType;
+    
+    // Check userType first, then fall back to preferences
+    if (userType) {
+      return userType === 'creator' || userType === 'both';
+    }
+    
+    const preferences = this.getUserPreferences();
+    return preferences?.canCreateTasks === true;
+  }
+
+  // Business rule: Check if user can claim tasks
+  canClaimTasks(): boolean {
+    return this.canAcceptTasks();
+  }
+
+  // Business rule: Update user preferences
+  updateUserPreferences(preferences: any): void {
+    localStorage.setItem('userPreferences', JSON.stringify(preferences));
   }
 
   private getUserPreferences() {
@@ -161,20 +206,62 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     const preferences = this.getUserPreferences();
     const hasBasicInfo = user.name && user.email && user.contact;
     const hasUserType = preferences && (preferences.canCreateTasks || preferences.canAcceptTasks);
+    const hasNewFields = user.firstName && user.lastName; // Check for new required fields
     
-    return hasBasicInfo && hasUserType;
+    return hasBasicInfo && hasUserType && hasNewFields;
+  }
+
+  needsProfileUpdate(): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    
+    // Check if user is missing new required fields OR has old format data
+    const hasNewFormat = !!(user.firstName && user.lastName && user.userType);
+    const hasOldFormatOnly = !!(user.name && !user.firstName); // Has old 'name' but no 'firstName'
+    
+    return !hasNewFormat || hasOldFormatOnly;
+  }
+
+  isProfileIncomplete(): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    
+    const userType = (user as any)?.userType;
+    const profileCompletion = (user as any).profileCompletion || 0;
+    
+    // For runners, require higher completion (need ID, address, bank details)
+    if (userType === 'runner') {
+      const hasRequiredFields = !!(user as any).idNumber && !!(user as any).address;
+      return profileCompletion < 80 || !hasRequiredFields;
+    }
+    
+    // For creators, standard completion check
+    return profileCompletion < 80;
+  }
+
+  getProfileCompletion(): number {
+    const user = this.getCurrentUser();
+    if (!user) return 0;
+    
+    return (user as any).profileCompletion || 0;
   }
 
   updateProfile(profileData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/update-profile`, profileData);
+    return this.http.put(`${environment.apiUrl}/api/v1/user/profile`, profileData);
   }
 
   getProfile(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/profile`);
+    return this.http.get(`${environment.apiUrl}/api/v1/user/profile`);
   }
 
-  getUserStats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/stats`);
+
+
+  verifyEmail(): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/v1/user/send-verification-email`, {});
+  }
+
+  verifyPhone(): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/v1/user/verify-phone`, {});
   }
 
   // Helper method to check token validity with detailed logging

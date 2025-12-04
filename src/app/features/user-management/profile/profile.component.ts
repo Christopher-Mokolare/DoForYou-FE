@@ -69,49 +69,49 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadUserProfile() {
+    // Always try to load from current user first
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      console.log('Loading profile from current user:', currentUser);
+      const user = currentUser as any;
+      this.profile = {
+        name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '',
+        email: user.email || '',
+        phone: user.contact || user.phoneNumber || '',
+        username: '',
+        idNumber: '',
+        address: '',
+        dateOfBirth: '',
+        bankName: '',
+        accountNumber: '',
+        branchCode: '',
+        accountHolderName: ''
+      };
+    }
+
+    // Then try to load from API (will override if successful)
     this.authService.getProfile().subscribe({
       next: (response: any) => {
-        if (response.success && response.profile) {
+        if (response.success && response.data) {
+          const userData = response.data;
           this.profile = {
-            name: response.profile.name || response.profile.fullName || response.profile.displayName || '',
-            email: response.profile.email || '',
-            phone: response.profile.phone || response.profile.contact || '',
-            username: response.profile.username || '',
-            idNumber: response.profile.idNumber || '',
-            address: response.profile.address || '',
-            dateOfBirth: response.profile.dateOfBirth || '',
+            name: userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || this.profile.name,
+            email: userData.email || this.profile.email,
+            phone: userData.phoneNumber || userData.contact || this.profile.phone,
+            username: userData.username || '',
+            idNumber: userData.idNumber || '',
+            address: userData.address || '',
+            dateOfBirth: userData.dateOfBirth ? userData.dateOfBirth.split('T')[0] : '',
             bankName: '',
             accountNumber: '',
             branchCode: '',
             accountHolderName: ''
           };
-          console.log('Profile data received:', response.profile);
-          this.verificationStatus = {
-            idNumberVerified: response.profile.idNumberVerified || false,
-            verificationStatus: response.profile.verificationStatus || 'Not Started'
-          };
+          console.log('Profile updated from API:', userData);
         }
       },
       error: (error) => {
-        console.error('Error loading profile:', error);
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser) {
-          console.log('Current user data:', currentUser);
-          const user = currentUser as any;
-          this.profile = {
-            name: user.name || user.fullName || user.displayName || '',
-            email: user.email || '',
-            phone: user.contact || user.phone || '',
-            username: '',
-            idNumber: '',
-            address: '',
-            dateOfBirth: '',
-            bankName: '',
-            accountNumber: '',
-            branchCode: '',
-            accountHolderName: ''
-          };
-        }
+        console.log('API profile load failed, using current user data');
       }
     });
   }
@@ -134,30 +134,63 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadStats() {
-    this.authService.getUserStats().subscribe({
-      next: (response: any) => {
+    // Set default stats since getUserStats endpoint doesn't exist
+    this.stats = {
+      tasksCreated: 0,
+      tasksCompleted: 0,
+      rating: 0,
+      totalEarnings: 0
+    };
+  }
+
+  verifyEmail() {
+    this.updating = true;
+    this.authService.verifyEmail().subscribe({
+      next: (response) => {
+        this.updating = false;
         if (response.success) {
-          this.stats = response.stats;
+          this.modalService.showModal({
+            type: 'success',
+            title: 'Email Verified',
+            message: 'Your email has been verified successfully.'
+          });
+          this.loadUserProfile();
         }
       },
-      error: (error) => {
-        console.error('Error loading stats:', error);
-        this.stats = {
-          tasksCreated: 0,
-          tasksCompleted: 0,
-          rating: 0,
-          totalEarnings: 0
-        };
-      }
+      error: () => this.updating = false
+    });
+  }
+
+  verifyPhone() {
+    this.updating = true;
+    this.authService.verifyPhone().subscribe({
+      next: (response) => {
+        this.updating = false;
+        if (response.success) {
+          this.modalService.showModal({
+            type: 'success',
+            title: 'Phone Verified',
+            message: 'Your phone number has been verified successfully.'
+          });
+          this.loadUserProfile();
+        }
+      },
+      error: () => this.updating = false
     });
   }
 
   updateProfile() {
     this.updating = true;
     
+    const nameParts = this.profile.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
     const updateData = {
-      name: this.profile.name,
-      contact: this.profile.phone,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: this.profile.phone,
+      userType: 'both',
       username: this.profile.username,
       idNumber: this.profile.idNumber,
       address: this.profile.address,
@@ -168,6 +201,25 @@ export class ProfileComponent implements OnInit {
       next: (response) => {
         this.updating = false;
         if (response.success) {
+          // Fetch updated user profile from server
+          this.authService.getProfile().subscribe({
+            next: (profileResponse: any) => {
+              if (profileResponse.success && profileResponse.data) {
+                const updatedUser = profileResponse.data;
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                this.authService.refreshCurrentUser();
+                
+                // Update form fields with fresh data
+                this.profile = {
+                  ...this.profile,
+                  name: `${updatedUser.firstName || ''} ${updatedUser.lastName || ''}`.trim(),
+                  phone: updatedUser.phoneNumber || updatedUser.contact || this.profile.phone
+                };
+              }
+            },
+            error: (error) => console.error('Error fetching updated profile:', error)
+          });
+          
           this.modalService.showModal({
             type: 'success',
             title: 'Profile Updated',

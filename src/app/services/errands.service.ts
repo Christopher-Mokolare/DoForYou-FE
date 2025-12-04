@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface CreateTaskData {
   taskDescription: string;
+  category: string;
   area: string;
   dateNeeded: string;
   budget: number;
@@ -76,7 +77,7 @@ export class ErrandsService {
 
   // Create a new task (requires authentication)
   createTask(taskData: CreateTaskData): Observable<CreateTaskResponse> {
-    const url = `${this.apiBaseUrl}/api/Tasks`;
+    const url = `${this.apiBaseUrl}/api/v1/tasks`;
     
     console.log('Creating task');
     
@@ -101,16 +102,15 @@ export class ErrandsService {
       return of(cachedData);
     }
 
-    const url = `${this.apiBaseUrl}/api/Tasks/available`;
+    const url = `${this.apiBaseUrl}/api/v1/tasks/available`;
     let params = new HttpParams()
-      .set('Page', page.toString())
-      .set('PageSize', pageSize.toString());
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
 
-    // Add filters - UPDATED for new status system
-    if (filters.search) params = params.set('Search', filters.search);
-    if (filters.paymentStatus) params = params.set('PaymentStatus', filters.paymentStatus);
-    if (filters.taskStatus) params = params.set('TaskStatus', filters.taskStatus);
-    if (filters.area) params = params.set('Area', filters.area);
+    // Add filters - Match actual HTML form
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.category) params = params.set('category', filters.category);
 
     console.log('Making API call for available tasks');
 
@@ -127,7 +127,7 @@ export class ErrandsService {
 
   // Get user's own tasks (requires authentication)
   getUserTasks(): Observable<PaginatedResponse> {
-    const url = `${this.apiBaseUrl}/api/Tasks`;
+    const url = `${this.apiBaseUrl}/api/v1/tasks`;
     console.log('Getting user tasks');
     
     return this.http.get<PaginatedResponse>(url).pipe(
@@ -143,10 +143,10 @@ export class ErrandsService {
       helperContact: helperContact
     };
     
-    const url = `${this.apiBaseUrl}/api/Tasks/${taskId}/claim`;
+    const url = `${this.apiBaseUrl}/api/v1/tasks/${taskId}/claim`;
     console.log('Claiming task');
     
-    return this.http.patch(url, claimData).pipe(
+    return this.http.post(url, claimData).pipe(
       tap(() => {
         console.log('Task claimed successfully');
         this.clearCache();
@@ -160,7 +160,7 @@ export class ErrandsService {
 
   // Get single task details
   getTask(taskId: string): Observable<any> {
-    const url = `${this.apiBaseUrl}/api/Tasks/${taskId}`;
+    const url = `${this.apiBaseUrl}/api/v1/tasks/${taskId}`;
     console.log('Getting task details');
     
     return this.http.get(url).pipe(
@@ -288,16 +288,29 @@ export class ErrandsService {
 
   // Generate PayFast payment URL for task
   generatePaymentUrl(taskId: string): Observable<any> {
-    const url = `${this.apiBaseUrl}/api/Payment/generate-payment-url/${taskId}`;
+    const url = `${this.apiBaseUrl}/api/v1/payment/initiate`;
     console.log('Generating payment URL');
     
-    return this.http.post(url, {}).pipe(
+    return this.http.post(url, { taskId }).pipe(
       tap(() => {
         console.log('Payment URL generated successfully');
       }),
       catchError(error => {
         console.error('Error generating payment URL:', error);
         return throwError(() => new Error('Failed to generate payment URL.'));
+      })
+    );
+  }
+
+  // Get filter options (statuses and categories)
+  getFilterOptions(): Observable<any> {
+    const url = `${this.apiBaseUrl}/api/v1/tasks/filters`;
+    console.log('Getting filter options');
+    
+    return this.http.get(url).pipe(
+      catchError(error => {
+        console.error('Error fetching filter options:', error);
+        return of({ statuses: [], categories: [] });
       })
     );
   }

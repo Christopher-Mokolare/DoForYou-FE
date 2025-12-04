@@ -1,195 +1,335 @@
-<div class="container py-5">
-  <!-- Loading Overlay -->
-  <div *ngIf="isSubmitting" class="loading-overlay">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <p>Posting your errand...</p>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <!-- Header -->
-      <div class="text-center mb-5">
-        <h1 class="display-5 brand-text mb-3">Post a New Task</h1>
-        <p class="lead text-muted">Need help with a task? Fill in the details below and our trusted helpers will reach out to you.</p>
-        
-        <!-- User Welcome Message -->
-        <div *ngIf="currentUser" class="alert alert-success d-inline-block">
-          <i class="fas fa-user-check me-2"></i>
-          Welcome back, <strong>{{ currentUser.name }}</strong>! Your contact details ({{ currentUser.contact }}) will be used from your profile.
-        </div>
-        
-        <!-- Not Logged In Warning -->
-        <div *ngIf="!currentUser" class="alert alert-warning d-inline-block">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          Please log in to post a task. Your profile information will be used automatically.
-        </div>
-      </div>
-
-      <!-- Task Form -->
-      <div class="card shadow-sm border-0" *ngIf="currentUser">
-        <div class="card-body p-4">
-          <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
-            
-            <!-- User Information Notice -->
-            <div class="alert alert-info mb-4" *ngIf="currentUser">
-              <i class="fas fa-info-circle me-2"></i>
-              Your profile information will be automatically used: 
-              <strong>{{ currentUser.name }}</strong> ({{ currentUser.contact }})
+<div class="unique-post-task">
+  <div class="hero-gradient">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <!-- Unique Header -->
+          <div class="text-center mb-5">
+            <div class="task-icon-wrapper">
+              <i class="fas fa-magic"></i>
             </div>
+            <h1 class="unique-title brand-font">
+              Create Your Task<span class="dot">.</span>
+            </h1>
+            <p class="unique-subtitle">
+              Transform your to-do into someone else's opportunity
+            </p>
 
-            <!-- Task Details -->
-            <div class="row mb-4">
-              <div class="col-12">
-                <h5 class="mb-3 text-primary">
-                  <i class="fas fa-tasks me-2"></i>Task Details
-                </h5>
+            <!-- User Welcome Card -->
+            <div *ngIf="currentUser" class="welcome-card">
+              <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
               </div>
-              <div class="col-12 mb-3">
-                <label for="taskDescription" class="form-label">Task Description *</label>
-                <textarea class="form-control" id="taskDescription" rows="4" 
-                          formControlName="taskDescription"
-                          placeholder="Please include as much detail as possible..."
-                          [class.is-invalid]="isFieldInvalid('taskDescription')"></textarea>
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('taskDescription')">
-                  {{ getFieldError('taskDescription') }}
-                </div>
-                <div class="form-text">Be specific about what needs to be done, including any special requirements.</div>
-              </div>
-              
-              <div class="col-md-6 mb-3">
-                <label for="area" class="form-label">Area/Suburb *</label>
-                <input type="text" class="form-control" id="area" formControlName="area"
-                       placeholder="e.g., Sandton, Pretoria, Cape Town CBD"
-                       [class.is-invalid]="isFieldInvalid('area')">
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('area')">
-                  {{ getFieldError('area') }}
-                </div>
-              </div>
-              
-              <div class="col-md-6 mb-3">
-                <label for="priority" class="form-label">Priority *</label>
-                <select class="form-select" id="priority" formControlName="priority"
-                        [class.is-invalid]="isFieldInvalid('priority')">
-                  <option value="standard">Standard (48 hours)</option>
-                  <option value="urgent">Urgent (24 hours)</option>
-                </select>
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('priority')">
-                  {{ getFieldError('priority') }}
-                </div>
+              <div class="welcome-text">
+                <span class="welcome-name">{{ currentUser.name }}</span>
+                <span class="welcome-contact">{{ currentUser.contact }}</span>
               </div>
             </div>
+          </div>
 
-            <!-- Timing & Budget -->
-            <div class="row mb-4">
-              <div class="col-12">
-                <h5 class="mb-3 text-primary">
-                  <i class="fas fa-clock me-2"></i>Timing & Budget
-                </h5>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="dateNeeded" class="form-label">When is this needed? *</label>
-                <input type="datetime-local" class="form-control" id="dateNeeded" formControlName="dateNeeded"
-                       [class.is-invalid]="isFieldInvalid('dateNeeded')">
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('dateNeeded')">
-                  {{ getFieldError('dateNeeded') }}
+          <!-- Unique Task Form -->
+          <div class="unique-form-card" *ngIf="currentUser">
+            <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+              <!-- Progress Steps -->
+              <div class="form-steps">
+                <div class="step active">
+                  <span class="step-number">1</span>
+                  <span class="step-label">Details</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                  <span class="step-number">2</span>
+                  <span class="step-label">Budget</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                  <span class="step-number">3</span>
+                  <span class="step-label">Payment</span>
                 </div>
               </div>
-              
-              <div class="col-md-6 mb-3">
-                <label for="budget" class="form-label">Your Budget (ZAR) *</label>
-                <div class="input-group">
-                  <span class="input-group-text">R</span>
-                  <input type="number" class="form-control" id="budget" formControlName="budget" min="0" step="0.01"
-                         placeholder="0.00"
-                         [class.is-invalid]="isFieldInvalid('budget')">
-                </div>
-                <div class="invalid-feedback" *ngIf="isFieldInvalid('budget')">
-                  {{ getFieldError('budget') }}
-                </div>
-                <div class="form-text">This is the amount you're willing to pay for this task.</div>
-              </div>
-            </div>
 
-            <!-- Additional Notes -->
-            <div class="row mb-4">
-              <div class="col-12">
-                <label for="notes" class="form-label">
-                  <i class="fas fa-sticky-note me-2"></i>Additional Notes (Optional)
-                </label>
-                <textarea class="form-control" id="notes" rows="3" formControlName="notes"
-                          placeholder="Any additional information that might be helpful..."></textarea>
-              </div>
-            </div>
+              <!-- Task Details Section -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                  </div>
+                  <h3 class="section-title brand-font">
+                    What do you need done?
+                  </h3>
+                </div>
+                <div class="unique-field">
+                  <label class="unique-label">Describe your task *</label>
+                  <textarea
+                    class="unique-textarea"
+                    rows="4"
+                    formControlName="taskDescription"
+                    placeholder="Tell us what you need help with..."
+                    [class.is-invalid]="isFieldInvalid('taskDescription')"
+                  ></textarea>
+                  <div class="field-hint">
+                    Be specific - the more details, the better matches!
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="isFieldInvalid('taskDescription')"
+                  >
+                    {{ getFieldError("taskDescription") }}
+                  </div>
+                </div>
 
-            <!-- Terms & Conditions -->
-            <div class="row mb-4">
-              <div class="col-12">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="termsAccepted" formControlName="termsAccepted"
-                         [class.is-invalid]="isFieldInvalid('termsAccepted')">
-                  <label class="form-check-label" for="termsAccepted">
-                    I have read and agree to the 
-                    <a href="https://docs.google.com/document/d/1PnAK2JTIHw4th92ZS-wjsEokBgc4l14XZnH-UVnYvsM/edit?usp=sharing" 
-                       target="_blank" class="text-primary">DoForYou Terms & Conditions</a> *
-                  </label>
-                  <div class="invalid-feedback" *ngIf="isFieldInvalid('termsAccepted')">
-                    {{ getFieldError('termsAccepted') }}
+                <div class="unique-field">
+                  <label class="unique-label">Category *</label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-tags"></i>
+                    <select
+                      class="unique-input"
+                      formControlName="category"
+                      [class.is-invalid]="isFieldInvalid('category')"
+                    >
+                      <option value="">Select a category...</option>
+                      <option *ngFor="let category of categoryOptions" [value]="category.value">
+                        {{ category.label }}
+                      </option>
+                    </select>
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="isFieldInvalid('category')"
+                  >
+                    {{ getFieldError("category") }}
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="unique-field">
+                      <label class="unique-label">Location *</label>
+                      <div class="input-with-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input
+                          type="text"
+                          class="unique-input"
+                          formControlName="area"
+                          placeholder="Sandton, Cape Town, etc."
+                          [class.is-invalid]="isFieldInvalid('area')"
+                        />
+                      </div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="isFieldInvalid('area')"
+                      >
+                        {{ getFieldError("area") }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="unique-field">
+                      <label class="unique-label">Urgency *</label>
+                      <div class="priority-selector">
+                        <input
+                          type="radio"
+                          id="standard"
+                          value="standard"
+                          formControlName="priority"
+                        />
+                        <label for="standard" class="priority-option">
+                          <i class="fas fa-clock"></i>
+                          <span>Standard</span>
+                          <small>48 hours</small>
+                        </label>
+
+                        <input
+                          type="radio"
+                          id="urgent"
+                          value="urgent"
+                          formControlName="priority"
+                        />
+                        <label for="urgent" class="priority-option urgent">
+                          <i class="fas fa-bolt"></i>
+                          <span>Urgent</span>
+                          <small>24 hours</small>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Payment Information -->
-            <div class="alert alert-success mb-4">
-              <h6 class="alert-heading">
-                <i class="fas fa-credit-card me-2"></i>Secure Payment with PayFast
-              </h6>
-              <p class="mb-2">After posting your task, you'll be redirected to PayFast for secure payment processing.</p>
-              <ul class="mb-2">
-                <li><strong>✓</strong> Secure online payment</li>
-                <li><strong>✓</strong> Instant task activation</li>
-                <li><strong>✓</strong> No admin delays</li>
-                <li><strong>✓</strong> Full refund if no helper found</li>
-              </ul>
-              <p class="mb-0"><small class="text-success">Your task will be live immediately after successful payment!</small></p>
-            </div>
+              <!-- Budget & Timing Section -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-calendar-dollar"></i>
+                  </div>
+                  <h3 class="section-title brand-font">When & How Much?</h3>
+                </div>
 
-            <!-- Submit Button -->
-            <div class="row">
-              <div class="col-12">
-                <button type="submit" class="btn btn-orange btn-lg w-100" [disabled]="taskForm.invalid || isSubmitting">
-                  <span *ngIf="!isSubmitting">
-                    <i class="fas fa-paper-plane me-2"></i>Post Task
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="unique-field">
+                      <label class="unique-label">Deadline *</label>
+                      <div class="input-with-icon">
+                        <i class="fas fa-calendar"></i>
+                        <input
+                          type="datetime-local"
+                          class="unique-input"
+                          formControlName="dateNeeded"
+                          [class.is-invalid]="isFieldInvalid('dateNeeded')"
+                        />
+                      </div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="isFieldInvalid('dateNeeded')"
+                      >
+                        {{ getFieldError("dateNeeded") }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="unique-field">
+                      <label class="unique-label">Your Budget *</label>
+                      <div class="budget-input">
+                        <span class="currency">R</span>
+                        <input
+                          type="number"
+                          class="unique-input budget"
+                          formControlName="budget"
+                          min="0"
+                          step="0.01"
+                          placeholder="100.00"
+                          [class.is-invalid]="isFieldInvalid('budget')"
+                        />
+                      </div>
+                      <div class="field-hint">
+                        Fair pricing attracts quality helpers
+                      </div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="isFieldInvalid('budget')"
+                      >
+                        {{ getFieldError("budget") }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Notes -->
+              <div class="form-section">
+                <div class="unique-field">
+                  <label class="unique-label">
+                    <i class="fas fa-lightbulb me-2"></i>Anything else?
+                    (Optional)
+                  </label>
+                  <textarea
+                    class="unique-textarea"
+                    rows="3"
+                    formControlName="notes"
+                    placeholder="Special requirements, preferences, or helpful details..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Terms Agreement -->
+              <div class="terms-section">
+                <div class="custom-checkbox">
+                  <input
+                    type="checkbox"
+                    id="termsAccepted"
+                    formControlName="termsAccepted"
+                    [class.is-invalid]="isFieldInvalid('termsAccepted')"
+                  />
+                  <label for="termsAccepted">
+                    <span class="checkmark"></span>
+                    I agree to the
+                    <a
+                      routerLink="/terms"
+                      target="_blank"
+                      >Terms & Conditions</a
+                    >
+                  </label>
+                </div>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="isFieldInvalid('termsAccepted')"
+                >
+                  {{ getFieldError("termsAccepted") }}
+                </div>
+              </div>
+
+              <!-- Payment Info Card -->
+              <div class="payment-info-card">
+                <div class="payment-header">
+                  <i class="fas fa-shield-alt"></i>
+                  <h4 class="brand-font">Secure Payment</h4>
+                </div>
+                <div class="payment-features">
+                  <div class="feature">
+                    <i class="fas fa-lock"></i>
+                    <span>Bank-level security</span>
+                  </div>
+                  <div class="feature">
+                    <i class="fas fa-zap"></i>
+                    <span>Instant activation</span>
+                  </div>
+                  <div class="feature">
+                    <i class="fas fa-undo"></i>
+                    <span>Money-back guarantee</span>
+                  </div>
+                </div>
+                <p class="payment-note">
+                  Powered by PayFast - South Africa's leading payment gateway
+                </p>
+              </div>
+
+              <!-- Unique Submit Button -->
+              <div class="submit-section">
+                <button
+                  type="submit"
+                  class="unique-submit-btn"
+                  [disabled]="taskForm.invalid || isSubmitting"
+                >
+                  <span class="btn-content" *ngIf="!isSubmitting">
+                    <i class="fas fa-rocket"></i>
+                    <span class="btn-text">Launch My Task</span>
+                    <span class="btn-arrow">→</span>
                   </span>
-                  <span *ngIf="isSubmitting">
-                    <i class="fas fa-spinner fa-spin me-2"></i>Posting...
+                  <span class="btn-content" *ngIf="isSubmitting">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span class="btn-text">Creating Magic...</span>
                   </span>
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Required -->
+  <div *ngIf="!currentUser" class="login-required">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="login-card">
+            <div class="login-icon">
+              <i class="fas fa-user-lock"></i>
             </div>
-          </form>
+            <h3 class="brand-font">Join the Community</h3>
+            <p>Sign in to start posting tasks and connecting with helpers</p>
+            <a routerLink="/login" class="unique-submit-btn">
+              <span class="btn-content">
+                <i class="fas fa-sign-in-alt"></i>
+                <span class="btn-text">Sign In</span>
+                <span class="btn-arrow">→</span>
+              </span>
+            </a>
+          </div>
         </div>
-      </div>
-
-      <!-- Login Required Message -->
-      <div *ngIf="!currentUser" class="card shadow-sm border-0">
-        <div class="card-body p-5 text-center">
-          <i class="fas fa-lock fa-3x text-warning mb-3"></i>
-          <h3 class="mb-3">Login Required</h3>
-          <p class="text-muted mb-4">You need to be logged in to post a task. Your profile information will be used automatically.</p>
-          <a routerLink="/login" class="btn btn-orange btn-lg">
-            <i class="fas fa-sign-in-alt me-2"></i>Login to Continue
-          </a>
-        </div>
-      </div>
-
-      <!-- Back to Home -->
-      <div class="text-center mt-4">
-        <a routerLink="/" class="btn btn-outline-secondary">
-          <i class="fas fa-arrow-left me-2"></i>Back to Home
-        </a>
       </div>
     </div>
   </div>

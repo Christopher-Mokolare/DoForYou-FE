@@ -1,62 +1,86 @@
-<div class="container py-5">
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0">Available Tasks</h1>
-      </div>
-      <div *ngIf="!isLoggedIn" class="alert alert-info mb-3">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Browse as Guest:</strong> You can view tasks, but need to 
-        <a routerLink="/register" class="alert-link">register</a> or 
-        <a routerLink="/login" class="alert-link">login</a> to accept them.
-      </div>
-      <div class="text-center">
-        <p class="lead" *ngIf="lastUpdated">
-          Last updated: {{ lastUpdated | date:'mediumTime' }}
-          <button (click)="refreshErrands()" class="btn btn-sm btn-link" [disabled]="isLoading">
+<div class="modern-tasks-page">
+  <!-- Hero Header -->
+  <div class="hero-header">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <div class="hero-content">
+            <h1 class="hero-title">
+              <i class="fas fa-rocket me-3"></i>
+              Start Earning Today!
+            </h1>
+            <p class="hero-subtitle">Monetize your skills • Choose flexible opportunities • Build your professional reputation</p>
+            <div class="stats-row">
+              <div class="stat-item">
+                <span class="stat-number">{{ totalItems }}</span>
+                <span class="stat-label">Active Tasks</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item" *ngIf="lastUpdated">
+                <span class="stat-number">{{ lastUpdated | date:'HH:mm' }}</span>
+                <span class="stat-label">Last Updated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 text-end">
+          <button (click)="refreshErrands()" class="refresh-btn" [disabled]="isLoading">
             <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
-            {{ isLoading ? 'Refreshing...' : 'Refresh' }}
+            <span>{{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}</span>
           </button>
-        </p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Filters Section -->
-  <div class="row mb-4" *ngIf="!isLoading && !error">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">Search</label>
-              <input type="text" class="form-control" placeholder="Search tasks..." 
-                     [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)">
+  <!-- Guest Alert -->
+  <div *ngIf="!isLoggedIn" class="guest-alert">
+    <div class="container">
+      <div class="alert-card">
+        <div class="alert-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <div class="alert-content">
+          <h4>Join to Start Earning</h4>
+          <p>Create an account to accept tasks and start earning money today</p>
+        </div>
+        <div class="alert-actions">
+          <a routerLink="/register" class="btn btn-primary me-2">Sign Up</a>
+          <a routerLink="/login" class="btn btn-outline-primary">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Filters -->
+  <div class="filters-section" *ngIf="!isLoading && !error">
+    <div class="container">
+      <div class="filters-card">
+        <div class="filters-header">
+          <h3><i class="fas fa-filter me-2"></i>Find Your Perfect Task</h3>
+          <button class="clear-btn" (click)="clearFilters()" *ngIf="searchTerm || categoryFilter">
+            <i class="fas fa-times"></i> Clear All
+          </button>
+        </div>
+        <div class="filters-body">
+          <div class="filters-row">
+            <div class="search-box">
+              <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search tasks..." 
+                       [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)">
+                <button class="search-clear" *ngIf="searchTerm" (click)="searchTerm = ''; onSearchChange('')">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
             </div>
-            <div class="col-md-3">
-              <label class="form-label">Status</label>
-              <select class="form-select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
-                <option value="">All Statuses</option>
-                <option value="verified">Verified</option>
-                <option value="open">Open</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Category</label>
-              <select class="form-select" [(ngModel)]="categoryFilter" (change)="onFilterChange()">
+            <div class="category-filters">
+              <select class="category-select" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
                 <option value="">All Categories</option>
-                <option value="delivery">Delivery</option>
-                <option value="cleaning">Cleaning</option>
-                <option value="repair">Repair</option>
-                <!-- Add more categories as needed -->
+                <option *ngFor="let category of categoryOptions" [value]="category.value">
+                  {{ category.label }}
+                </option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">&nbsp;</label>
-              <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
-                Clear Filters
-              </button>
             </div>
           </div>
         </div>
@@ -81,100 +105,132 @@
     </button>
   </div>
 
-  <!-- Errands List -->
-  <div class="row g-4" *ngIf="!isLoading && !error">
-    <div *ngFor="let errand of errands; trackBy: trackByErrand" class="col-lg-4 col-md-6">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h5 class="card-title mb-0">
-              {{ (errand.task_description || "No description") | truncate:100 }}
-            </h5>
-            <span *ngIf="errand.status?.toUpperCase()?.includes('VERIFIED')" 
-                  class="badge bg-success ms-2">
-              <i class="fas fa-check-circle"></i> Verified
-            </span>
-          </div>
-          
-          <div class="card-text">
-            <p><strong>Location:</strong> {{ errand.area_suburb || 'Not specified' }}</p>
-            <p><strong>When Needed:</strong> {{ errand.date_time_needed || 'Not specified' }}</p>
-            <p><strong>Budget:</strong> R{{ errand.budget || '0' }}</p>
-            <p><strong>Posted:</strong> {{ (errand.timestamp | date:'medium') || 'Unknown' }}</p>
-            <p *ngIf="errand.notes"><strong>Notes:</strong> {{ errand.notes }}</p>
-            <p><strong>Status:</strong> 
-              <span [class]="'badge bg-' + getStatusClass(errand.status)">
-                {{ errand.status || 'Unknown' }}
-              </span>
-            </p>
+  <!-- Tasks Grid -->
+  <div class="tasks-section" *ngIf="!isLoading && !error">
+    <div class="container">
+      <div class="tasks-grid">
+        <div *ngFor="let errand of errands; trackBy: trackByErrand" class="task-card-wrapper">
+          <div class="task-card">
+            <!-- Card Header -->
+            <div class="task-header">
+              <div class="task-category">
+                <i class="fas fa-tag"></i>
+                <span>{{ errand.category || 'General' }}</span>
+              </div>
+              <div class="task-budget">
+                <span class="currency">R</span>
+                <span class="amount">{{ errand.budget || '0' }}</span>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="task-body">
+              <h3 class="task-title">{{ (errand.task_description || "No description") | truncate:80 }}</h3>
+              
+              <div class="task-details">
+                <div class="detail-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>{{ errand.area_suburb || 'Location not specified' }}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-clock"></i>
+                  <span>{{ (errand.date_time_needed | date:'MMM d, y') || 'Date flexible' }}</span>
+                </div>
+                <div class="detail-item" *ngIf="errand.notes">
+                  <i class="fas fa-sticky-note"></i>
+                  <span>{{ errand.notes | truncate:50 }}</span>
+                </div>
+              </div>
+
+              <div class="task-meta">
+                <div class="posted-time">
+                  <i class="fas fa-calendar-plus"></i>
+                  <span>{{ errand.timestamp | date:'MMM d, HH:mm' }}</span>
+                </div>
+                <div class="task-status">
+                  <span class="status-badge" [class]="'status-' + getStatusClass(errand.status)">
+                    {{ errand.status || 'Unknown' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="task-footer">
+              <button (click)="acceptErrand(errand)" 
+                      class="accept-btn"
+                      [class.disabled]="!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING')"
+                      [disabled]="!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING')"
+                      [title]="getButtonTooltip(errand)">
+                <i class="fas fa-handshake"></i>
+                <span>{{ getButtonText(errand) }}</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="card-footer bg-white border-0">
-          <button (click)="acceptErrand(errand)" 
-                  class="btn btn-orange w-100"
-                  [disabled]="!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING')"
-                  [title]="getButtonTooltip(errand)">
-            <i class="fas fa-handshake me-2"></i>
-            {{ getButtonText(errand) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="errands.length === 0" class="empty-state">
+    <div class="container">
+      <div class="empty-content">
+        <div class="empty-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3>No Tasks Found</h3>
+        <p>We couldn't find any tasks matching your criteria. Try adjusting your filters or check back later.</p>
+        <div class="empty-actions">
+          <button (click)="clearFilters()" class="btn btn-outline-primary me-3" *ngIf="searchTerm || categoryFilter">
+            <i class="fas fa-filter"></i> Clear Filters
+          </button>
+          <button (click)="postErrand()" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>
+            Post Your Own Task
           </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Empty State -->
-    <div *ngIf="errands.length === 0" class="col-12">
-      <div class="card">
-        <div class="card-body text-center py-5">
-          <h5>No available tasks at the moment</h5>
-          <p>Check back later or post your own errand!</p>
-          <a (click)="postErrand()" class="btn btn-orange" style="cursor: pointer;">
-            <i class="fas fa-plus-circle me-2"></i>
-            Post an Errand
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination Controls -->
-    <div *ngIf="errands.length > 0" class="col-12 mt-4">
-      <nav aria-label="Errands pagination">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-          <div class="d-flex align-items-center">
-            <span class="me-2">Items per page:</span>
-            <select class="form-select form-select-sm" style="width: auto;" 
-                    [(ngModel)]="itemsPerPage" (change)="onPageSizeChange(itemsPerPage)">
+  <!-- Modern Pagination -->
+  <div *ngIf="errands.length > 0" class="pagination-section">
+    <div class="container">
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          <span class="results-text">
+            Showing <strong>{{ (currentPage - 1) * itemsPerPage + 1 }}</strong> - 
+            <strong>{{ currentPage * itemsPerPage > totalItems ? totalItems : currentPage * itemsPerPage }}</strong>
+            of <strong>{{ totalItems }}</strong> tasks
+          </span>
+          <div class="page-size-selector">
+            <label>Show:</label>
+            <select [(ngModel)]="itemsPerPage" (change)="onPageSizeChange(itemsPerPage)">
               <option *ngFor="let size of pageSizeOptions" [value]="size">{{size}}</option>
             </select>
           </div>
-          
-          <div class="text-center">
-            <span class="me-3">
-              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - 
-              {{ currentPage * itemsPerPage > totalItems ? totalItems : currentPage * itemsPerPage }}
-              of {{ totalItems }} tasks
-            </span>
-          </div>
-
-          <ul class="pagination mb-0">
-            <li class="page-item" [class.disabled]="currentPage === 1">
-              <a class="page-link" (click)="onPageChange(currentPage - 1)" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            
-            <li *ngFor="let page of getPageNumbers()" 
-                class="page-item" [class.active]="currentPage === page">
-              <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
-            </li>
-            
-            <li class="page-item" [class.disabled]="currentPage === totalPages">
-              <a class="page-link" (click)="onPageChange(currentPage + 1)" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
         </div>
-      </nav>
+
+        <div class="pagination-controls" *ngIf="totalPages > 1">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button *ngFor="let page of getPageNumbers()" 
+                    class="page-number" 
+                    [class.active]="currentPage === page"
+                    (click)="onPageChange(page)">
+              {{ page }}
+            </button>
+          </div>
+          
+          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

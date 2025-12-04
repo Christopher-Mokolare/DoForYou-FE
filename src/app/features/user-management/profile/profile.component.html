@@ -15,12 +15,18 @@
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" class="form-control" [(ngModel)]="profile.email" name="email" readonly>
+          <div class="input-group">
+            <input type="email" class="form-control" [(ngModel)]="profile.email" name="email" readonly>
+            <button type="button" class="btn btn-outline-success" (click)="verifyEmail()" [disabled]="updating">Verify Email</button>
+          </div>
           <small class="text-muted">Email cannot be changed</small>
         </div>
         <div class="form-group">
           <label>Phone</label>
-          <input type="tel" class="form-control" [(ngModel)]="profile.phone" name="phone" required>
+          <div class="input-group">
+            <input type="tel" class="form-control" [(ngModel)]="profile.phone" name="phone" required>
+            <button type="button" class="btn btn-outline-success" (click)="verifyPhone()" [disabled]="updating">Verify Phone</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Username</label>

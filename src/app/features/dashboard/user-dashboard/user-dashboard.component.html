@@ -1,74 +1,355 @@
 <div class="user-dashboard">
+  <!-- Hero Header -->
   <div class="dashboard-header">
-    <h1>My Dashboard</h1>
-    <p>Welcome back! Here's an overview of your task activity.</p>
-  </div>
-
-  <div class="stats-grid" *ngIf="canCreateTasks">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary">
-        <i class="fas fa-tasks"></i>
+    <div class="container">
+      <h1 *ngIf="userType === 'creator'"><i class="fas fa-user-tie me-3"></i>Task Creator Dashboard</h1>
+      <p *ngIf="userType === 'creator'">Manage and track your posted tasks</p>
+      
+      <h1 *ngIf="userType === 'runner'"><i class="fas fa-running me-3"></i>Task Runner Dashboard</h1>
+      <p *ngIf="userType === 'runner'">Find tasks and track your earnings</p>
+      
+      <h1 *ngIf="userType === 'both'"><i class="fas fa-tachometer-alt me-3"></i>My Dashboard</h1>
+      <p *ngIf="userType === 'both'">Manage your tasks as both creator and runner</p>
+      
+      <!-- Profile Completion Alerts -->
+      <div *ngIf="needsProfileUpdate" class="alert alert-warning mb-4">
+        <h5><i class="fas fa-exclamation-triangle"></i> Complete Your Profile</h5>
+        <p>We've added new features! Please update your profile with additional information.</p>
+        <a routerLink="/profile" class="btn btn-warning btn-sm">Complete Profile</a>
       </div>
-      <div class="stat-content">
-        <h3>{{stats.active}}</h3>
-        <p>Active Tasks</p>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon bg-success">
-        <i class="fas fa-check-circle"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{stats.completed}}</h3>
-        <p>Completed</p>
-      </div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-icon bg-warning">
-        <i class="fas fa-clock"></i>
-      </div>
-      <div class="stat-content">
-        <h3>{{stats.pending}}</h3>
-        <p>Pending</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="runner-section" *ngIf="canAcceptTasks && (runnerStats.claimed > 0 || runnerStats.inProgress > 0)">
-    <h2>My Runner Activity</h2>
-    <div class="runner-stats">
-      <div class="stat-card">
-        <div class="stat-icon bg-info">
-          <i class="fas fa-hand-paper"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{runnerStats.claimed}}</h3>
-          <p>Tasks Claimed</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon bg-primary">
-          <i class="fas fa-cog"></i>
-        </div>
-        <div class="stat-content">
-          <h3>{{runnerStats.inProgress}}</h3>
-          <p>In Progress</p>
+      
+      <div *ngIf="!needsProfileUpdate && isProfileIncomplete" class="alert alert-info mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-1"><i class="fas fa-user-circle"></i> Profile Completion</h6>
+            <p class="mb-2">Your profile is {{profileCompletion}}% complete. Add more details to unlock all features!</p>
+            <div class="progress mb-2" style="height: 8px;">
+              <div class="progress-bar" [style.width.%]="profileCompletion"></div>
+            </div>
+          </div>
+          <a routerLink="/profile" class="btn btn-info btn-sm ms-3">Complete Profile</a>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="quick-actions">
-    <a routerLink="/post-errand" class="btn btn-primary" *ngIf="canCreateTasks">
-      <i class="fas fa-plus"></i> Post New Task
-    </a>
-    <a routerLink="/browse-errands" class="btn btn-outline-primary" *ngIf="canAcceptTasks">
-      <i class="fas fa-search"></i> Find Tasks
-    </a>
-    <a routerLink="/profile" class="btn btn-outline-secondary" *ngIf="!canCreateTasks && !canAcceptTasks">
-      <i class="fas fa-cog"></i> Set Up Profile
-    </a>
+  <!-- Combined Stats for 'both' users -->
+  <div class="stats-section" *ngIf="userType === 'both'">
+    <div class="container">
+      <div class="stats-grid">
+        <!-- Creator Stats -->
+        <div class="stat-card">
+          <div class="stat-icon bg-primary">
+            <i class="fas fa-plus-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.active}}</h3>
+            <p>Posted Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="fas fa-hand-paper"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.inProgress}}</h3>
+            <p>Tasks In Progress</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-success">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.completed + runnerStats.completed}}</h3>
+            <p>Total Completed</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-danger">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{creatorStats.totalSpent}}</h3>
+            <p>Total Spent</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-info">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.totalEarnings}}</h3>
+            <p>Total Earned</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-secondary">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.pending}}</h3>
+            <p>Pending Tasks</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Creator Only Stats -->
+  <div class="stats-section" *ngIf="userType === 'creator'">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-primary">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.active}}</h3>
+            <p>Active Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-success">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.completed}}</h3>
+            <p>Completed Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.pending}}</h3>
+            <p>Pending Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-info">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{creatorStats.totalSpent}}</h3>
+            <p>Total Spent</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-secondary">
+            <i class="fas fa-calendar-month"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{creatorStats.thisMonth}}</h3>
+            <p>This Month</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-dark">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{creatorStats.averageCost | number:'1.0-0'}}</h3>
+            <p>Average Task Cost</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Runner Only Stats -->
+  <div class="stats-section" *ngIf="userType === 'runner'">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-info">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{runnerStats.available}}</h3>
+            <p>Available Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="fas fa-hand-paper"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{runnerStats.myActive}}</h3>
+            <p>My Active Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-success">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{runnerStats.completed}}</h3>
+            <p>Completed</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-primary">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.totalEarnings}}</h3>
+            <p>Total Earnings</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-secondary">
+            <i class="fas fa-calendar-month"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.thisMonth}}</h3>
+            <p>This Month</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-dark">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{runnerStats.completionRate | number:'1.0-0'}}%</h3>
+            <p>Completion Rate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions Section -->
+  <div class="actions-section">
+    <div class="container">
+
+
+      <!-- Recent Activity Section -->
+      <div class="activity-section" *ngIf="recentActivity.length > 0">
+        <h2><i class="fas fa-history me-2"></i>Recent Activity</h2>
+        <div class="activity-feed">
+          <div *ngFor="let activity of recentActivity" class="activity-item">
+            <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
+              <i [class]="getActivityIcon(activity.type)"></i>
+            </div>
+            <div class="activity-content">
+              <p class="activity-message">{{ activity.message }}</p>
+              <div class="activity-meta">
+                <span class="activity-time">{{ activity.timestamp | date:'MMM d, HH:mm' }}</span>
+                <span class="activity-amount">R{{ activity.amount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Combined Quick Actions for 'both' users -->
+      <div class="quick-actions" *ngIf="userType === 'both'">
+        <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+        <div class="action-buttons">
+          <a routerLink="/post-errand" class="btn btn-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-plus"></i> Post New Task
+          </a>
+          <a routerLink="/browse-errands" class="btn btn-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-search"></i> Find Tasks
+          </a>
+          <button class="btn btn-secondary" *ngIf="isProfileIncomplete" disabled title="Complete your profile first">
+            <i class="fas fa-lock"></i> Complete Profile First
+          </button>
+          <a routerLink="/tasks/my-posted" class="btn btn-outline-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-list"></i> My Posted Tasks
+          </a>
+          <a routerLink="/tasks/my-active" class="btn btn-outline-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-tasks"></i> My Active Tasks
+          </a>
+          <a routerLink="/profile" class="btn btn-outline-secondary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-user"></i> My Profile
+          </a>
+        </div>
+      </div>
+      
+      <!-- Creator Only Quick Actions -->
+      <div class="quick-actions" *ngIf="userType === 'creator'">
+        <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+        <div class="action-buttons">
+          <a routerLink="/post-errand" class="btn btn-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-plus"></i> Post New Task
+          </a>
+          <button class="btn btn-secondary" *ngIf="isProfileIncomplete" disabled title="Complete your profile to post tasks">
+            <i class="fas fa-lock"></i> Complete Profile to Post Tasks
+          </button>
+          <a routerLink="/tasks/my-posted" class="btn btn-outline-primary">
+            <i class="fas fa-list"></i> View My Posted Tasks
+          </a>
+          <a routerLink="/profile" class="btn btn-outline-secondary">
+            <i class="fas fa-receipt"></i> Payment History
+          </a>
+          <button (click)="cleanupOrphanedTasks()" class="btn btn-outline-secondary" [disabled]="cleanupInProgress">
+            <i class="fas fa-broom" [class.fa-spin]="cleanupInProgress"></i> 
+            {{ cleanupInProgress ? 'Cleaning...' : 'Cleanup Old Tasks' }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Runner Only Quick Actions -->
+      <div class="quick-actions" *ngIf="userType === 'runner'">
+        <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+        <div class="action-buttons">
+          <a routerLink="/browse-errands" class="btn btn-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-search"></i> Find Available Tasks
+          </a>
+          <button class="btn btn-secondary" *ngIf="isProfileIncomplete" disabled title="Complete your profile to accept tasks">
+            <i class="fas fa-lock"></i> Complete Profile to Accept Tasks
+          </button>
+          <a routerLink="/tasks/my-active" class="btn btn-outline-primary" *ngIf="!isProfileIncomplete">
+            <i class="fas fa-tasks"></i> View My Active Tasks
+          </a>
+
+          <a routerLink="/profile" class="btn btn-outline-primary" *ngIf="isProfileIncomplete">
+            <i class="fas fa-user-edit"></i> Complete Profile First
+          </a>
+        </div>
+      </div>
+      
+      <!-- Setup Profile for New Users -->
+      <div class="quick-actions" *ngIf="!userType || userType === ''">
+        <h3><i class="fas fa-user-cog me-2"></i>Get Started</h3>
+        <div class="action-buttons">
+          <a routerLink="/profile" class="btn btn-primary">
+            <i class="fas fa-cog"></i> Set Up Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Completion CTA -->
+  <div class="profile-cta" *ngIf="isProfileIncomplete">
+    <div class="container">
+      <div class="card border-0 bg-light">
+        <div class="card-body text-center py-4">
+          <i class="fas fa-user-plus fa-2x text-muted mb-3"></i>
+          <h6 class="text-muted">Complete your profile to access all DoForYou features</h6>
+          <p class="small text-muted mb-3">Add your ID number, address, and other details for better task matching</p>
+          <a routerLink="/profile" class="btn btn-outline-primary btn-sm">Complete Profile</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -10,13 +10,14 @@ import { LoadingService } from '../../services/loading.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  styles: []
 })
 export class RegisterComponent {
   registerForm: FormGroup;
   errorMessage: string = '';
   showPassword = false;
   showConfirmPassword = false;
+  dateOfBirth = '';
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -25,9 +26,13 @@ export class RegisterComponent {
 
   constructor() {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      contact: ['', [Validators.required, Validators.pattern('^[0-9+\\-\\s()]+$')]],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9+\\-\\s()]+$')]],
+      userType: ['', [Validators.required]],
+      idNumber: ['', [Validators.pattern('^[0-9]{13}$')]],
+      address: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -70,6 +75,32 @@ export class RegisterComponent {
     } else {
       this.markFormGroupTouched();
     }
+  }
+
+  onIdNumberChange(): void {
+    const idNumber = this.registerForm.get('idNumber')?.value;
+    if (idNumber && idNumber.length === 13 && /^\d{13}$/.test(idNumber)) {
+      this.dateOfBirth = this.extractDateFromIdNumber(idNumber);
+    } else {
+      this.dateOfBirth = '';
+    }
+  }
+
+  private extractDateFromIdNumber(idNumber: string): string {
+    const year = idNumber.substring(0, 2);
+    const month = idNumber.substring(2, 4);
+    const day = idNumber.substring(4, 6);
+    
+    const currentYear = new Date().getFullYear();
+    const currentCentury = Math.floor(currentYear / 100) * 100;
+    const fullYear = parseInt(year) <= (currentYear % 100) ? currentCentury + parseInt(year) : currentCentury - 100 + parseInt(year);
+    
+    return `${day}/${month}/${fullYear}`;
+  }
+
+  hasError(fieldName: string, errorType: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field?.errors && field.errors[errorType] && field.touched);
   }
 
   private markFormGroupTouched(): void {

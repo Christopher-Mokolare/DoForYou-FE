@@ -1,0 +1,263 @@
+<div class="task-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading task details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error }}
+    <button class="btn btn-outline-primary ms-3" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </button>
+  </div>
+
+  <!-- Task Details -->
+  <div *ngIf="task && !loading" class="task-detail">
+    <!-- Header -->
+    <div class="task-header">
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </button>
+          <h1 class="task-title">{{ task.title }}</h1>
+          <div class="task-meta">
+            <span class="badge" [ngClass]="getStatusClass(task.status)">{{ task.status | titlecase }}</span>
+            <span class="task-id ms-2 text-muted">ID: {{ task.taskId }}</span>
+            <span class="task-budget ms-3 fw-bold text-success">R{{ task.budget }}</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button *ngIf="isRunner && task.status === 'claimed'" 
+                  class="btn btn-success me-2" 
+                  (click)="completeTask()">
+            <i class="fas fa-check"></i> Mark Complete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Information Grid -->
+    <div class="row">
+      <!-- Main Content -->
+      <div class="col-lg-8">
+        <!-- Task Description -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5><i class="fas fa-info-circle"></i> Task Description</h5>
+          </div>
+          <div class="card-body">
+            <p class="task-description">{{ task.description }}</p>
+            <div class="task-details-grid">
+              <div class="detail-item">
+                <strong>Category:</strong> {{ task.category }}
+              </div>
+              <div class="detail-item">
+                <strong>Location:</strong> {{ task.location }}
+              </div>
+              <div class="detail-item">
+                <strong>Due Date:</strong> {{ formatDate(task.dueDate) }}
+              </div>
+              <div class="detail-item">
+                <strong>Priority:</strong> 
+                <span [ngClass]="getPriorityClass(task.priority)">{{ task.priority | titlecase }}</span>
+              </div>
+            </div>
+            <div *ngIf="task.notes" class="mt-3">
+              <strong>Additional Notes:</strong>
+              <p class="text-muted">{{ task.notes }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Updates -->
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-tasks"></i> Progress Updates</h5>
+            <small class="text-muted">{{ task.progressUpdates?.length || 0 }} updates</small>
+          </div>
+          <div class="card-body">
+            <!-- Add Progress Update (Runner Only) -->
+            <div *ngIf="isRunner && task.status === 'claimed'" class="progress-form mb-4">
+              <h6>Add Progress Update</h6>
+              <div class="input-group">
+                <textarea class="form-control" 
+                         [(ngModel)]="progressMessage" 
+                         placeholder="Describe your progress on this task..."
+                         rows="3"></textarea>
+              </div>
+              <button class="btn btn-primary mt-2" 
+                      (click)="addProgressUpdate()" 
+                      [disabled]="!progressMessage.trim()">
+                <i class="fas fa-plus"></i> Add Update
+              </button>
+            </div>
+
+            <!-- Progress Timeline -->
+            <div class="progress-timeline">
+              <div *ngIf="!task.progressUpdates || task.progressUpdates.length === 0" 
+                   class="text-muted text-center py-4">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <p>No progress updates yet</p>
+              </div>
+              
+              <div *ngFor="let update of task.progressUpdates" class="progress-item">
+                <div class="progress-marker"></div>
+                <div class="progress-content">
+                  <div class="progress-header">
+                    <strong>{{ update.userName }}</strong>
+                    <small class="text-muted ms-2">{{ formatDate(update.timestamp) }}</small>
+                  </div>
+                  <p class="progress-message">{{ update.message }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Communication -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5><i class="fas fa-comments"></i> Communication</h5>
+          </div>
+          <div class="card-body">
+            <!-- Messages -->
+            <div class="messages-container mb-3" style="max-height: 300px; overflow-y: auto;">
+              <div *ngIf="messages.length === 0" class="text-muted text-center py-3">
+                <i class="fas fa-comment-slash fa-2x mb-2"></i>
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+              
+              <div *ngFor="let message of messages" class="message-item mb-3">
+                <div class="message-header">
+                  <strong>{{ message.senderName }}</strong>
+                  <small class="text-muted ms-2">{{ formatDate(message.timestamp) }}</small>
+                </div>
+                <div class="message-content">{{ message.content }}</div>
+              </div>
+            </div>
+
+            <!-- Send Message -->
+            <div *ngIf="isCreator || isRunner" class="message-form">
+              <div class="input-group">
+                <textarea class="form-control" 
+                         [(ngModel)]="newMessage" 
+                         placeholder="Type your message..."
+                         rows="2"></textarea>
+                <button class="btn btn-primary" 
+                        (click)="sendMessage()" 
+                        [disabled]="!newMessage.trim()">
+                  <i class="fas fa-paper-plane"></i> Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Task Creator Info -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h6><i class="fas fa-user"></i> Task Creator</h6>
+          </div>
+          <div class="card-body">
+            <div class="contact-info">
+              <p class="mb-2"><strong>{{ task.creatorName }}</strong></p>
+              <p class="text-muted mb-3">{{ task.creatorContact }}</p>
+              <div class="contact-actions">
+                <button class="btn btn-outline-primary btn-sm me-2" (click)="callCreator()">
+                  <i class="fas fa-phone"></i> Call
+                </button>
+                <button class="btn btn-outline-success btn-sm" (click)="whatsappCreator()">
+                  <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Runner Info -->
+        <div *ngIf="task.runnerName" class="card mb-4">
+          <div class="card-header">
+            <h6><i class="fas fa-running"></i> Task Runner</h6>
+          </div>
+          <div class="card-body">
+            <div class="contact-info">
+              <p class="mb-2"><strong>{{ task.runnerName }}</strong></p>
+              <p class="text-muted mb-3">{{ task.runnerContact }}</p>
+              <div class="contact-actions">
+                <button class="btn btn-outline-primary btn-sm me-2" (click)="callRunner()">
+                  <i class="fas fa-phone"></i> Call
+                </button>
+                <button class="btn btn-outline-success btn-sm" (click)="whatsappRunner()">
+                  <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Timeline -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h6><i class="fas fa-clock"></i> Timeline</h6>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-marker bg-primary"></div>
+                <div class="timeline-content">
+                  <small class="text-muted">Created</small>
+                  <p class="mb-0">{{ formatDate(task.createdAt) }}</p>
+                </div>
+              </div>
+              
+              <div *ngIf="task.runnerName" class="timeline-item">
+                <div class="timeline-marker bg-warning"></div>
+                <div class="timeline-content">
+                  <small class="text-muted">Accepted by {{ task.runnerName }}</small>
+                  <p class="mb-0">In Progress</p>
+                </div>
+              </div>
+              
+              <div *ngIf="task.completedAt" class="timeline-item">
+                <div class="timeline-marker bg-success"></div>
+                <div class="timeline-content">
+                  <small class="text-muted">Completed</small>
+                  <p class="mb-0">{{ formatDate(task.completedAt) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <button *ngIf="isRunner && task.status === 'claimed'" 
+                      class="btn btn-success" 
+                      (click)="completeTask()">
+                <i class="fas fa-check"></i> Mark as Complete
+              </button>
+              
+              <button class="btn btn-outline-primary" (click)="goBack()">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

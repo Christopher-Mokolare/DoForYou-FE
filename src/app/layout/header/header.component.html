@@ -55,7 +55,8 @@
               <!-- Regular User Links - Only show for non-admin users -->
               <div *ngIf="!isAdmin">
                 <li><a class="dropdown-item" routerLink="/dashboard">Dashboard</a></li>
-                <li><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
+                <li *ngIf="canShowPostErrand() && !authService.isProfileIncomplete()"><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
+                <li *ngIf="canShowPostErrand() && authService.isProfileIncomplete()"><a class="dropdown-item text-muted" routerLink="/profile" title="Complete your profile to post tasks">Complete Profile to Post Tasks</a></li>
                 <li><a class="dropdown-item" routerLink="/profile">My Profile</a></li>
                 <li><a class="dropdown-item" routerLink="/notifications">Notifications</a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -87,8 +88,8 @@
           </li>
         </ng-template>
 
-        <!-- Post Errand Button - Only show for non-admin users -->
-        <li class="nav-item" *ngIf="!isAdmin">
+        <!-- Post Errand Button - Only show for creators and users with 'both' role -->
+        <li class="nav-item" *ngIf="!isAdmin && canShowPostErrand()">
           <a class="nav-link post-errand-link" (click)="postErrand()">
             POST AN ERRAND
             <span class="pulse-dot"></span>
@@ -98,3 +99,9 @@
     </div>
   </div>
 </nav>
+
+<app-profile-completion-modal 
+  [isVisible]="showProfileModal" 
+  [profileCompletion]="authService.getProfileCompletion()"
+  (closed)="onModalClosed()">
+</app-profile-completion-modal>

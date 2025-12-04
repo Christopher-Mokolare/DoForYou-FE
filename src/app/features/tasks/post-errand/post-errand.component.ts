@@ -18,6 +18,7 @@ export class PostErrandComponent implements OnInit {
   isSubmitting = false;
   submitted = false;
   currentUser: any;
+  categoryOptions: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -49,13 +50,33 @@ export class PostErrandComponent implements OnInit {
       return;
     }
 
-    // User loaded successfully
+    // Check if profile is complete
+    if (this.authService.isProfileIncomplete()) {
+      alert('Please complete your profile before posting tasks. Your profile is only ' + this.authService.getProfileCompletion() + '% complete.');
+      this.router.navigate(['/profile']);
+      return;
+    }
+
+    // Load category options
+    this.loadCategoryOptions();
+  }
+
+  private loadCategoryOptions(): void {
+    this.errandsService.getFilterOptions().subscribe({
+      next: (options) => {
+        this.categoryOptions = options.categories || [];
+      },
+      error: (error) => {
+        console.error('Failed to load categories:', error);
+      }
+    });
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
       // REMOVED: name and contact fields - they come from user profile
       taskDescription: ['', [Validators.required, Validators.minLength(10)]],
+      category: ['', [Validators.required]],
       area: ['', [Validators.required]],
       priority: ['standard', [Validators.required]],
       dateNeeded: ['', [Validators.required, this.futureDateValidator]],
@@ -89,6 +110,7 @@ export class PostErrandComponent implements OnInit {
         // Validate and sanitize form data
         const formData: CreateTaskData = {
           taskDescription: this.sanitizeInput(this.taskForm.value.taskDescription),
+          category: this.taskForm.value.category,
           area: this.sanitizeInput(this.taskForm.value.area),
           priority: this.taskForm.value.priority,
           dateNeeded: new Date(this.taskForm.value.dateNeeded).toISOString(),
@@ -97,22 +119,27 @@ export class PostErrandComponent implements OnInit {
           termsAccepted: this.taskForm.value.termsAccepted
         };
 
-      // Submitting task data
-
-        // Store task data in session and redirect to payment first
-        const taskData = {
-          ...formData,
-          budget: formData.budget
-        };
-        
-        sessionStorage.setItem('pendingTask', JSON.stringify(taskData));
-        
-        this.loadingService.hide();
-        this.isSubmitting = false;
-        
-        // Generate temporary task ID for payment
-        const tempTaskId = 'TEMP_' + Date.now();
-        this.initiatePayment(tempTaskId, taskData.budget);
+        // Create task via backend API
+        this.errandsService.createTask(formData).subscribe({
+          next: (response) => {
+            console.log('Task created successfully:', response);
+            this.loadingService.hide();
+            this.isSubmitting = false;
+            
+            // Redirect to PayFast payment URL
+            if (response.data?.paymentUrl) {
+              window.location.href = response.data.paymentUrl;
+            } else {
+              alert('Payment URL not received. Please try again.');
+            }
+          },
+          error: (error) => {
+            console.error('Error creating task:', error);
+            this.loadingService.hide();
+            this.isSubmitting = false;
+            alert('Failed to create task. Please try again.');
+          }
+        });
       } catch (error) {
         console.error('Error processing task submission');
         this.loadingService.hide();
@@ -162,19 +189,7 @@ export class PostErrandComponent implements OnInit {
     return 'Invalid value';
   }
 
-  private initiatePayment(tempTaskId: string, budget: number): void {
-    // Generate payment URL with temporary task ID
-    const paymentUrl = this.generatePayFastUrl(tempTaskId, budget);
-    
-    // Show message and redirect to payment
-    alert(`Budget: R${budget.toFixed(2)}\n\nYou will now be redirected to PayFast to complete payment.\n\nYour task will be posted after successful payment.`);
-    
-    // Reset form
-    this.taskForm.reset({ priority: 'standard' });
-    
-    // Redirect to PayFast payment page
-    window.location.href = paymentUrl;
-  }
+
 
   private sanitizeInput(input: string): string {
     return input.trim().replace(/[<>"'&]/g, '');
@@ -188,24 +203,5 @@ export class PostErrandComponent implements OnInit {
     return numBudget;
   }
 
-  private generatePayFastUrl(taskId: string, amount: number): string {
-    const sanitizedTaskId = this.sanitizeInput(taskId);
-    const paymentData = {
-      merchant_id: '10000100',
-      merchant_key: '46f0cd694581a',
-      amount: amount.toFixed(2),
-      item_name: `Task Payment - ${sanitizedTaskId}`,
-      item_description: 'DoForYou Task Payment',
-      return_url: 'http://localhost:4200/payment-success',
-      cancel_url: 'http://localhost:4200/payment-cancelled',
-      notify_url: 'http://localhost:5015/api/payfast/notify',
-      custom_str1: sanitizedTaskId
-    };
 
-    const queryString = Object.entries(paymentData)
-      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-      .join('&');
-
-    return `https://sandbox.payfast.co.za/eng/process?${queryString}`;
-  }
 }

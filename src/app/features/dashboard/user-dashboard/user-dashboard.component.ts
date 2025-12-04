@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ErrandsService } from '../../../services/errands.service';
+import { TaskService } from '../../../services/task.service';
 import { AuthService } from '../../../services/auth.service';
-import { UserPreferencesService } from '../../../services/user-preferences.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -13,68 +12,138 @@ import { UserPreferencesService } from '../../../services/user-preferences.servi
   styleUrls: ['./user-dashboard.component.scss']
 })
 export class UserDashboardComponent implements OnInit {
-  stats = { active: 0, completed: 0, pending: 0 };
-  runnerStats = { claimed: 0, inProgress: 0, earnings: 0 };
-  canCreateTasks = true;
-  canAcceptTasks = true;
+  creatorStats = { active: 0, inProgress: 0, completed: 0, pending: 0, totalSpent: 0, thisMonth: 0, averageCost: 0, mostExpensive: 0 };
+  runnerStats = { available: 0, myActive: 0, completed: 0, totalEarnings: 0, thisMonth: 0, completionRate: 0, averageEarning: 0 };
+  recentActivity: any[] = [];
+  canCreateTasks = false;
+  canAcceptTasks = false;
+  needsProfileUpdate = false;
+  isProfileIncomplete = false;
+  profileCompletion = 0;
+  userType = '';
 
-  constructor(
-    private errandsService: ErrandsService,
-    private authService: AuthService,
-    private userPreferencesService: UserPreferencesService
-  ) {}
+  private taskService = inject(TaskService);
+  private authService = inject(AuthService);
+  
+  cleanupInProgress = false;
 
   ngOnInit() {
-    this.loadUserPreferences();
+    this.canCreateTasks = this.authService.canCreateTasks();
+    this.canAcceptTasks = this.authService.canAcceptTasks();
+    const user = this.authService.getCurrentUser();
+    this.userType = (user as any)?.userType || '';
+    
+    console.log('Current userType:', this.userType);
+    
+    this.loadFreshProfileData();
     this.loadUserStats();
   }
 
-  private loadUserPreferences() {
+  private loadFreshProfileData() {
+    // Get fresh profile data from server
+    this.authService.getProfile().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Update localStorage with fresh data
+          localStorage.setItem('currentUser', JSON.stringify(response.data));
+          this.authService.refreshCurrentUser();
+          
+          // Refresh permissions and userType based on fresh data
+          this.canCreateTasks = this.authService.canCreateTasks();
+          this.canAcceptTasks = this.authService.canAcceptTasks();
+          this.userType = response.data.userType || '';
+          this.checkProfileCompletion();
+        }
+      },
+      error: () => {
+        // Fallback to cached data if server request fails
+        const user = this.authService.getCurrentUser();
+        this.userType = (user as any)?.userType || '';
+        this.checkProfileCompletion();
+      }
+    });
+  }
+
+  private checkProfileCompletion() {
+    this.needsProfileUpdate = this.authService.needsProfileUpdate();
+    this.isProfileIncomplete = this.authService.isProfileIncomplete();
+    
     const user = this.authService.getCurrentUser();
-    if (user) {
-      this.canCreateTasks = user.canCreateTasks ?? true;
-      this.canAcceptTasks = user.canAcceptTasks ?? true;
+    this.profileCompletion = (user as any)?.profileCompletion || 0;
+    
+    if (this.needsProfileUpdate) {
+      console.log('User needs to complete profile with new required information');
+    }
+    if (this.isProfileIncomplete) {
+      console.log('User profile is incomplete:', this.profileCompletion + '%');
     }
   }
 
   private loadUserStats() {
-    // Load tasks created by user
-    this.errandsService.getUserTasks().subscribe({
+    // Load enhanced dashboard stats
+    this.taskService.getDashboardStats().subscribe({
       next: (response) => {
-        const tasks = response.tasks || [];
-        this.stats = {
-          active: tasks.filter(t => t.taskStatus === 'posted' || t.taskStatus === 'claimed').length,
-          completed: tasks.filter(t => t.taskStatus === 'completed').length,
-          pending: tasks.filter(t => t.paymentStatus === 'pending').length
-        };
-      },
-      error: () => {
-        this.stats = { active: 0, completed: 0, pending: 0 };
-      }
-    });
-
-    // Load tasks claimed by user (as runner)
-    this.loadRunnerStats();
-  }
-
-  private loadRunnerStats() {
-    // This would need a new API endpoint to get tasks where current user is the runner
-    // For now, using available tasks and filtering client-side
-    this.errandsService.getVerifiedTasks().subscribe({
-      next: (response) => {
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser) {
-          const runnerTasks = response.tasks.filter(t => t.helperContact === currentUser.contact);
-          this.runnerStats = {
-            claimed: runnerTasks.filter(t => t.taskStatus === 'claimed').length,
-            inProgress: runnerTasks.filter(t => t.taskStatus === 'in_progress').length,
-            earnings: 0 // Would calculate from completed tasks
-          };
+        if (response.success && response.data) {
+          this.creatorStats = response.data.creator;
+          this.runnerStats = response.data.runner;
+          console.log('Dashboard stats loaded:', response.data);
         }
       },
-      error: () => {
-        this.runnerStats = { claimed: 0, inProgress: 0, earnings: 0 };
+      error: (error) => {
+        console.error('Error loading dashboard stats:', error);
       }
     });
+
+    // Load recent activity
+    this.taskService.getRecentActivity(5).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.recentActivity = response.data;
+          console.log('Recent activity loaded:', response.data);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading recent activity:', error);
+      }
+    });
+  }
+
+  cleanupOrphanedTasks(): void {
+    if (this.cleanupInProgress) return;
+    
+    this.cleanupInProgress = true;
+    this.taskService.cleanupOrphanedTasks().subscribe({
+      next: (response) => {
+        console.log('Cleanup completed:', response);
+        alert(`Cleanup completed! Removed ${response.data?.deletedCount || 0} orphaned tasks.`);
+        this.loadUserStats(); // Refresh stats
+        this.cleanupInProgress = false;
+      },
+      error: (error) => {
+        console.error('Cleanup failed:', error);
+        alert('Cleanup failed. Please try again.');
+        this.cleanupInProgress = false;
+      }
+    });
+  }
+
+  getActivityIcon(type: string): string {
+    switch (type) {
+      case 'task_created': return 'fas fa-plus-circle';
+      case 'task_claimed': return 'fas fa-handshake';
+      case 'task_completed_creator': return 'fas fa-check-circle';
+      case 'task_completed_runner': return 'fas fa-trophy';
+      default: return 'fas fa-info-circle';
+    }
+  }
+
+  getActivityIconClass(type: string): string {
+    switch (type) {
+      case 'task_created': return 'activity-icon-primary';
+      case 'task_claimed': return 'activity-icon-warning';
+      case 'task_completed_creator': return 'activity-icon-success';
+      case 'task_completed_runner': return 'activity-icon-success';
+      default: return 'activity-icon-info';
+    }
   }
 }
