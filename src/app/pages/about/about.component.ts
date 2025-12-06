@@ -17,14 +17,7 @@ export class AboutComponent implements OnInit {
     
     constructor(private router: Router, public authService: AuthService) {}
 
-  teamMembers = [
-    {
-      name: 'Ashwin Mokoena',
-      position: 'Founder and CEO',
-      image: 'assets/images/admin.jpg',
-      bio: 'Visionary entrepreneur with a passion for empowering South Africans through technology and opportunity.'
-    }
-  ];
+
 
 
   ngOnInit(): void {
@@ -64,21 +57,7 @@ export class AboutComponent implements OnInit {
       });
     });
 
-    // Team member animations
-    gsap.utils.toArray('.team-card').forEach((card: any, i) => {
-      gsap.from(card, {
-        scrollTrigger: {
-          trigger: card,
-          start: "top 80%",
-          toggleActions: "play none none none"
-        },
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        delay: i * 0.1,
-        ease: "back.out"
-      });
-    });
+
 
     // Milestone animations
     gsap.utils.toArray('.milestone-item').forEach((item: any, i) => {
