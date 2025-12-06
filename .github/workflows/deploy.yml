@@ -3,12 +3,12 @@ name: Deploy Pipeline
 on:
   push:
     branches:
-      - dev
-      - qa
+      - main-dev
+      - main-qa
       - main
   pull_request:
     branches:
-      - qa
+      - main-qa
       - main
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - run: npm run test -- --watch=false --browsers=ChromeHeadless
 
   deploy-dev:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main-dev'
     needs: build-and-test
     runs-on: ubuntu-latest
     environment: development
@@ -48,7 +48,7 @@ jobs:
           scope: ${{ secrets.VERCEL_ORG_ID }}
 
   deploy-qa:
-    if: github.ref == 'refs/heads/qa'
+    if: github.ref == 'refs/heads/main-qa'
     needs: build-and-test
     runs-on: ubuntu-latest
     environment: qa

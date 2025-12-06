@@ -9,12 +9,12 @@ Create 3 separate Railway services:
 #### Development Service
 - **Name**: `doforyou-backend-dev`
 - **Domain**: `doforyou-backend-dev.up.railway.app`
-- **Branch**: `dev`
+- **Branch**: `main-dev`
 
 #### QA Service  
 - **Name**: `doforyou-backend-qa`
 - **Domain**: `doforyou-backend-qa.up.railway.app`
-- **Branch**: `qa`
+- **Branch**: `main-qa`
 
 #### Production Service (Existing)
 - **Name**: `doforyou-backend-prod`
@@ -112,9 +112,9 @@ RAILWAY_SERVICE_PROD=your-prod-service-id
 
 ### 5. Deployment Flow
 
-1. **Development**: Push to `dev` → Auto-deploy to Railway Dev service
-2. **QA**: Merge `dev` to `qa` → Auto-deploy to Railway QA service  
-3. **Production**: Merge `qa` to `main` → Auto-deploy to Railway Production service
+1. **Development**: Push to `main-dev` → Auto-deploy to Railway Dev service
+2. **QA**: Merge `main-dev` to `main-qa` → Auto-deploy to Railway QA service  
+3. **Production**: Merge `main-qa` to `main` → Auto-deploy to Railway Production service
 
 ### 6. Testing Endpoints
 

@@ -3,8 +3,8 @@ name: Backend Deploy Pipeline
 on:
   push:
     branches:
-      - dev
-      - qa
+      - main-dev
+      - main-qa
       - main
     paths:
       - 'backend/**'
@@ -12,7 +12,7 @@ on:
 
 jobs:
   deploy-backend-dev:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main-dev'
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -25,7 +25,7 @@ jobs:
           service: ${{ secrets.RAILWAY_SERVICE_DEV }}
 
   deploy-backend-qa:
-    if: github.ref == 'refs/heads/qa'
+    if: github.ref == 'refs/heads/main-qa'
     runs-on: ubuntu-latest
     environment: qa
     steps:
