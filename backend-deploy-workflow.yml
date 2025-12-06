@@ -1,3 +1,6 @@
+# This file should be placed in your BACKEND repository at:
+# .github/workflows/deploy.yml
+
 name: Backend Deploy Pipeline
 
 on:
@@ -6,13 +9,27 @@ on:
       - main-dev
       - main-qa
       - main
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
+  pull_request:
+    branches:
+      - main-qa
+      - main
 
 jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
+      
+      - run: dotnet restore
+      - run: dotnet build --no-restore
+      - run: dotnet test --no-build --verbosity normal
+
   deploy-backend-dev:
     if: github.ref == 'refs/heads/main-dev'
+    needs: build-and-test
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -26,6 +43,7 @@ jobs:
 
   deploy-backend-qa:
     if: github.ref == 'refs/heads/main-qa'
+    needs: build-and-test
     runs-on: ubuntu-latest
     environment: qa
     steps:
@@ -39,6 +57,7 @@ jobs:
 
   deploy-backend-prod:
     if: github.ref == 'refs/heads/main'
+    needs: build-and-test
     runs-on: ubuntu-latest
     environment: production
     steps:

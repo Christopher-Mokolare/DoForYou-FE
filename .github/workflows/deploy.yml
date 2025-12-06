@@ -1,4 +1,4 @@
-name: Deploy Pipeline
+name: Frontend Deploy Pipeline
 
 on:
   push:
