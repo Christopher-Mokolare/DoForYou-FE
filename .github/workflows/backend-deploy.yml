@@ -1,0 +1,51 @@
+name: Backend Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+
+jobs:
+  deploy-backend-dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Railway Dev
+        uses: railwayapp/railway-deploy@v1
+        with:
+          railway-token: ${{ secrets.RAILWAY_TOKEN_DEV }}
+          service: ${{ secrets.RAILWAY_SERVICE_DEV }}
+
+  deploy-backend-qa:
+    if: github.ref == 'refs/heads/qa'
+    runs-on: ubuntu-latest
+    environment: qa
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Railway QA
+        uses: railwayapp/railway-deploy@v1
+        with:
+          railway-token: ${{ secrets.RAILWAY_TOKEN_QA }}
+          service: ${{ secrets.RAILWAY_SERVICE_QA }}
+
+  deploy-backend-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Railway Production
+        uses: railwayapp/railway-deploy@v1
+        with:
+          railway-token: ${{ secrets.RAILWAY_TOKEN_PROD }}
+          service: ${{ secrets.RAILWAY_SERVICE_PROD }}

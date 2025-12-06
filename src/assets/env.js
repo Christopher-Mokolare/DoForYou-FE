@@ -6,7 +6,6 @@
   // Environment variables - these will be replaced at deployment time
   window['env']['apiUrl'] = '${API_URL}';
   window['env']['apiKey'] = '${API_KEY}';
-  window['env']['taskRequestForm'] = '${TASK_REQUEST_FORM}';
   window['env']['whatsappNumber'] = '${WHATSAPP_NUMBER}';
   window['env']['contactEmail'] = '${CONTACT_EMAIL}';
   window['env']['supportPhone'] = '${SUPPORT_PHONE}';

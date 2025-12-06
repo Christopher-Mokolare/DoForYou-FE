@@ -44,7 +44,6 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   // Dynamic filter options
   categoryOptions: any[] = [];
 
-  readonly taskRequestForm = environment.taskRequestForm;
   readonly whatsappNumber = environment.whatsappNumber;
 
   constructor(
