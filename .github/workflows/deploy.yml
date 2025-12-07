@@ -1,4 +1,4 @@
-name: Frontend CI Pipeline
+name: Build and Deploy
 
 on:
   push:
@@ -6,20 +6,22 @@ on:
       - main-dev
       - main-qa
       - main
-  pull_request:
-    branches:
-      - main-qa
-      - main
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
       
-      - run: npm ci
-      - run: npm run build
+      - name: Install Dependencies
+        run: npm install
+      
+      - name: Build Project
+        run: npm run build
