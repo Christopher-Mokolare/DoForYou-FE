@@ -1,4 +1,4 @@
-name: Frontend Deploy Pipeline
+name: Frontend CI Pipeline
 
 on:
   push:
@@ -22,36 +22,12 @@ jobs:
           cache: 'npm'
       
       - run: npm ci
+      - run: npm run build:dev
       - run: npm run test -- --watch=false --browsers=ChromeHeadless
 
-  deploy-dev:
-    if: github.ref == 'refs/heads/main-dev'
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    environment: development
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - run: npm ci
-      - run: ng build --configuration development
-      
-      # Deploy to dev environment (Vercel preview)
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          scope: ${{ secrets.VERCEL_ORG_ID }}
-
-  deploy-qa:
+  build-qa:
     if: github.ref == 'refs/heads/main-qa'
-    needs: build-and-test
     runs-on: ubuntu-latest
-    environment: qa
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,22 +36,11 @@ jobs:
           cache: 'npm'
       
       - run: npm ci
-      - run: ng build --configuration qa
-      
-      # Deploy to QA environment
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod --env QA'
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+      - run: npm run build:qa
 
-  deploy-prod:
+  build-prod:
     if: github.ref == 'refs/heads/main'
-    needs: build-and-test
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -84,13 +49,4 @@ jobs:
           cache: 'npm'
       
       - run: npm ci
-      - run: ng build --configuration production
-      
-      # Deploy to production
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+      - run: npm run build:prod
