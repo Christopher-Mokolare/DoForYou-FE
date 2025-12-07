@@ -24,4 +24,11 @@ jobs:
         run: npm install
       
       - name: Build Project
-        run: npm run build
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main-dev" ]]; then
+            npm run build:dev
+          elif [[ "${{ github.ref }}" == "refs/heads/main-qa" ]]; then
+            npm run build:qa
+          else
+            npm run build:prod
+          fi
