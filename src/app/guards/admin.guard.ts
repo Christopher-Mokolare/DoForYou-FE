@@ -19,7 +19,6 @@ export const adminGuard = () => {
         router.navigate(['/login']);
         return false;
       } catch (error) {
-        console.error('Admin guard error');
         router.navigate(['/login']);
         return false;
       }

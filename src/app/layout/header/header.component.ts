@@ -33,7 +33,6 @@ export class HeaderComponent implements AfterViewInit, OnInit {
       this.currentUser = user;
       // Updated: Use proper role checking
       this.isAdmin = this.checkIfAdmin(user);
-      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user, 'Is Admin:', this.isAdmin, 'UserType:', (user as any)?.userType);
     });
   }
 
@@ -120,7 +119,6 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   logout() {
-    console.log('Logging out user');
     this.authService.logout();
     this.router.navigate(['/']);
     this.scrollToTop();

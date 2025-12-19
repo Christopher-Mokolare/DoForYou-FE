@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
         error: (error: any) => {
           this.loadingService.hide();
           this.errorMessage = 'Login failed. Please check your credentials and try again.';
-          console.error('Login error:', error);
+
         }
       });
     } else {

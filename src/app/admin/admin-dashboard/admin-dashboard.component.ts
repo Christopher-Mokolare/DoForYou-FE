@@ -381,7 +381,6 @@ export class AdminDashboardComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        console.error('Failed to load dashboard');
         this.error = 'Failed to load dashboard';
         this.loading = false;
       }

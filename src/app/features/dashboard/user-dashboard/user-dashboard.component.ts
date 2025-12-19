@@ -33,7 +33,6 @@ export class UserDashboardComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     this.userType = (user as any)?.userType || '';
     
-    console.log('Current userType:', this.userType);
     
     this.loadFreshProfileData();
     this.loadUserStats();
@@ -72,10 +71,8 @@ export class UserDashboardComponent implements OnInit {
     this.profileCompletion = (user as any)?.profileCompletion || 0;
     
     if (this.needsProfileUpdate) {
-      console.log('User needs to complete profile with new required information');
     }
     if (this.isProfileIncomplete) {
-      console.log('User profile is incomplete:', this.profileCompletion + '%');
     }
   }
 
@@ -86,11 +83,9 @@ export class UserDashboardComponent implements OnInit {
         if (response.success && response.data) {
           this.creatorStats = response.data.creator;
           this.runnerStats = response.data.runner;
-          console.log('Dashboard stats loaded:', response.data);
         }
       },
       error: (error) => {
-        console.error('Error loading dashboard stats:', error);
       }
     });
 
@@ -99,11 +94,9 @@ export class UserDashboardComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.recentActivity = response.data;
-          console.log('Recent activity loaded:', response.data);
         }
       },
       error: (error) => {
-        console.error('Error loading recent activity:', error);
       }
     });
   }
@@ -114,14 +107,10 @@ export class UserDashboardComponent implements OnInit {
     this.cleanupInProgress = true;
     this.taskService.cleanupOrphanedTasks().subscribe({
       next: (response) => {
-        console.log('Cleanup completed:', response);
-        alert(`Cleanup completed! Removed ${response.data?.deletedCount || 0} orphaned tasks.`);
         this.loadUserStats(); // Refresh stats
         this.cleanupInProgress = false;
       },
       error: (error) => {
-        console.error('Cleanup failed:', error);
-        alert('Cleanup failed. Please try again.');
         this.cleanupInProgress = false;
       }
     });

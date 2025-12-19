@@ -79,7 +79,6 @@ export class ProfileComponent implements OnInit {
     // Always try to load from current user first
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
-      console.log('Loading profile from current user:', currentUser);
       const user = currentUser as any;
       this.profile = {
         name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '',
@@ -120,11 +119,9 @@ export class ProfileComponent implements OnInit {
             this.validateIdNumberSilently();
           }
           
-          console.log('Profile updated from API:', userData);
         }
       },
       error: (error) => {
-        console.log('API profile load failed, using current user data');
       }
     });
   }
@@ -136,7 +133,6 @@ export class ProfileComponent implements OnInit {
         this.userType = response.canCreateTasks ? 'creator' : 'runner';
       },
       error: (error) => {
-        console.error('Error loading preferences:', error);
         const saved = localStorage.getItem('userPreferences');
         if (saved) {
           this.preferences = { ...this.preferences, ...JSON.parse(saved) };
@@ -162,7 +158,6 @@ export class ProfileComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error loading stats:', error);
         this.setDefaultStats();
       }
     });
@@ -251,7 +246,6 @@ export class ProfileComponent implements OnInit {
                 };
               }
             },
-            error: (error) => console.error('Error fetching updated profile:', error)
           });
           
           this.modalService.showModal({
@@ -357,7 +351,6 @@ export class ProfileComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error updating preferences:', error);
         this.userPreferencesService.saveToLocalStorage(this.preferences);
         this.modalService.showModal({
           type: 'warning',

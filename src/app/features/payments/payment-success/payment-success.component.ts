@@ -69,7 +69,6 @@ export class PaymentSuccessComponent implements OnInit, OnDestroy {
     this.errandsService.getTask(taskId).subscribe({
       next: (response) => {
         const task = response.data || response;
-        console.log('Task status check:', task);
         
         if (task.paymentStatus === 'COMPLETED' && 
             (task.taskStatus === 'POSTED' || task.taskStatus === 'VERIFIED' || task.taskStatus === 'AVAILABLE')) {
@@ -86,7 +85,6 @@ export class PaymentSuccessComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error checking task status:', error);
         if (this.currentAttempt >= this.maxPollingAttempts) {
           this.handlePollingTimeout();
         }

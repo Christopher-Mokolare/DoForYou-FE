@@ -36,7 +36,6 @@ export class ErrorHandlerService {
       }
     }
 
-    console.error('HTTP Error:', {
       status: error.status,
       message: errorMessage
     });

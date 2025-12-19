@@ -1,9 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { TaskService, TaskDto, ClaimTaskRequest } from '../../services/task.service';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ErrandsService, Errand } from '../../services/errands.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-task-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DatePipe],
   template: `
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-6">Available Tasks</h2>
@@ -73,14 +77,14 @@ import { AuthService } from '../../services/auth.service';
   `
 })
 export class TaskListComponent implements OnInit {
-  private taskService = inject(TaskService);
+  private errandsService = inject(ErrandsService);
   private authService = inject(AuthService);
 
-  tasks: TaskDto[] = [];
+  tasks: Errand[] = [];
   canAcceptTasks = false;
   showClaimModal = false;
-  selectedTask: TaskDto | null = null;
-  claimData: ClaimTaskRequest = { helperName: '', helperContact: '' };
+  selectedTask: Errand | null = null;
+  claimData = { helperName: '', helperContact: '' };
 
   ngOnInit() {
     this.canAcceptTasks = this.authService.canAcceptTasks();
@@ -88,17 +92,16 @@ export class TaskListComponent implements OnInit {
   }
 
   loadTasks() {
-    this.taskService.getAvailableTasks().subscribe({
+    this.errandsService.getVerifiedTasks().subscribe({
       next: (response) => {
         if (response.success) {
-          this.tasks = response.data.tasks;
+          this.tasks = response.tasks;
         }
       },
-      error: (error) => console.error('Error loading tasks:', error)
     });
   }
 
-  claimTask(task: TaskDto) {
+  claimTask(task: Errand) {
     this.selectedTask = task;
     this.showClaimModal = true;
     this.claimData = { helperName: '', helperContact: '' };
@@ -106,14 +109,11 @@ export class TaskListComponent implements OnInit {
 
   confirmClaim() {
     if (this.selectedTask && this.claimData.helperName && this.claimData.helperContact) {
-      this.taskService.claimTask(this.selectedTask.taskId, this.claimData).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.loadTasks(); // Refresh list
-            this.cancelClaim();
-          }
+      this.errandsService.claimTask(this.selectedTask.taskId, this.claimData.helperName, this.claimData.helperContact).subscribe({
+        next: () => {
+          this.loadTasks(); // Refresh list
+          this.cancelClaim();
         },
-        error: (error) => console.error('Error claiming task:', error)
       });
     }
   }

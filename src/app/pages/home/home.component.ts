@@ -74,7 +74,6 @@ export class HomeComponent implements AfterViewInit {
           // Restart video each time it comes into view
           video.currentTime = 0;
           video.play().catch(error => {
-            console.warn('Autoplay prevented:', error);
           });
         } else {
           // Pause when leaving viewport

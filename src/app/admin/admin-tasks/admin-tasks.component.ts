@@ -65,7 +65,6 @@ export class AdminTasksComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Failed to load tasks');
         this.loading = false;
       }
     });
@@ -125,7 +124,6 @@ export class AdminTasksComponent implements OnInit {
         this.verifying = this.verifying.filter(id => id !== taskId);
       },
       error: () => {
-        console.error('Payment verification failed');
         this.verifying = this.verifying.filter(id => id !== taskId);
       }
     });
@@ -142,7 +140,6 @@ export class AdminTasksComponent implements OnInit {
         this.verifying = this.verifying.filter(id => id !== taskId);
       },
       error: () => {
-        console.error('Payment unverification failed');
         this.verifying = this.verifying.filter(id => id !== taskId);
       }
     });
@@ -159,7 +156,6 @@ export class AdminTasksComponent implements OnInit {
         }
       },
       error: () => {
-        console.error('Bulk verification failed');
       }
     });
   }

@@ -43,7 +43,6 @@ export class TaskDetailsComponent implements OnInit {
         this.updateActionButtons();
       },
       error: (error) => {
-        console.error('Error loading task:', error);
       }
     });
   }
@@ -57,7 +56,6 @@ export class TaskDetailsComponent implements OnInit {
           this.loadTaskDetails(); // Refresh task data
         },
         error: (error) => {
-          console.error('Error claiming task:', error);
           this.modalService.showAlert('Error', 'Failed to accept task. Please try again.', 'error');
         }
       });
@@ -83,14 +81,12 @@ export class TaskDetailsComponent implements OnInit {
         this.loadTaskDetails(); // Refresh to show updated status
       },
       error: (error) => {
-        console.error('Error claiming task:', error);
         this.modalService.showAlert('Error', 'Failed to claim task. Please try again.', 'error');
       }
     });
   }
 
   markComplete() {
-    // TODO: Implement mark complete functionality
     this.modalService.showAlert('Info', 'Mark complete functionality coming soon!', 'info');
   }
 }

@@ -45,14 +45,12 @@ export class PostErrandComponent implements OnInit {
     
     // Check if user preferences allow task creation
     if (this.currentUser?.canCreateTasks === false) {
-      alert('You have selected "Task Runner" mode. To post errands, please update your preferences to "Task Creator" or "Both" in your profile settings.');
       this.router.navigate(['/profile/preferences']);
       return;
     }
 
     // Check if profile is complete
     if (this.authService.isProfileIncomplete()) {
-      alert('Please complete your profile before posting tasks. Your profile is only ' + this.authService.getProfileCompletion() + '% complete.');
       this.router.navigate(['/profile']);
       return;
     }
@@ -67,7 +65,6 @@ export class PostErrandComponent implements OnInit {
         this.categoryOptions = options.categories || [];
       },
       error: (error) => {
-        console.error('Failed to load categories:', error);
       }
     });
   }
@@ -122,7 +119,6 @@ export class PostErrandComponent implements OnInit {
         // Create task via backend API
         this.errandsService.createTask(formData).subscribe({
           next: (response) => {
-            console.log('Task created successfully:', response);
             this.loadingService.hide();
             this.isSubmitting = false;
             
@@ -135,24 +131,19 @@ export class PostErrandComponent implements OnInit {
             if (response.data?.paymentUrl) {
               window.location.href = response.data.paymentUrl;
             } else {
-              alert('Payment URL not received. Please try again.');
             }
           },
           error: (error) => {
-            console.error('Error creating task:', error);
             this.loadingService.hide();
             this.isSubmitting = false;
             
             // Show more specific error message
             const errorMessage = error?.error?.message || error?.message || 'Failed to create task. Please try again.';
-            alert(errorMessage);
           }
         });
       } catch (error) {
-        console.error('Error processing task submission');
         this.loadingService.hide();
         this.isSubmitting = false;
-        alert('Error processing your request. Please try again.');
       }
     } else {
       this.markFormGroupTouched();
@@ -163,7 +154,6 @@ export class PostErrandComponent implements OnInit {
           firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       } catch (error) {
-        console.error('Error scrolling to invalid field');
       }
     }
   }

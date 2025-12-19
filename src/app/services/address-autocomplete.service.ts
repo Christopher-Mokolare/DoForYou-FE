@@ -22,9 +22,7 @@ export class AddressAutocompleteService {
   }
 
   private loadGoogleMapsAPI(): void {
-    console.log('Loading Google Maps API...');
     if (typeof google !== 'undefined' && google.maps) {
-      console.log('Google Maps already loaded');
       this.initializeServices();
       return;
     }
@@ -34,46 +32,34 @@ export class AddressAutocompleteService {
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      console.log('Google Maps API loaded successfully');
       this.initializeServices();
     };
     script.onerror = () => {
-      console.error('Failed to load Google Maps API');
+      // Google Maps API failed to load
     };
     document.head.appendChild(script);
   }
 
   private initializeServices(): void {
     if (typeof google !== 'undefined' && google.maps) {
-      console.log('Initializing Google Maps services...');
       this.autocompleteService = new google.maps.places.AutocompleteService();
       this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
       this.isLoaded = true;
-      console.log('Google Maps services initialized successfully');
-    } else {
-      console.error('Google Maps not available for initialization');
     }
   }
 
   getAddressSuggestions(input: string): Observable<AddressSuggestion[]> {
     const subject = new Subject<AddressSuggestion[]>();
-    console.log('AddressService: getAddressSuggestions called with:', input);
-    console.log('AddressService: isLoaded =', this.isLoaded);
 
     if (!input || input.length < 3) {
-      console.log('AddressService: Input too short, returning empty');
       subject.next([]);
       subject.complete();
       return subject.asObservable();
     }
 
-    // Force fallback for testing - remove this line when Google API works
-    if (!this.isLoaded || true) {
-    // if (!this.isLoaded) {
-      console.log('AddressService: Google Maps not loaded, using fallback');
+    if (!this.isLoaded) {
       // Fallback: return basic suggestions for common SA areas
       const fallbackSuggestions = this.getFallbackSuggestions(input);
-      console.log('AddressService: Fallback suggestions:', fallbackSuggestions);
       subject.next(fallbackSuggestions);
       subject.complete();
       return subject.asObservable();
@@ -86,18 +72,14 @@ export class AddressAutocompleteService {
     };
 
     this.autocompleteService.getPlacePredictions(request, (predictions: any[], status: any) => {
-      console.log('Google Places API response - Status:', status, 'Predictions:', predictions);
       if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
         const suggestions: AddressSuggestion[] = predictions.map(prediction => ({
           description: prediction.description,
           placeId: prediction.place_id
         }));
-        console.log('Mapped suggestions:', suggestions);
         subject.next(suggestions);
       } else {
-        console.log('Google Places API failed, using fallback. Status:', status);
         const fallbackSuggestions = this.getFallbackSuggestions(input);
-        console.log('Using fallback suggestions:', fallbackSuggestions);
         subject.next(fallbackSuggestions);
       }
       subject.complete();

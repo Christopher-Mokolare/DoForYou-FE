@@ -19,6 +19,9 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+*.swp
+*.swo
+*~
 
 # Visual Studio Code
 .vscode/*
@@ -48,3 +51,30 @@ Thumbs.db
 .env.qa
 .env.production
 .env.*.local
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Build artifacts
+build/
+*.tgz
+*.tar.gz
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig

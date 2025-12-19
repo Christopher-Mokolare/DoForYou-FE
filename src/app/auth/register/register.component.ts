@@ -99,7 +99,6 @@ export class RegisterComponent {
         error: (error: any) => {
           this.loadingService.hide();
           this.errorMessage = 'Registration failed. Please try again.';
-          console.error('Registration error:', error);
         }
       });
     } else {

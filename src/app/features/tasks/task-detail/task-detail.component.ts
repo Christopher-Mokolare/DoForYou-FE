@@ -123,7 +123,6 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Failed to load messages:', error);
       }
     });
   }

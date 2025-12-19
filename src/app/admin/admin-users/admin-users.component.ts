@@ -60,7 +60,6 @@ export class AdminUsersComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        console.error('Failed to load users');
         this.loading = false;
       }
     });
@@ -103,7 +102,6 @@ export class AdminUsersComponent implements OnInit {
         this.updating = this.updating.filter(id => id !== userId);
       },
       error: () => {
-        console.error('Failed to update user status');
         this.updating = this.updating.filter(id => id !== userId);
       }
     });
@@ -120,14 +118,12 @@ export class AdminUsersComponent implements OnInit {
         this.updating = this.updating.filter(id => id !== user.id);
       },
       error: () => {
-        console.error('Failed to update user role');
         this.updating = this.updating.filter(id => id !== user.id);
       }
     });
   }
 
   viewUserDetails(user: AdminUser) {
-    console.log('Viewing user details');
   }
 
   getRoleClass(role: string): string {

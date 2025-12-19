@@ -127,7 +127,6 @@ export class MyPostedTasksComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Failed to load posted tasks:', error);
         this.loading = false;
       }
     });

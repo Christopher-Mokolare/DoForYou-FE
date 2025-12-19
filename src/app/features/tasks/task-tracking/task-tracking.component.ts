@@ -34,7 +34,6 @@ export class TaskTrackingComponent implements OnInit {
           this.acceptedTasks = response.acceptedTasks || [];
         }
       },
-      error: (error) => console.error('Error loading tasks:', error)
     });
   }
 
@@ -62,7 +61,6 @@ export class TaskTrackingComponent implements OnInit {
         this.closeModal();
         this.loadTasks();
       },
-      error: (error) => console.error('Error completing task:', error)
     });
   }
 
@@ -71,7 +69,6 @@ export class TaskTrackingComponent implements OnInit {
       isApproved: isApproved
     }).subscribe({
       next: () => this.loadTasks(),
-      error: (error) => console.error('Error confirming task:', error)
     });
   }
 
@@ -90,7 +87,6 @@ export class TaskTrackingComponent implements OnInit {
         this.closeModal();
         this.loadTasks();
       },
-      error: (error) => console.error('Error requesting revision:', error)
     });
   }
 

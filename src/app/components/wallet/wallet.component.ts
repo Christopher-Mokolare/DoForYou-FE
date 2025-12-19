@@ -1,9 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule, DatePipe } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaymentService, WalletData, WithdrawRequest } from '../../services/payment.service';
 
 @Component({
   selector: 'app-wallet',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, DatePipe],
   template: `
     <div class="container mx-auto p-4 max-w-2xl">
       <h2 class="text-2xl font-bold mb-6">My Wallet</h2>
@@ -117,7 +120,6 @@ export class WalletComponent implements OnInit {
           this.walletData = response.data;
         }
       },
-      error: (error) => console.error('Error loading wallet:', error)
     });
   }
 
@@ -140,7 +142,6 @@ export class WalletComponent implements OnInit {
           this.isWithdrawing = false;
         },
         error: (error) => {
-          console.error('Error withdrawing funds:', error);
           this.isWithdrawing = false;
         }
       });

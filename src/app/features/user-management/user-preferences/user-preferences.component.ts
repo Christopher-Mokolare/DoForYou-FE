@@ -61,7 +61,6 @@ export class UserPreferencesComponent implements OnInit {
         this.preferences.preferredCategories = prefs.preferredCategories;
         this.preferences.preferredLocations = prefs.preferredLocations;
       },
-      error: () => console.error('Error loading preferences')
     });
   }
 
@@ -92,12 +91,9 @@ export class UserPreferencesComponent implements OnInit {
         
         const roleMessage = this.preferences.canCreateTasks && this.preferences.canAcceptTasks ? 'Both Creator & Runner' :
                            this.preferences.canCreateTasks ? 'Task Creator' : 'Task Runner';
-        alert(`Preferences saved to database! You are now set as: ${roleMessage}`);
         this.saving = false;
       },
       error: (error) => {
-        console.error('Error saving preferences:', error);
-        alert('Error saving preferences to database. Saved locally instead.');
         this.saving = false;
       }
     });

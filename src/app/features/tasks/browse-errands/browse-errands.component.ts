@@ -89,7 +89,6 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     
     const filters = this.buildFilters();
 
-    console.log('Loading errands with filters');
 
     this.errandsService.getVerifiedTasks(this.currentPage, this.itemsPerPage, filters).subscribe({
       next: (data: PaginatedResponse) => {
@@ -98,10 +97,8 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         this.totalPages = data.totalPages;
         this.lastUpdated = new Date();
         this.loadingService.hide();
-        console.log('Errands loaded successfully');
       },
       error: () => {
-        console.error('Failed to load errands');
         this.error = 'Failed to load errands. Please try again later.';
         this.loadingService.hide();
       }
@@ -114,7 +111,6 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         this.categoryOptions = options.categories || [];
       },
       error: (error) => {
-        console.error('Failed to load filter options:', error);
       }
     });
   }
@@ -221,7 +217,6 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         }, 2000);
       },
       error: (error) => {
-        console.error('Task claim failed');
         this.modalService.showAlert('Error', 'Failed to accept task. Please try again.', 'error');
       }
     });

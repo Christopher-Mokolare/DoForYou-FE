@@ -92,7 +92,6 @@ export class NotificationsComponent implements OnInit {
         }
       },
       error: () => {
-        console.error('Failed to mark notification as read');
       }
     });
   }
@@ -105,7 +104,6 @@ export class NotificationsComponent implements OnInit {
         }
       },
       error: () => {
-        console.error('Failed to mark all notifications as read');
       }
     });
   }
@@ -118,7 +116,6 @@ export class NotificationsComponent implements OnInit {
     Promise.all(deletePromises).then(() => {
       this.notifications = [];
     }).catch(() => {
-      console.error('Failed to clear notifications');
     });
   }
 
@@ -133,7 +130,6 @@ export class NotificationsComponent implements OnInit {
         }
       },
       error: () => {
-        console.error('Failed to delete notification');
       }
     });
   }

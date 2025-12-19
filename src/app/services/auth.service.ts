@@ -21,19 +21,19 @@ export class AuthService {
     const token = this.getToken();
     const userStr = localStorage.getItem('currentUser');
     
-    console.log('Loading current user - Token exists:', !!token, 'User exists:', !!userStr);
+
     
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
-        console.log('User loaded successfully');
+
       } catch (error) {
-        console.error('Error parsing user data:', error);
+  
         this.logout();
       }
     } else {
-      console.log('No user data found in localStorage');
+
     }
   }
 
@@ -45,7 +45,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
     .pipe(
       tap(response => {
-        console.log('Login response received');
+
         if (response.success && response.token && response.user) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
@@ -66,13 +66,13 @@ login(loginData: LoginModel): Observable<AuthResponse> {
             localStorage.setItem('userPreferences', JSON.stringify(defaultPreferences));
           }
           
-          console.log('User logged in successfully');
+
         }
       }),
       catchError(error => {
-        console.error('Login failed with status:', error?.status || 'unknown');
+
         if (error.status === 0) {
-          console.error('Backend connection failed');
+
         }
         return throwError(() => error);
       })
@@ -84,7 +84,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('refreshToken');
     this.currentUserSubject.next(null);
-    console.log('User logged out');
+
   }
 
   getToken(): string | null {
@@ -192,7 +192,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
       } catch (error) {
-        console.error('Error refreshing user data:', error);
+
       }
     }
   }

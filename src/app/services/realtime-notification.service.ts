@@ -77,9 +77,7 @@ export class RealtimeNotificationService {
 
     try {
       await this.hubConnection.start();
-      console.log('SignalR connection established');
     } catch (error) {
-      console.error('Error establishing SignalR connection:', error);
     }
   }
 

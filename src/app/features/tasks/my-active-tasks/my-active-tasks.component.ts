@@ -97,7 +97,6 @@ export class MyActiveTasksComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Failed to load active tasks:', error);
         this.loading = false;
       }
     });

@@ -72,16 +72,12 @@ export class SecurityService {
 
     switch (level) {
       case 'error':
-        console.error(sanitizedMessage, sanitizedData);
         break;
       case 'warn':
-        console.warn(sanitizedMessage, sanitizedData);
         break;
       case 'info':
-        console.info(sanitizedMessage, sanitizedData);
         break;
       default:
-        console.log(sanitizedMessage, sanitizedData);
     }
   }
 }

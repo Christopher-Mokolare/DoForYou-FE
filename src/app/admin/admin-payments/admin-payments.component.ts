@@ -320,7 +320,6 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
         this.loading = false;
       },
       error: () => {
-        console.error('Failed to load payments data');
         this.loading = false;
       }
     });
@@ -332,7 +331,6 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
 
   exportPaymentReport() {
     if (!this.paymentsData) {
-      console.error('No payment data available for export');
       return;
     }
     
@@ -346,7 +344,6 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
       link.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error generating payment report');
     }
   }
 
