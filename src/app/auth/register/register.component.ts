@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractContro
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoadingService } from '../../services/loading.service';
+import { AddressAutocompleteComponent } from '../../shared/components/address-autocomplete/address-autocomplete.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AddressAutocompleteComponent],
   templateUrl: './register.component.html',
   styles: []
 })
@@ -31,7 +32,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9+\\-\\s()]+$')]],
       userType: ['', [Validators.required]],
-      idNumber: ['', [Validators.pattern('^[0-9]{13}$')]],
+      idNumber: ['', [this.southAfricanIdValidator]],
       address: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
@@ -45,6 +46,35 @@ export class RegisterComponent {
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       return { 'passwordMismatch': true };
     }
+    return null;
+  }
+
+  southAfricanIdValidator(control: AbstractControl): { [key: string]: boolean } | null {
+    const value = control.value;
+    if (!value) return null; // Optional field
+    
+    if (value.length !== 13 || !/^\d{13}$/.test(value)) {
+      return { 'invalidId': true };
+    }
+    
+    // Luhn algorithm check
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      let digit = parseInt(value[i]);
+      if (i % 2 === 1) {
+        digit *= 2;
+        if (digit > 9) {
+          digit = Math.floor(digit / 10) + (digit % 10);
+        }
+      }
+      sum += digit;
+    }
+    
+    const checkDigit = (10 - (sum % 10)) % 10;
+    if (checkDigit !== parseInt(value[12])) {
+      return { 'invalidId': true };
+    }
+    
     return null;
   }
 

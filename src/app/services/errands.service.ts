@@ -94,32 +94,32 @@ export class ErrandsService {
   }
 
   getVerifiedTasks(page: number = 1, pageSize: number = 10, filters: any = {}): Observable<PaginatedResponse> {
-    const cacheKey = this.generateCacheKey('available_tasks', page, pageSize, filters);
-    const cachedData = this.getFromCache(cacheKey);
-
-    if (cachedData) {
-      console.log('Returning cached data');
-      return of(cachedData);
-    }
-
     const url = `${this.apiBaseUrl}/api/v1/tasks/available`;
     let params = new HttpParams()
       .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
+      .set('pageSize', pageSize.toString())
+      .set('includeOwn', 'true'); // Add parameter to include user's own tasks
 
-    // Add filters - Match actual HTML form
+    // Add filters
     if (filters.search) params = params.set('search', filters.search);
     if (filters.status) params = params.set('status', filters.status);
     if (filters.category) params = params.set('category', filters.category);
 
-    console.log('Making API call for available tasks');
+    console.log('Making API call for available tasks (including own)');
+    console.log('Request URL:', url);
+    console.log('Request params:', params.toString());
 
     return this.http.get<PaginatedResponse>(url, { params }).pipe(
       retry(2),
       map(response => this.processResponse(response)),
       tap(data => {
-        console.log('API response processed');
-        this.setCache(cacheKey, data);
+        console.log('Available tasks API response processed:', data.count, 'tasks found');
+        if (data.count === 0) {
+          console.warn('No tasks returned. Possible reasons:');
+          console.warn('1. Backend filtering by status (e.g., only showing VERIFIED/POSTED tasks)');
+          console.warn('2. PayFast webhook has not updated task status yet');
+          console.warn('3. Task payment verification pending');
+        }
       }),
       catchError(error => this.handleError(error))
     );
@@ -318,5 +318,42 @@ export class ErrandsService {
   clearCache(): void {
     console.log('Clearing cache');
     this.cache.clear();
+  }
+
+  // Force refresh tasks after payment completion
+  refreshTasksAfterPayment(): Observable<PaginatedResponse> {
+    console.log('Force refreshing tasks after payment');
+    this.clearCache();
+    return this.getVerifiedTasks(1, 10, {});
+  }
+
+  // Check if a specific task is now available
+  checkTaskAvailability(taskId: string): Observable<boolean> {
+    return this.getVerifiedTasks(1, 50, {}).pipe(
+      map(response => {
+        const taskExists = response.tasks.some(task => 
+          (task.taskId === taskId || task.taskid === taskId)
+        );
+        console.log(`Task ${taskId} availability check:`, taskExists);
+        return taskExists;
+      })
+    );
+  }
+
+  // Debug method to get all user tasks regardless of status
+  getAllUserTasksDebug(): Observable<any> {
+    const url = `${this.apiBaseUrl}/api/v1/tasks/debug`;
+    console.log('Getting all user tasks for debugging');
+    
+    return this.http.get(url).pipe(
+      tap(response => {
+        console.log('Debug - All user tasks:', response);
+      }),
+      catchError(error => {
+        console.error('Debug endpoint not available:', error);
+        // Fallback to regular user tasks endpoint
+        return this.getUserTasks();
+      })
+    );
   }
 }

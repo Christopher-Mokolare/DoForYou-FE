@@ -126,6 +126,11 @@ export class PostErrandComponent implements OnInit {
             this.loadingService.hide();
             this.isSubmitting = false;
             
+            // Store task ID for payment success tracking
+            if (response.data?.taskId) {
+              sessionStorage.setItem('pendingTaskId', response.data.taskId);
+            }
+            
             // Redirect to PayFast payment URL
             if (response.data?.paymentUrl) {
               window.location.href = response.data.paymentUrl;
@@ -137,7 +142,10 @@ export class PostErrandComponent implements OnInit {
             console.error('Error creating task:', error);
             this.loadingService.hide();
             this.isSubmitting = false;
-            alert('Failed to create task. Please try again.');
+            
+            // Show more specific error message
+            const errorMessage = error?.error?.message || error?.message || 'Failed to create task. Please try again.';
+            alert(errorMessage);
           }
         });
       } catch (error) {

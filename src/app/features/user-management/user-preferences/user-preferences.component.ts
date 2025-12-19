@@ -39,8 +39,28 @@ export class UserPreferencesComponent implements OnInit {
   }
 
   loadPreferences(): void {
+    // Load from current user data first, then fall back to localStorage
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && (currentUser as any).userType) {
+      const userType = (currentUser as any).userType;
+      this.preferences.canCreateTasks = userType === 'creator' || userType === 'both';
+      this.preferences.canAcceptTasks = userType === 'runner' || userType === 'both';
+    }
+    
+    // Load other preferences from service (localStorage)
     this.preferencesService.getUserPreferences().subscribe({
-      next: (prefs) => this.preferences = prefs,
+      next: (prefs) => {
+        // Only update non-role preferences to preserve database userType
+        this.preferences.taskCreatorNotifications = prefs.taskCreatorNotifications;
+        this.preferences.taskRunnerNotifications = prefs.taskRunnerNotifications;
+        this.preferences.paymentNotifications = prefs.paymentNotifications;
+        this.preferences.emailNotifications = prefs.emailNotifications;
+        this.preferences.smsNotifications = prefs.smsNotifications;
+        this.preferences.minTaskAmount = prefs.minTaskAmount;
+        this.preferences.maxTaskAmount = prefs.maxTaskAmount;
+        this.preferences.preferredCategories = prefs.preferredCategories;
+        this.preferences.preferredLocations = prefs.preferredLocations;
+      },
       error: () => console.error('Error loading preferences')
     });
   }
@@ -53,24 +73,33 @@ export class UserPreferencesComponent implements OnInit {
   savePreferences(): void {
     this.saving = true;
     this.preferencesService.updateUserPreferences(this.preferences).subscribe({
-      next: () => {
+      next: (response) => {
+        // Update current user data with new userType
         const currentUser = this.authService.getCurrentUser();
         if (currentUser) {
-          currentUser.canCreateTasks = this.preferences.canCreateTasks;
-          currentUser.canAcceptTasks = this.preferences.canAcceptTasks;
+          // Update userType based on preferences
+          if (this.preferences.canCreateTasks && this.preferences.canAcceptTasks) {
+            (currentUser as any).userType = 'both';
+          } else if (this.preferences.canCreateTasks) {
+            (currentUser as any).userType = 'creator';
+          } else if (this.preferences.canAcceptTasks) {
+            (currentUser as any).userType = 'runner';
+          }
+          
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
           this.authService.refreshCurrentUser();
         }
         
-        const roleMessage = this.preferences.canCreateTasks ? 'Task Creator' : 'Task Runner';
-        alert(`Preferences saved! You are now set as: ${roleMessage}`);
-        window.location.reload();
+        const roleMessage = this.preferences.canCreateTasks && this.preferences.canAcceptTasks ? 'Both Creator & Runner' :
+                           this.preferences.canCreateTasks ? 'Task Creator' : 'Task Runner';
+        alert(`Preferences saved to database! You are now set as: ${roleMessage}`);
+        this.saving = false;
       },
-      error: () => {
-        console.error('Error saving preferences');
-        alert('Error saving preferences. Please try again.');
-      },
-      complete: () => this.saving = false
+      error: (error) => {
+        console.error('Error saving preferences:', error);
+        alert('Error saving preferences to database. Saved locally instead.');
+        this.saving = false;
+      }
     });
   }
 }

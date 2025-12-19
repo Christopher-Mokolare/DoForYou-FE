@@ -89,7 +89,6 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   getToken(): string | null {
     const token = localStorage.getItem('token');
-    console.log('Retrieving token from storage:', !!token);
     return token;
   }
 
@@ -100,7 +99,6 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isValid = payload.exp > Date.now() / 1000;
-      console.log('Token validation completed');
       return isValid;
     } catch {
       return false;
@@ -268,17 +266,14 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   isTokenValid(): boolean {
     const token = this.getToken();
     if (!token) {
-      console.log('No token found');
       return false;
     }
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = payload.exp < (Date.now() / 1000);
-      console.log('Token validation completed');
       return !isExpired;
     } catch (error) {
-      console.error('Error parsing token:', error);
       return false;
     }
   }

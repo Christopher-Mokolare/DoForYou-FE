@@ -1,0 +1,28 @@
+<div class="address-autocomplete-container">
+  <input
+    type="text"
+    [class]="inputClass"
+    [placeholder]="placeholder"
+    [(ngModel)]="inputValue"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    [disabled]="disabled"
+    autocomplete="off">
+  
+  <div class="suggestions-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+    <div 
+      class="suggestion-item"
+      *ngFor="let suggestion of suggestions; trackBy: trackBySuggestion"
+      (click)="selectSuggestion(suggestion)">
+      <i class="fas fa-map-marker-alt me-2"></i>
+      {{ suggestion.description }}
+    </div>
+  </div>
+  
+  <small class="form-text text-muted mt-1" *ngIf="showFormatHint && inputValue.trim() && !disabled">
+    {{ formatHint }}
+  </small>
+  
+
+</div>

@@ -24,10 +24,20 @@
           </div>
         </div>
         <div class="col-lg-4 text-end">
-          <button (click)="refreshErrands()" class="refresh-btn" [disabled]="isLoading">
-            <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
-            <span>{{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}</span>
-          </button>
+          <div class="d-flex gap-2">
+            <button (click)="refreshErrands()" class="refresh-btn" [disabled]="isLoading">
+              <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+              <span>{{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}</span>
+            </button>
+            <button (click)="checkMyTasks()" class="btn btn-outline-info" *ngIf="isLoggedIn">
+              <i class="fas fa-search me-2"></i>
+              Check My Tasks
+            </button>
+            <button (click)="postErrand()" class="btn btn-primary">
+              <i class="fas fa-plus-circle me-2"></i>
+              Post Task
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -47,6 +57,27 @@
         <div class="alert-actions">
           <a routerLink="/register" class="btn btn-primary me-2">Sign Up</a>
           <a routerLink="/login" class="btn btn-outline-primary">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Just Posted Task Alert -->
+  <div *ngIf="isLoggedIn" class="payment-success-alert" style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%); border: 1px solid #10b981; margin-bottom: 2rem;">
+    <div class="container">
+      <div class="alert-card" style="background: transparent; border: none; padding: 1rem;">
+        <div class="alert-icon" style="color: #10b981;">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="alert-content">
+          <h4 style="color: #065f46; margin-bottom: 0.5rem;">Just posted a task?</h4>
+          <p style="color: #047857; margin-bottom: 0;">If you just completed payment, your task may take 1-2 minutes to appear. Click "Refresh Tasks" above if you don't see it.</p>
+        </div>
+        <div class="alert-actions">
+          <button (click)="refreshErrands()" class="btn btn-success btn-sm" [disabled]="isLoading">
+            <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+            {{ isLoading ? 'Refreshing...' : 'Refresh Now' }}
+          </button>
         </div>
       </div>
     </div>

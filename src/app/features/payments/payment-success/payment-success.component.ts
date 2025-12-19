@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ErrandsService } from '../../../services/errands.service';
+import { interval, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-payment-success',
@@ -10,8 +12,13 @@ import { ErrandsService } from '../../../services/errands.service';
   templateUrl: './payment-success.component.html',
   styleUrls: ['./payment-success.component.scss']
 })
-export class PaymentSuccessComponent implements OnInit {
+export class PaymentSuccessComponent implements OnInit, OnDestroy {
   processing = true;
+  statusMessage = 'Processing your payment and activating your task...';
+  taskActivated = false;
+  private pollingSubscription?: Subscription;
+  maxPollingAttempts = 15;
+  currentAttempt = 0;
 
   constructor(
     private router: Router,
@@ -19,48 +26,88 @@ export class PaymentSuccessComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.createTaskAfterPayment();
+    this.verifyTaskActivation();
   }
 
-  private createTaskAfterPayment() {
-    const pendingTaskData = sessionStorage.getItem('pendingTask');
+  ngOnDestroy() {
+    this.pollingSubscription?.unsubscribe();
+  }
+
+  private verifyTaskActivation() {
+    const pendingTaskId = sessionStorage.getItem('pendingTaskId');
     
-    if (pendingTaskData) {
-      const taskData = JSON.parse(pendingTaskData);
-      
-      // Add 10 second timeout
-      const timeout = setTimeout(() => {
-        this.handleError('Task creation timed out. Please contact support.');
-      }, 10000);
-      
-      this.errandsService.createTask(taskData).subscribe({
-        next: (response) => {
-          clearTimeout(timeout);
-          if (response.success) {
-            sessionStorage.removeItem('pendingTask');
-            this.processing = false;
-          } else {
-            this.handleError('Failed to create task after payment');
-          }
-        },
-        error: (error) => {
-          clearTimeout(timeout);
-          console.error('Task creation error:', error);
-          this.handleError('Error creating task after payment');
-        }
-      });
-    } else {
-      this.handleError('No pending task data found');
+    if (!pendingTaskId) {
+      this.processing = false;
+      this.taskActivated = true;
+      this.statusMessage = 'Payment completed successfully!';
+      sessionStorage.removeItem('pendingTask');
+      return;
     }
+
+    this.pollTaskStatus(pendingTaskId);
   }
 
-  private handleError(message: string) {
-    console.error(message);
-    alert(message + '. Please contact support.');
+  private pollTaskStatus(taskId: string) {
+    this.statusMessage = 'Verifying task activation...';
+    
+    this.pollingSubscription = interval(2000).pipe(
+      take(this.maxPollingAttempts)
+    ).subscribe({
+      next: () => {
+        this.currentAttempt++;
+        this.checkTaskStatus(taskId);
+      },
+      complete: () => {
+        if (!this.taskActivated) {
+          this.handlePollingTimeout();
+        }
+      }
+    });
+  }
+
+  private checkTaskStatus(taskId: string) {
+    this.errandsService.getTask(taskId).subscribe({
+      next: (response) => {
+        const task = response.data || response;
+        console.log('Task status check:', task);
+        
+        if (task.paymentStatus === 'COMPLETED' && 
+            (task.taskStatus === 'POSTED' || task.taskStatus === 'VERIFIED' || task.taskStatus === 'AVAILABLE')) {
+          this.taskActivated = true;
+          this.processing = false;
+          this.statusMessage = 'Task activated successfully!';
+          this.pollingSubscription?.unsubscribe();
+          sessionStorage.removeItem('pendingTaskId');
+          sessionStorage.removeItem('pendingTask');
+        } else if (this.currentAttempt >= this.maxPollingAttempts) {
+          this.handlePollingTimeout();
+        } else {
+          this.statusMessage = `Waiting for task activation... (${this.currentAttempt}/${this.maxPollingAttempts})`;
+        }
+      },
+      error: (error) => {
+        console.error('Error checking task status:', error);
+        if (this.currentAttempt >= this.maxPollingAttempts) {
+          this.handlePollingTimeout();
+        }
+      }
+    });
+  }
+
+  private handlePollingTimeout() {
     this.processing = false;
+    this.taskActivated = false;
+    this.statusMessage = 'Payment completed, but task activation is taking longer than expected.';
+    this.pollingSubscription?.unsubscribe();
+    sessionStorage.removeItem('pendingTaskId');
+    sessionStorage.removeItem('pendingTask');
   }
 
   goToDashboard() {
     this.router.navigate(['/user-dashboard']);
+  }
+
+  goToBrowseTasks() {
+    this.router.navigate(['/browse-errands']);
   }
 }

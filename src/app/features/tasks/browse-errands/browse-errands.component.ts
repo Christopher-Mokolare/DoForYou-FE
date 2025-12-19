@@ -55,6 +55,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.checkPaymentStatus();
     this.loadFilterOptions();
     this.loadErrands();
     this.setupAutoRefresh();
@@ -339,5 +340,129 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     this.scrollToTop();
   }
 
+  checkMyTasks(): void {
+    this.errandsService.getUserTasks().subscribe({
+      next: (response) => {
+        const userTasks = response.tasks;
+        if (userTasks.length === 0) {
+          this.modalService.showAlert(
+            'No Tasks Found',
+            'You haven\'t posted any tasks yet.',
+            'info'
+          );
+        } else {
+          const pendingTasks = userTasks.filter(task => task.paymentStatus === 'PENDING');
+          const activeTasks = userTasks.filter(task => task.paymentStatus === 'COMPLETED');
+          
+          let message = `You have ${userTasks.length} task(s) total:\n`;
+          if (activeTasks.length > 0) {
+            message += `• ${activeTasks.length} active task(s)\n`;
+          }
+          if (pendingTasks.length > 0) {
+            message += `• ${pendingTasks.length} pending payment task(s)`;
+          }
+          
+          this.modalService.showAlert(
+            'Your Tasks',
+            message,
+            'info'
+          );
+        }
+      },
+      error: () => {
+        this.modalService.showAlert(
+          'Error',
+          'Could not retrieve your tasks. Please try again.',
+          'error'
+        );
+      }
+    });
+  }
+
+  private checkPaymentStatus(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const taskId = urlParams.get('taskId');
+    
+    if (paymentStatus === 'success') {
+      // Force refresh to show newly posted task
+      this.errandsService.clearCache();
+      
+      if (taskId) {
+        // Check if the specific task is now available
+        setTimeout(() => {
+          this.errandsService.checkTaskAvailability(taskId).subscribe(isAvailable => {
+            if (isAvailable) {
+              this.modalService.showAlert(
+                'Task Posted Successfully!', 
+                'Your task is now live and visible on this page. Look for your task in the list below.',
+                'success'
+              );
+            } else {
+              this.modalService.showAlert(
+                'Payment Completed', 
+                'Your payment was successful. Your task may take a few minutes to appear. Please refresh the page if you don\'t see it shortly.',
+                'info'
+              );
+            }
+          });
+        }, 2000);
+      } else {
+        this.modalService.showAlert(
+          'Payment Successful!', 
+          'Your task has been posted and should be visible shortly. Please refresh the page if you don\'t see it.',
+          'success'
+        );
+      }
+      
+      // Clean up URL
+      window.history.replaceState({}, '', '/browse-errands');
+    } else if (paymentStatus === 'already_active') {
+      this.modalService.showAlert(
+        'Task Already Active', 
+        'Your task is already posted and visible.',
+        'info'
+      );
+      window.history.replaceState({}, '', '/browse-errands');
+    } else if (paymentStatus === 'error') {
+      const pendingTaskId = sessionStorage.getItem('pendingTaskId');
+      if (pendingTaskId) {
+        this.errandsService.getTask(pendingTaskId).subscribe({
+          next: (response) => {
+            const task = response.data || response;
+            if (task && task.paymentStatus === 'COMPLETED') {
+              this.modalService.showAlert(
+                'Task Posted Successfully!', 
+                'Your payment was processed and your task is now live.',
+                'success'
+              );
+            } else {
+              this.modalService.showAlert(
+                'Payment Status Unclear', 
+                'Your payment may have been processed. Please check your dashboard or refresh this page.',
+                'warning'
+              );
+            }
+            sessionStorage.removeItem('pendingTaskId');
+          },
+          error: () => {
+            this.modalService.showAlert(
+              'Payment Status Unclear', 
+              'Please check your dashboard or refresh this page. Contact support if your task doesn\'t appear.',
+              'warning'
+            );
+            sessionStorage.removeItem('pendingTaskId');
+          }
+        });
+      } else {
+        this.modalService.showAlert(
+          'Payment Status Unclear', 
+          'Please check your dashboard or refresh this page.',
+          'warning'
+        );
+      }
+      window.history.replaceState({}, '', '/browse-errands');
+    }
+  }
 
 }

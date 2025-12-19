@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { ModalService } from '../../../services/modal.service';
 import { UserPreferencesService, UserPreferences, BankDetails } from '../../../services/user-preferences.service';
+import { AddressAutocompleteComponent } from '../../../shared/components/address-autocomplete/address-autocomplete.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AddressAutocompleteComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
@@ -54,11 +57,15 @@ export class ProfileComponent implements OnInit {
   };
 
   updating = false;
+  editingPersonal = false;
+  editingBank = false;
+  showIdValidationMessage = false;
 
   constructor(
     private authService: AuthService,
     private modalService: ModalService,
-    private userPreferencesService: UserPreferencesService
+    private userPreferencesService: UserPreferencesService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -107,6 +114,12 @@ export class ProfileComponent implements OnInit {
             branchCode: '',
             accountHolderName: ''
           };
+          
+          // Validate ID number after loading from API without showing messages
+          if (this.profile.idNumber) {
+            this.validateIdNumberSilently();
+          }
+          
           console.log('Profile updated from API:', userData);
         }
       },
@@ -134,7 +147,28 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadStats() {
-    // Set default stats since getUserStats endpoint doesn't exist
+    // Load real stats from backend using HttpClient
+    this.http.get<any>(`${environment.apiUrl}/api/v1/tasks/dashboard/stats`).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.stats = {
+            tasksCreated: response.data.tasksCreated || 0,
+            tasksCompleted: response.data.tasksCompleted || 0,
+            rating: response.data.averageRating || 0,
+            totalEarnings: response.data.totalEarnings || 0
+          };
+        } else {
+          this.setDefaultStats();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error);
+        this.setDefaultStats();
+      }
+    });
+  }
+
+  private setDefaultStats() {
     this.stats = {
       tasksCreated: 0,
       tasksCompleted: 0,
@@ -225,6 +259,8 @@ export class ProfileComponent implements OnInit {
             title: 'Profile Updated',
             message: 'Your profile has been updated successfully.'
           });
+          this.editingPersonal = false;
+          this.showIdValidationMessage = false;
         } else {
           this.modalService.showModal({
             type: 'error',
@@ -271,6 +307,7 @@ export class ProfileComponent implements OnInit {
             title: 'Bank Details Updated',
             message: 'Your bank details have been updated successfully.'
           });
+          this.editingBank = false;
         } else {
           this.modalService.showModal({
             type: 'error',
@@ -291,8 +328,13 @@ export class ProfileComponent implements OnInit {
   }
 
   onUserTypeChange() {
-    this.preferences.canCreateTasks = this.userType === 'creator';
-    this.preferences.canAcceptTasks = this.userType === 'runner';
+    if (this.userType === 'creator') {
+      this.preferences.canCreateTasks = true;
+      this.preferences.canAcceptTasks = false;
+    } else if (this.userType === 'runner') {
+      this.preferences.canCreateTasks = false;
+      this.preferences.canAcceptTasks = true;
+    }
     this.updatePreferences();
   }
 
@@ -327,12 +369,51 @@ export class ProfileComponent implements OnInit {
   }
 
   onIdNumberChange() {
-    if (this.profile.idNumber.length === 13) {
+    this.showIdValidationMessage = true;
+    this.validateIdNumberSilently();
+  }
+
+  private validateIdNumberSilently() {
+    if (this.profile.idNumber && this.profile.idNumber.length === 13) {
+      const isValid = this.validateSouthAfricanId(this.profile.idNumber);
+      if (isValid) {
+        this.verificationStatus.idNumberVerified = true;
+      } else {
+        this.verificationStatus.idNumberVerified = false;
+      }
+      // Extract date regardless of validation for display purposes
       const dateOfBirth = this.extractDateFromIdNumber(this.profile.idNumber);
       if (dateOfBirth) {
         this.profile.dateOfBirth = dateOfBirth;
       }
+    } else if (this.profile.idNumber && this.profile.idNumber.length > 0 && this.profile.idNumber.length < 13) {
+      this.verificationStatus.idNumberVerified = false;
+    } else {
+      // Empty or null ID number - don't show as invalid
+      this.verificationStatus.idNumberVerified = false;
     }
+  }
+
+  private validateSouthAfricanId(idNumber: string): boolean {
+    if (idNumber.length !== 13 || !/^\d{13}$/.test(idNumber)) {
+      return false;
+    }
+    
+    // Luhn algorithm check
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      let digit = parseInt(idNumber[i]);
+      if (i % 2 === 1) {
+        digit *= 2;
+        if (digit > 9) {
+          digit = Math.floor(digit / 10) + (digit % 10);
+        }
+      }
+      sum += digit;
+    }
+    
+    const checkDigit = (10 - (sum % 10)) % 10;
+    return checkDigit === parseInt(idNumber[12]);
   }
 
   private extractDateFromIdNumber(idNumber: string): string {
@@ -362,6 +443,11 @@ export class ProfileComponent implements OnInit {
     };
   }
 
+  onAddressSelected(address: string) {
+    this.profile.address = address;
+    this.validateAddress();
+  }
+
   validateAddress() {
     this.addressError = '';
     if (!this.profile.address) return;
@@ -384,5 +470,13 @@ export class ProfileComponent implements OnInit {
       this.addressError = 'Please include a valid 4-digit postal code.';
       return;
     }
+  }
+
+  toggleEditPersonal() {
+    this.editingPersonal = !this.editingPersonal;
+  }
+
+  toggleEditBank() {
+    this.editingBank = !this.editingBank;
   }
 }
