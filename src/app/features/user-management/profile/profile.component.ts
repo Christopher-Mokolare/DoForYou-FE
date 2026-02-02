@@ -44,7 +44,7 @@ export class ProfileComponent implements OnInit {
     smsNotifications: false
   };
 
-  userType: 'creator' | 'runner' = 'creator';
+  userType: 'creator' | 'runner' | 'both' = 'creator';
 
   stats = {
     tasksCreated: 0,
@@ -107,7 +107,16 @@ export class ProfileComponent implements OnInit {
             branchCode: '',
             accountHolderName: ''
           };
+          
+          // Set userType from API response
+          this.userType = userData.userType || 'creator';
+          
+          // Update localStorage with fresh profile data
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          this.authService.refreshCurrentUser();
+          
           console.log('Profile updated from API:', userData);
+          console.log('UserType set to:', this.userType);
         }
       },
       error: (error) => {
@@ -120,14 +129,15 @@ export class ProfileComponent implements OnInit {
     this.userPreferencesService.getPreferences().subscribe({
       next: (response: UserPreferences) => {
         this.preferences = response;
-        this.userType = response.canCreateTasks ? 'creator' : 'runner';
+        // Don't override userType here - it's already set from API profile response
+        console.log('Preferences loaded:', response);
+        console.log('Current userType:', this.userType);
       },
       error: (error) => {
         console.error('Error loading preferences:', error);
         const saved = localStorage.getItem('userPreferences');
         if (saved) {
           this.preferences = { ...this.preferences, ...JSON.parse(saved) };
-          this.userType = this.preferences.canCreateTasks ? 'creator' : 'runner';
         }
       }
     });
@@ -291,8 +301,16 @@ export class ProfileComponent implements OnInit {
   }
 
   onUserTypeChange() {
-    this.preferences.canCreateTasks = this.userType === 'creator';
-    this.preferences.canAcceptTasks = this.userType === 'runner';
+    if (this.userType === 'creator') {
+      this.preferences.canCreateTasks = true;
+      this.preferences.canAcceptTasks = false;
+    } else if (this.userType === 'runner') {
+      this.preferences.canCreateTasks = false;
+      this.preferences.canAcceptTasks = true;
+    } else if (this.userType === 'both') {
+      this.preferences.canCreateTasks = true;
+      this.preferences.canAcceptTasks = true;
+    }
     this.updatePreferences();
   }
 

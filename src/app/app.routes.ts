@@ -6,6 +6,7 @@ import { TermsComponent } from './pages/terms/terms.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { AdminLayoutComponent } from './admin/admin-layout/admin-layout.component';
+import { WalletComponent } from './components/wallet/wallet.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { ProfileCompletionGuard } from './guards/profile-completion.guard';
@@ -21,6 +22,9 @@ export const routes: Routes = [
   // Auth Routes
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  
+  // Wallet Route
+  { path: 'wallet', component: WalletComponent, canActivate: [authGuard] },
   
   // Feature Routes (Lazy Loaded)
   {

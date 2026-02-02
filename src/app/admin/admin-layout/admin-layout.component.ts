@@ -67,13 +67,6 @@ import { AuthService } from '../../services/auth.service';
           <button class="btn btn-link sidebar-toggle d-lg-none" (click)="toggleSidebar()">
             <i class="fas fa-bars"></i>
           </button>
-          
-          <div class="header-actions">
-            <button class="btn btn-outline-primary btn-sm" routerLink="/">
-              <i class="fas fa-home"></i>
-              View Site
-            </button>
-          </div>
         </header>
 
         <!-- Page Content -->
@@ -96,9 +89,11 @@ import { AuthService } from '../../services/auth.service';
       display: flex;
       flex-direction: column;
       position: fixed;
-      height: 100vh;
+      height: calc(100vh - 80px);
       overflow-y: auto;
-      z-index: 1000;
+      z-index: 999;
+      left: 0;
+      top: 80px;
     }
 
     .sidebar-header {
@@ -181,17 +176,11 @@ import { AuthService } from '../../services/auth.service';
     .admin-header {
       background: white;
       border-bottom: 1px solid #eee;
-      padding: 1rem 2rem;
+      padding: .5rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
     }
 
     .admin-content {
@@ -205,14 +194,57 @@ import { AuthService } from '../../services/auth.service';
       font-size: 1.2rem;
     }
 
+    @media (min-width: 992px) {
+      .admin-sidebar {
+        transform: translateX(0) !important;
+        position: fixed;
+        left: 0;
+        top: 80px;
+        height: calc(100vh - 80px);
+      }
+    }
+
     @media (max-width: 991.98px) {
       .admin-sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
       }
 
+      .admin-sidebar.show {
+        transform: translateX(0);
+      }
+
       .admin-main {
         margin-left: 0;
+      }
+
+      .admin-header {
+        padding: 1rem;
+      }
+
+      .admin-content {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .sidebar-header h4 {
+        font-size: 1.1rem;
+      }
+
+      .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .user-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+
+      .sidebar-footer {
+        padding: 1rem;
       }
     }
   `]
@@ -220,6 +252,7 @@ import { AuthService } from '../../services/auth.service';
 export class AdminLayoutComponent {
   currentUser: any = null;
   pendingCount = 0;
+  sidebarOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -231,7 +264,11 @@ export class AdminLayoutComponent {
   }
 
   toggleSidebar() {
-    // Toggle sidebar on mobile
+    this.sidebarOpen = !this.sidebarOpen;
+    const sidebar = document.querySelector('.admin-sidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('show', this.sidebarOpen);
+    }
   }
 
   logout() {

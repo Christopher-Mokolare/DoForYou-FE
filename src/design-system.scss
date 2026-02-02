@@ -1,0 +1,195 @@
+/* Global Design System - DoForYou Frontend */
+
+/* Page Layout */
+.page-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+  
+  .page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: 12px;
+    
+    .stat-badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      
+      &.total { background-color: #e3f2fd; color: #1976d2; }
+      &.verified, &.success { background-color: #e8f5e8; color: #2e7d32; }
+      &.unverified, &.warning { background-color: #fff3e0; color: #f57c00; }
+      &.error { background-color: #ffebee; color: #c62828; }
+    }
+  }
+  
+  .header-actions {
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+    }
+  }
+}
+
+/* Filters Section */
+.filters-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  
+  .filters-grid {
+    display: grid;
+    gap: 16px;
+    align-items: end;
+    
+    &.grid-2 { grid-template-columns: 200px 1fr; }
+    &.grid-3 { grid-template-columns: 200px 200px 1fr; }
+    &.grid-4 { grid-template-columns: 180px 180px 150px 1fr; }
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr !important;
+      gap: 12px;
+    }
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    
+    .filter-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6c757d;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .filter-select,
+    .filter-input {
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      font-size: 13px;
+      background: white;
+      
+      &:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+    }
+  }
+  
+  .search-group .filter-input {
+    width: 100%;
+  }
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-start;
+  
+  .btn-xs {
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.2;
+    border-radius: 3px;
+    min-width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    i {
+      font-size: 10px;
+    }
+  }
+  
+  .loading-indicator {
+    margin-left: 4px;
+    color: #007bff;
+    font-size: 10px;
+  }
+}
+
+/* Badges */
+.badge {
+  font-size: 10px;
+  padding: 3px 6px;
+  
+  &.bg-admin { background-color: #dc3545 !important; }
+  &.bg-user { background-color: #0d6efd !important; }
+  &.bg-helper { background-color: #198754 !important; }
+  &.bg-pending { background-color: #ffc107 !important; }
+  &.bg-verified { background-color: #198754 !important; }
+  &.bg-failed { background-color: #dc3545 !important; }
+  &.bg-draft { background-color: #6c757d !important; }
+  &.bg-posted { background-color: #0d6efd !important; }
+  &.bg-claimed { background-color: #fd7e14 !important; }
+  &.bg-completed { background-color: #198754 !important; }
+}
+
+/* Tables */
+.data-table .table {
+  td {
+    padding: 8px 12px;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  
+  th {
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #dee2e6;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .data-table .table td {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

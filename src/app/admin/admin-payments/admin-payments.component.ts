@@ -10,146 +10,157 @@ declare var Chart: any;
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="admin-payments">
+    <div class="page-container">
       <div class="page-header">
-        <h1>Payment Overview</h1>
-        <p class="text-muted">Monitor platform revenue and payouts</p>
+        <h1 class="page-title">Payment Overview</h1>
+        <div class="header-stats">
+          <span class="stat-badge success">Revenue: R{{paymentsData?.totalCommission | number:'1.2-2'}}</span>
+          <span class="stat-badge warning">Pending: R{{paymentsData?.pendingCommission | number:'1.2-2'}}</span>
+        </div>
       </div>
 
       <!-- Financial Stats -->
-      <div class="stats-grid" *ngIf="paymentsData">
-        <div class="stat-card revenue">
-          <div class="stat-icon">
-            <i class="fas fa-dollar-sign"></i>
-          </div>
-          <div class="stat-content">
-            <h3>R{{paymentsData.totalCommission | number:'1.2-2'}}</h3>
-            <p>Total Revenue (15%)</p>
-            <small class="text-success">Platform commission earned</small>
-          </div>
-        </div>
-
-        <div class="stat-card pending">
-          <div class="stat-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <div class="stat-content">
-            <h3>R{{paymentsData.pendingCommission | number:'1.2-2'}}</h3>
-            <p>Pending Revenue</p>
-            <small class="text-warning">Awaiting payment verification</small>
+      <div class="row mb-4" *ngIf="paymentsData">
+        <div class="col-xl-3 col-md-6 mb-3">
+          <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted text-uppercase small mb-1">Platform Revenue</div>
+                <div class="h4 mb-0 text-success">R{{paymentsData.totalCommission | number:'1.2-2'}}</div>
+                <small class="text-muted">15% Commission</small>
+              </div>
+              <i class="fas fa-dollar-sign fa-2x text-muted opacity-50"></i>
+            </div>
           </div>
         </div>
-
-        <div class="stat-card payouts">
-          <div class="stat-icon">
-            <i class="fas fa-hand-holding-usd"></i>
-          </div>
-          <div class="stat-content">
-            <h3>R{{paymentsData.runnerPayouts | number:'1.2-2'}}</h3>
-            <p>Runner Payouts (85%)</p>
-            <small class="text-info">Total paid to helpers</small>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+          <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted text-uppercase small mb-1">Pending Revenue</div>
+                <div class="h4 mb-0 text-warning">R{{paymentsData.pendingCommission | number:'1.2-2'}}</div>
+                <small class="text-muted">Awaiting verification</small>
+              </div>
+              <i class="fas fa-clock fa-2x text-muted opacity-50"></i>
+            </div>
           </div>
         </div>
-
-        <div class="stat-card pending-payouts">
-          <div class="stat-icon">
-            <i class="fas fa-exclamation-triangle"></i>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+          <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted text-uppercase small mb-1">Helper Payouts</div>
+                <div class="h4 mb-0 text-info">R{{paymentsData.runnerPayouts | number:'1.2-2'}}</div>
+                <small class="text-muted">85% to helpers</small>
+              </div>
+              <i class="fas fa-hand-holding-usd fa-2x text-muted opacity-50"></i>
+            </div>
           </div>
-          <div class="stat-content">
-            <h3>{{paymentsData.pendingPayouts}}</h3>
-            <p>Pending Payouts</p>
-            <small class="text-danger">Tasks awaiting runner payment</small>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+          <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted text-uppercase small mb-1">Pending Payouts</div>
+                <div class="h4 mb-0 text-danger">{{paymentsData.pendingPayouts}}</div>
+                <small class="text-muted">Tasks awaiting payment</small>
+              </div>
+              <i class="fas fa-exclamation-triangle fa-2x text-muted opacity-50"></i>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Payment Breakdown -->
-      <div class="row">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-header">
-              <h5>Revenue Breakdown</h5>
-            </div>
-            <div class="card-body">
-              <div class="revenue-chart">
-                <canvas #revenueChart width="400" height="200"></canvas>
-              </div>
-            </div>
+      <!-- Quick Actions -->
+      <div class="content-card mb-4">
+        <h5 class="mb-3">Quick Actions</h5>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <a class="btn btn-warning w-100" routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
+              <i class="fas fa-check-circle me-2"></i>
+              <span class="d-none d-lg-inline">Verify Payments</span>
+              <span class="d-lg-none">Verify</span>
+            </a>
+          </div>
+          <div class="col-md-3 mb-3">
+            <a class="btn btn-success w-100" routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
+              <i class="fas fa-money-bill-wave me-2"></i>
+              <span class="d-none d-lg-inline">Process Payouts</span>
+              <span class="d-lg-none">Payouts</span>
+            </a>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-info w-100" (click)="exportPaymentReport()">
+              <i class="fas fa-download me-2"></i>
+              <span class="d-none d-lg-inline">Export Report</span>
+              <span class="d-lg-none">Export</span>
+            </button>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-primary w-100" (click)="refreshData()">
+              <i class="fas fa-sync-alt me-2"></i>
+              <span class="d-none d-lg-inline">Refresh Data</span>
+              <span class="d-lg-none">Refresh</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-header">
-              <h5>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-              <div class="quick-actions">
-                <a class="btn btn-primary btn-sm w-100 mb-2" 
-                   routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
-                  <i class="fas fa-check-circle"></i>
-                  Verify Pending Payments
-                </a>
-                <a class="btn btn-success btn-sm w-100 mb-2"
-                   routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
-                  <i class="fas fa-money-bill-wave"></i>
-                  Process Runner Payouts
-                </a>
-                <button class="btn btn-info btn-sm w-100 mb-2" (click)="exportPaymentReport()">
-                  <i class="fas fa-download"></i>
-                  Export Payment Report
-                </button>
-                <button class="btn btn-warning btn-sm w-100" (click)="refreshData()">
-                  <i class="fas fa-sync-alt"></i>
-                  Refresh Data
-                </button>
+      <!-- Payment Flow -->
+      <div class="content-card">
+        <h5 class="mb-4">Payment Flow</h5>
+        <div class="row">
+          <div class="col-md-3 mb-4">
+            <div class="text-center">
+              <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <span class="fw-bold">1</span>
               </div>
+              <h6 class="mt-3">User Payment</h6>
+              <p class="small text-muted">Customer pays upfront</p>
             </div>
           </div>
-
-          <!-- Payment Status Legend -->
-          <div class="card mt-3">
-            <div class="card-header">
-              <h6>Payment Flow</h6>
-            </div>
-            <div class="card-body">
-              <div class="payment-flow">
-                <div class="flow-step">
-                  <div class="step-number">1</div>
-                  <div class="step-content">
-                    <strong>User Payment</strong>
-                    <small>Customer pays upfront</small>
-                  </div>
-                </div>
-                <div class="flow-arrow">↓</div>
-                <div class="flow-step">
-                  <div class="step-number">2</div>
-                  <div class="step-content">
-                    <strong>Auto Verification</strong>
-                    <small>PayFast ITN confirms payment</small>
-                  </div>
-                </div>
-                <div class="flow-arrow">↓</div>
-                <div class="flow-step">
-                  <div class="step-number">3</div>
-                  <div class="step-content">
-                    <strong>Task Completion</strong>
-                    <small>Helper completes task</small>
-                  </div>
-                </div>
-                <div class="flow-arrow">↓</div>
-                <div class="flow-step">
-                  <div class="step-number">4</div>
-                  <div class="step-content">
-                    <strong>Auto Payout</strong>
-                    <small>85% to helper, 15% commission (1hr delay)</small>
-                  </div>
-                </div>
+          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
+            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          </div>
+          <div class="col-md-3 mb-4">
+            <div class="text-center">
+              <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <span class="fw-bold">2</span>
               </div>
+              <h6 class="mt-3">Auto Verification</h6>
+              <p class="small text-muted">PayFast ITN confirms payment</p>
+            </div>
+          </div>
+          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
+            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          </div>
+          <div class="col-md-3 mb-4">
+            <div class="text-center">
+              <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <span class="fw-bold">3</span>
+              </div>
+              <h6 class="mt-3">Task Completion</h6>
+              <p class="small text-muted">Helper completes task</p>
+            </div>
+          </div>
+          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
+            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          </div>
+          <div class="col-md-3 mb-4">
+            <div class="text-center">
+              <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <span class="fw-bold">4</span>
+              </div>
+              <h6 class="mt-3">Auto Payout</h6>
+              <p class="small text-muted">85% to helper, 15% commission (1hr delay)</p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   `,
   styles: [`

@@ -22,7 +22,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = `${environment.apiUrl}/api/v1/categories`;
+  private apiUrl = `${environment.apiUrl}/categories`;
   private http = inject(HttpClient);
 
   getCategories(): Observable<ApiResponse<Category[]>> {

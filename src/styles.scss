@@ -1,6 +1,9 @@
 // styles.scss - Global styles
 @use "sass:color";
 
+// Import design system
+@import 'design-system.scss';
+
 // Variables
 :root {
   --primary: #FF6B35;

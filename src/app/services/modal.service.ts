@@ -28,7 +28,7 @@ export class ModalService {
     });
   }
 
-  showConfirm(title: string, message: string, onConfirm: () => void, onCancel?: () => void, confirmText = 'Login', cancelText = 'Register') {
+  showConfirm(title: string, message: string, onConfirm: () => void, onCancel?: () => void, confirmText = 'Yes', cancelText = 'Cancel') {
     this.modalSubject.next({
       id: 'confirm-modal',
       title,

@@ -56,16 +56,39 @@ export class AdminTasksComponent implements OnInit {
       pageSize: this.pagination.pageSize
     };
 
+    console.log('Loading tasks with query:', query);
+
     this.adminService.getTasks(query).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.tasks = response.data || [];
-          this.pagination = response.pagination || this.pagination;
+        console.log('Raw API response:', response);
+        
+        // Handle both old and new response formats
+        if (Array.isArray(response)) {
+          // Old format: direct array
+          this.tasks = response;
+          this.pagination = {
+            page: 1,
+            pageSize: 20,
+            totalCount: response.length,
+            totalPages: 1
+          };
+        } else {
+          // New format: object with tasks property
+          this.tasks = response.tasks || [];
+          this.pagination = {
+            page: response.page || 1,
+            pageSize: response.pageSize || 20,
+            totalCount: response.totalCount || 0,
+            totalPages: response.totalPages || 0
+          };
         }
+        
+        console.log('Processed tasks:', this.tasks);
+        console.log('Pagination:', this.pagination);
         this.loading = false;
       },
       error: (error) => {
-        console.error('Failed to load tasks');
+        console.error('Failed to load tasks:', error);
         this.loading = false;
       }
     });
@@ -104,7 +127,7 @@ export class AdminTasksComponent implements OnInit {
 
   toggleSelectAll(event: any) {
     if (event.target.checked) {
-      this.selectedTasks = this.tasks.map(task => task.taskId);
+      this.selectedTasks = this.tasks.map(task => task.TaskId || task.id?.toString());
     } else {
       this.selectedTasks = [];
     }
@@ -176,19 +199,28 @@ export class AdminTasksComponent implements OnInit {
 
   getPaymentStatusClass(status: string): string {
     const classes: { [key: string]: string } = {
-      'pending': 'bg-pending',
-      'verified': 'bg-verified',
-      'failed': 'bg-failed'
+      'Pending': 'bg-warning',
+      'pending': 'bg-warning',
+      'Completed': 'bg-success',
+      'completed': 'bg-success',
+      'Failed': 'bg-danger',
+      'failed': 'bg-danger'
     };
     return classes[status] || 'bg-secondary';
   }
 
   getTaskStatusClass(status: string): string {
     const classes: { [key: string]: string } = {
-      'draft': 'bg-draft',
-      'posted': 'bg-posted',
-      'claimed': 'bg-claimed',
-      'completed': 'bg-completed'
+      'PendingPayment': 'bg-warning',
+      'pendingpayment': 'bg-warning',
+      'Posted': 'bg-info',
+      'posted': 'bg-info',
+      'Claimed': 'bg-primary',
+      'claimed': 'bg-primary',
+      'Completed': 'bg-success',
+      'completed': 'bg-success',
+      'Cancelled': 'bg-danger',
+      'cancelled': 'bg-danger'
     };
     return classes[status] || 'bg-secondary';
   }

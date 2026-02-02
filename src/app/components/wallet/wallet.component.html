@@ -1,0 +1,79 @@
+<div class="wallet-container">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="wallet-card text-center">
+          <h2 class="wallet-title">My Wallet</h2>
+          <div class="balance-display">
+            <div class="balance-amount">R{{ balance | number:'1.2-2' }}</div>
+            <div class="balance-label">Available Balance</div>
+          </div>
+          <div class="wallet-actions mt-4">
+            <button 
+              class="btn btn-primary btn-lg w-100" 
+              (click)="showWithdrawModal()"
+              [disabled]="balance < 50">
+              Withdraw Funds
+            </button>
+            <p class="text-muted mt-2 small" *ngIf="balance < 50">
+              Minimum withdrawal amount is R50
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Withdrawal Modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Withdraw Funds</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="withdrawFunds()">
+          <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <input 
+              type="number" 
+              class="form-control" 
+              [(ngModel)]="withdrawAmount"
+              name="amount"
+              min="50" 
+              [max]="balance"
+              required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Bank Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [(ngModel)]="bankName"
+              name="bankName"
+              required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Account Number</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [(ngModel)]="bankAccount"
+              name="bankAccount"
+              required>
+          </div>
+          <div class="d-grid">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="withdrawing">
+              {{ withdrawing ? 'Processing...' : 'Withdraw' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

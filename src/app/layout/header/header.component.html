@@ -58,6 +58,7 @@
                 <li *ngIf="canShowPostErrand() && !authService.isProfileIncomplete()"><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
                 <li *ngIf="canShowPostErrand() && authService.isProfileIncomplete()"><a class="dropdown-item text-muted" routerLink="/profile" title="Complete your profile to post tasks">Complete Profile to Post Tasks</a></li>
                 <li><a class="dropdown-item" routerLink="/profile">My Profile</a></li>
+                <li><a class="dropdown-item" routerLink="/wallet">Wallet</a></li>
                 <li><a class="dropdown-item" routerLink="/notifications">Notifications</a></li>
                 <li><hr class="dropdown-divider"></li>
               </div>

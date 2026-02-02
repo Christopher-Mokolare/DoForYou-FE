@@ -15,6 +15,7 @@ export const TASKS_ROUTES: Routes = [
   { path: 'tracking', component: TaskTrackingComponent, canActivate: [authGuard] },
   { path: 'my-active', component: MyActiveTasksComponent, canActivate: [authGuard] },
   { path: 'my-posted', component: MyPostedTasksComponent, canActivate: [authGuard] },
+  { path: 'payment-success', redirectTo: '/payments/success', pathMatch: 'full' },
   { path: ':id/detail', component: TaskDetailComponent, canActivate: [authGuard] },
   { path: ':id', component: TaskDetailsComponent },
   { path: '', redirectTo: 'browse', pathMatch: 'full' }

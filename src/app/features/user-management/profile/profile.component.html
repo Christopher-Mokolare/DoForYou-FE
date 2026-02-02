@@ -1,9 +1,5 @@
 <div class="profile">
   <h2>My Profile</h2>
-  <div class="profile-status" *ngIf="!isProfileComplete()">
-    <i class="fas fa-exclamation-triangle"></i>
-    <span>Please complete your profile to access all features</span>
-  </div>
   
   <div class="profile-sections">
     <div class="profile-card">
@@ -92,6 +88,24 @@
                   <li>Browse available tasks</li>
                   <li>Earn money by completing tasks</li>
                   <li>Build your reputation</li>
+                </ul>
+              </div>
+            </div>
+          </label>
+
+          <label class="user-type-option" [class.active]="userType === 'both'">
+            <input type="radio" name="userType" value="both" [(ngModel)]="userType" (ngModelChange)="onUserTypeChange()">
+            <div class="option-content">
+              <div class="option-icon both">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="option-details">
+                <h4>Both Creator & Runner</h4>
+                <p>Full access to post and complete tasks</p>
+                <ul>
+                  <li>Post unlimited tasks</li>
+                  <li>Complete tasks for others</li>
+                  <li>Maximum earning potential</li>
                 </ul>
               </div>
             </div>

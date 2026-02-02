@@ -23,35 +23,25 @@ export class PaymentSuccessComponent implements OnInit {
   }
 
   private createTaskAfterPayment() {
-    const pendingTaskData = sessionStorage.getItem('pendingTask');
+    const timeout = setTimeout(() => {
+      this.handleError('Payment confirmation timed out. Please contact support.');
+    }, 10000);
     
-    if (pendingTaskData) {
-      const taskData = JSON.parse(pendingTaskData);
-      
-      // Add 10 second timeout
-      const timeout = setTimeout(() => {
-        this.handleError('Task creation timed out. Please contact support.');
-      }, 10000);
-      
-      this.errandsService.createTask(taskData).subscribe({
-        next: (response) => {
-          clearTimeout(timeout);
-          if (response.success) {
-            sessionStorage.removeItem('pendingTask');
-            this.processing = false;
-          } else {
-            this.handleError('Failed to create task after payment');
-          }
-        },
-        error: (error) => {
-          clearTimeout(timeout);
-          console.error('Task creation error:', error);
-          this.handleError('Error creating task after payment');
+    this.errandsService.handlePaymentSuccess().subscribe({
+      next: (response) => {
+        clearTimeout(timeout);
+        if (response.success) {
+          this.processing = false;
+        } else {
+          this.handleError('Failed to confirm payment');
         }
-      });
-    } else {
-      this.handleError('No pending task data found');
-    }
+      },
+      error: (error) => {
+        clearTimeout(timeout);
+        console.error('Payment confirmation error:', error);
+        this.handleError('Error confirming payment');
+      }
+    });
   }
 
   private handleError(message: string) {

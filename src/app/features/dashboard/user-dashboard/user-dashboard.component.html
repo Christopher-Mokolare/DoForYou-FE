@@ -240,6 +240,51 @@
     <div class="container">
 
 
+      <!-- Payment History Modal -->
+      <div class="modal fade" id="paymentHistoryModal" tabindex="-1" aria-labelledby="paymentHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="paymentHistoryModalLabel">
+                <i class="fas fa-receipt me-2"></i>Payment History
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div *ngIf="paymentHistory.length > 0">
+                <div *ngFor="let payment of paymentHistory" class="payment-item border-bottom pb-3 mb-3">
+                  <div class="row align-items-center">
+                    <div class="col-8">
+                      <h6 class="mb-1">{{payment.taskDescription | slice:0:60}}{{payment.taskDescription.length > 60 ? '...' : ''}}</h6>
+                      <div class="d-flex align-items-center text-muted small">
+                        <i class="fas fa-tag me-1"></i>
+                        <span class="me-3">{{payment.category}}</span>
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        <span>{{payment.area}}</span>
+                      </div>
+                    </div>
+                    <div class="col-4 text-end">
+                      <h5 class="text-success mb-0">R{{payment.amount | number:'1.0-0'}}</h5>
+                      <small class="text-muted">{{payment.paymentDate | date:'MMM d, yyyy'}}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="paymentHistory.length === 0" class="text-center py-5">
+                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">No Payment History</h6>
+                <p class="text-muted mb-0">You haven't made any payments yet.</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i>Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Activity Section -->
       <div class="activity-section" *ngIf="recentActivity.length > 0">
         <h2><i class="fas fa-history me-2"></i>Recent Activity</h2>
@@ -249,10 +294,10 @@
               <i [class]="getActivityIcon(activity.type)"></i>
             </div>
             <div class="activity-content">
-              <p class="activity-message">{{ activity.message }}</p>
+              <p class="activity-message">{{ activity.description || activity.message }}</p>
               <div class="activity-meta">
                 <span class="activity-time">{{ activity.timestamp | date:'MMM d, HH:mm' }}</span>
-                <span class="activity-amount">R{{ activity.amount }}</span>
+                <span class="activity-amount" *ngIf="activity.amount">R{{ activity.amount }}</span>
               </div>
             </div>
           </div>
@@ -297,9 +342,9 @@
           <a routerLink="/tasks/my-posted" class="btn btn-outline-primary">
             <i class="fas fa-list"></i> View My Posted Tasks
           </a>
-          <a routerLink="/profile" class="btn btn-outline-secondary">
-            <i class="fas fa-receipt"></i> Payment History
-          </a>
+          <button (click)="loadPaymentHistory()" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#paymentHistoryModal">
+            <i class="fas fa-receipt"></i> View Payment History
+          </button>
           <button (click)="cleanupOrphanedTasks()" class="btn btn-outline-secondary" [disabled]="cleanupInProgress">
             <i class="fas fa-broom" [class.fa-spin]="cleanupInProgress"></i> 
             {{ cleanupInProgress ? 'Cleaning...' : 'Cleanup Old Tasks' }}

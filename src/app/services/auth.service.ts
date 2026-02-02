@@ -8,7 +8,7 @@ import { LoginModel, RegisterModel, AuthResponse, User, ChangePasswordModel } fr
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/api/v1/auth`;
+  private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private http = inject(HttpClient);
@@ -88,9 +88,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   }
 
   getToken(): string | null {
-    const token = localStorage.getItem('token');
-    console.log('Retrieving token from storage:', !!token);
-    return token;
+    return localStorage.getItem('token');
   }
 
   isAuthenticated(): boolean {
@@ -99,9 +97,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const isValid = payload.exp > Date.now() / 1000;
-      console.log('Token validation completed');
-      return isValid;
+      return payload.exp > Date.now() / 1000;
     } catch {
       return false;
     }
@@ -203,12 +199,17 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     const user = this.getCurrentUser();
     if (!user) return false;
     
-    const preferences = this.getUserPreferences();
-    const hasBasicInfo = user.name && user.email && user.contact;
-    const hasUserType = preferences && (preferences.canCreateTasks || preferences.canAcceptTasks);
-    const hasNewFields = user.firstName && user.lastName; // Check for new required fields
+    // Use the profileCompleted flag from the API response if available
+    if (typeof (user as any).profileCompleted === 'boolean') {
+      return (user as any).profileCompleted;
+    }
     
-    return hasBasicInfo && hasUserType && hasNewFields;
+    // Fallback to checking required fields
+    const hasBasicInfo = user.firstName && user.lastName && user.email && user.contact;
+    const hasUserType = user.userType;
+    const hasRequiredFields = (user as any).idNumber && (user as any).address;
+    
+    return !!(hasBasicInfo && hasUserType && hasRequiredFields);
   }
 
   needsProfileUpdate(): boolean {
@@ -224,19 +225,19 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   isProfileIncomplete(): boolean {
     const user = this.getCurrentUser();
-    if (!user) return false;
+    if (!user) return true;
     
-    const userType = (user as any)?.userType;
-    const profileCompletion = (user as any).profileCompletion || 0;
-    
-    // For runners, require higher completion (need ID, address, bank details)
-    if (userType === 'runner') {
-      const hasRequiredFields = !!(user as any).idNumber && !!(user as any).address;
-      return profileCompletion < 80 || !hasRequiredFields;
+    // Use the profileCompleted flag from the API response if available
+    if (typeof (user as any).profileCompleted === 'boolean') {
+      return !(user as any).profileCompleted;
     }
     
-    // For creators, standard completion check
-    return profileCompletion < 80;
+    // Fallback to checking required fields
+    const hasBasicInfo = user.firstName && user.lastName && user.email && user.contact;
+    const hasUserType = user.userType;
+    const hasRequiredFields = (user as any).idNumber && (user as any).address;
+    
+    return !(hasBasicInfo && hasUserType && hasRequiredFields);
   }
 
   getProfileCompletion(): number {
@@ -247,38 +248,32 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   }
 
   updateProfile(profileData: any): Observable<any> {
-    return this.http.put(`${environment.apiUrl}/api/v1/user/profile`, profileData);
+    return this.http.put(`${environment.apiUrl}/user/profile`, profileData);
   }
 
   getProfile(): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/api/v1/user/profile`);
+    return this.http.get(`${environment.apiUrl}/user/profile`);
   }
 
 
 
   verifyEmail(): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/api/v1/user/send-verification-email`, {});
+    return this.http.post(`${environment.apiUrl}/user/send-verification-email`, {});
   }
 
   verifyPhone(): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/api/v1/user/verify-phone`, {});
+    return this.http.post(`${environment.apiUrl}/user/verify-phone`, {});
   }
 
-  // Helper method to check token validity with detailed logging
+  // Helper method to check token validity
   isTokenValid(): boolean {
     const token = this.getToken();
-    if (!token) {
-      console.log('No token found');
-      return false;
-    }
+    if (!token) return false;
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const isExpired = payload.exp < (Date.now() / 1000);
-      console.log('Token validation completed');
-      return !isExpired;
-    } catch (error) {
-      console.error('Error parsing token:', error);
+      return payload.exp > (Date.now() / 1000);
+    } catch {
       return false;
     }
   }

@@ -25,7 +25,9 @@ export class AdminUsersComponent implements OnInit {
     page: 1,
     pageSize: 20,
     totalCount: 0,
-    totalPages: 0
+    totalPages: 0,
+    verifiedCount: 0,
+    unverifiedCount: 0
   };
 
   constructor(private adminService: AdminService) {}
@@ -35,32 +37,50 @@ export class AdminUsersComponent implements OnInit {
   }
 
   get verifiedCount(): number {
-    return this.users.filter(u => u.isVerified).length;
+    return this.pagination.verifiedCount;
   }
 
   get unverifiedCount(): number {
-    return this.users.filter(u => !u.isVerified).length;
+    return this.pagination.unverifiedCount;
   }
 
   loadUsers() {
     this.loading = true;
-    const query = {
-      ...this.filters,
+    const query: any = {
+      role: this.filters.role || undefined,
+      search: this.filters.search || undefined,
       page: this.pagination.page,
-      pageSize: this.pagination.pageSize,
-      isVerified: this.filters.isVerified === '' ? undefined : this.filters.isVerified === 'true'
+      pageSize: this.pagination.pageSize
     };
+
+    // Only add isVerified if it has a valid value
+    if (this.filters.isVerified !== '') {
+      query.isVerified = this.filters.isVerified === 'true';
+    }
+
+    // Remove undefined values
+    Object.keys(query).forEach(key => {
+      if (query[key] === undefined || query[key] === '') {
+        delete query[key];
+      }
+    });
 
     this.adminService.getUsers(query).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.users = response.data;
-          this.pagination = response.pagination;
-        }
+        // Backend returns data directly, not wrapped in success object
+        this.users = response.users || [];
+        this.pagination = {
+          page: response.page || 1,
+          pageSize: response.pageSize || 20,
+          totalCount: response.totalCount || 0,
+          totalPages: response.totalPages || 0,
+          verifiedCount: response.verifiedCount || 0,
+          unverifiedCount: response.unverifiedCount || 0
+        };
         this.loading = false;
       },
-      error: () => {
-        console.error('Failed to load users');
+      error: (error) => {
+        console.error('Failed to load users:', error);
         this.loading = false;
       }
     });

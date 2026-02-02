@@ -77,7 +77,7 @@ export class ErrandsService {
 
   // Create a new task (requires authentication)
   createTask(taskData: CreateTaskData): Observable<CreateTaskResponse> {
-    const url = `${this.apiBaseUrl}/api/v1/tasks`;
+    const url = `${this.apiBaseUrl}/tasks`;
     
     console.log('Creating task');
     
@@ -102,7 +102,7 @@ export class ErrandsService {
       return of(cachedData);
     }
 
-    const url = `${this.apiBaseUrl}/api/v1/tasks/available`;
+    const url = `${this.apiBaseUrl}/tasks/available`;
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
@@ -127,7 +127,7 @@ export class ErrandsService {
 
   // Get user's own tasks (requires authentication)
   getUserTasks(): Observable<PaginatedResponse> {
-    const url = `${this.apiBaseUrl}/api/v1/tasks`;
+    const url = `${this.apiBaseUrl}/tasks`;
     console.log('Getting user tasks');
     
     return this.http.get<PaginatedResponse>(url).pipe(
@@ -143,7 +143,7 @@ export class ErrandsService {
       helperContact: helperContact
     };
     
-    const url = `${this.apiBaseUrl}/api/v1/tasks/${taskId}/claim`;
+    const url = `${this.apiBaseUrl}/tasks/${taskId}/claim`;
     console.log('Claiming task');
     
     return this.http.post(url, claimData).pipe(
@@ -160,7 +160,7 @@ export class ErrandsService {
 
   // Get single task details
   getTask(taskId: string): Observable<any> {
-    const url = `${this.apiBaseUrl}/api/v1/tasks/${taskId}`;
+    const url = `${this.apiBaseUrl}/tasks/${taskId}`;
     console.log('Getting task details');
     
     return this.http.get(url).pipe(
@@ -288,7 +288,7 @@ export class ErrandsService {
 
   // Generate PayFast payment URL for task
   generatePaymentUrl(taskId: string): Observable<any> {
-    const url = `${this.apiBaseUrl}/api/v1/payment/initiate`;
+    const url = `${this.apiBaseUrl}/payment/initiate`;
     console.log('Generating payment URL');
     
     return this.http.post(url, { taskId }).pipe(
@@ -304,13 +304,66 @@ export class ErrandsService {
 
   // Get filter options (statuses and categories)
   getFilterOptions(): Observable<any> {
-    const url = `${this.apiBaseUrl}/api/v1/tasks/filters`;
-    console.log('Getting filter options');
+    const url = `${this.apiBaseUrl}/tasks/filters`;
+    console.log('Getting filter options from:', url);
     
     return this.http.get(url).pipe(
+      tap(response => {
+        console.log('Filter options response:', response);
+      }),
       catchError(error => {
         console.error('Error fetching filter options:', error);
         return of({ statuses: [], categories: [] });
+      })
+    );
+  }
+
+  // Handle payment success without requiring task ID
+  handlePaymentSuccess(): Observable<any> {
+    const url = `${this.apiBaseUrl}/tasks/payment-success`;
+    console.log('Handling payment success');
+    
+    return this.http.post(url, {}).pipe(
+      tap(() => {
+        console.log('Payment success handled');
+        this.clearCache();
+      }),
+      catchError(error => {
+        console.error('Error handling payment success:', error);
+        return throwError(() => new Error('Failed to process payment success.'));
+      })
+    );
+  }
+
+  // Get payment history
+  getPaymentHistory(): Observable<any> {
+    const url = `${this.apiBaseUrl}/tasks/payment-history`;
+    console.log('Getting payment history');
+    
+    return this.http.get(url).pipe(
+      tap(() => {
+        console.log('Payment history loaded');
+      }),
+      catchError(error => {
+        console.error('Error loading payment history:', error);
+        return throwError(() => new Error('Failed to load payment history.'));
+      })
+    );
+  }
+
+  // Update task payment status after successful payment
+  updateTaskPaymentStatus(taskId: string, paymentStatus: string): Observable<any> {
+    const url = `${this.apiBaseUrl}/tasks/${taskId}/payment-status`;
+    console.log('Updating task payment status');
+    
+    return this.http.put(url, { status: paymentStatus }).pipe(
+      tap(() => {
+        console.log('Task payment status updated successfully');
+        this.clearCache();
+      }),
+      catchError(error => {
+        console.error('Error updating payment status:', error);
+        return throwError(() => new Error('Failed to update payment status.'));
       })
     );
   }

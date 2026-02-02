@@ -75,6 +75,19 @@
   }
 }
 
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+
+  .form-control {
+    flex: 1;
+  }
+
+  .btn {
+    white-space: nowrap;
+  }
+}
+
 .text-muted {
   color: #6c757d;
   font-size: 0.875rem;
@@ -146,6 +159,10 @@
 
   &.runner {
     background: linear-gradient(135deg, #28a745, #34ce57);
+  }
+
+  &.both {
+    background: linear-gradient(135deg, #6f42c1, #8a63d2);
   }
 }
 
@@ -252,6 +269,17 @@
 
   &:hover:not(:disabled) {
     background: #218838;
+  }
+}
+
+.btn-outline-success {
+  background: transparent;
+  color: #28a745;
+  border: 1px solid #28a745;
+
+  &:hover:not(:disabled) {
+    background: #28a745;
+    color: white;
   }
 }
 

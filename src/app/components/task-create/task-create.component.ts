@@ -1,13 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { CategoryService, Category } from '../../services/category.service';
-import { TaskService, CreateTaskRequest } from '../../services/task.service';
+import { ErrandsService, CreateTaskData } from '../../services/errands.service';
 import { PaymentService } from '../../services/payment.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-task-create',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <div class="container mx-auto p-4 max-w-2xl">
       <h2 class="text-2xl font-bold mb-6">Create New Task</h2>
@@ -60,7 +63,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class TaskCreateComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private taskService = inject(TaskService);
+  private errandsService = inject(ErrandsService);
   private paymentService = inject(PaymentService);
   private authService = inject(AuthService);
 
@@ -99,8 +102,9 @@ export class TaskCreateComponent implements OnInit {
     if (this.taskForm.valid && this.canCreateTasks && !this.profileIncomplete) {
       this.isSubmitting = true;
       
-      const taskData: CreateTaskRequest = {
+      const taskData: CreateTaskData = {
         taskDescription: this.taskForm.value.taskDescription,
+        category: 'General',
         area: this.taskForm.value.area,
         dateNeeded: this.taskForm.value.dateNeeded,
         budget: this.taskForm.value.budget,
@@ -109,31 +113,19 @@ export class TaskCreateComponent implements OnInit {
         termsAccepted: this.taskForm.value.termsAccepted
       };
 
-      this.taskService.createTask(taskData).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.initiatePayment(response.data.id, taskData.budget);
+      this.errandsService.createTask(taskData).subscribe({
+        next: (response: any) => {
+          if (response.success && response.data) {
+            // Store task ID for payment success handling
+            sessionStorage.setItem('pendingTaskId', response.data.task.taskId);
+            // Redirect to payment URL
+            if (response.data.paymentUrl) {
+              window.location.href = response.data.paymentUrl;
+            }
           }
         },
         error: () => this.isSubmitting = false
       });
     }
-  }
-
-  private initiatePayment(taskId: string, amount: number) {
-    const paymentRequest = {
-      taskId: taskId,
-      amount: amount,
-      paymentMethod: 'payfast'
-    };
-
-    this.paymentService.initiatePayment(paymentRequest).subscribe({
-      next: (response) => {
-        if (response.success && response.data.paymentUrl) {
-          window.location.href = response.data.paymentUrl;
-        }
-      },
-      error: () => this.isSubmitting = false
-    });
-  }
+}
 }

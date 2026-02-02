@@ -48,7 +48,7 @@ export interface WithdrawResponse {
   providedIn: 'root'
 })
 export class PaymentService {
-  private apiUrl = `${environment.apiUrl}/api/v1/payment`;
+  private apiUrl = `${environment.apiUrl}/payment`;
   private http = inject(HttpClient);
 
   initiatePayment(request: PaymentRequest): Observable<ApiResponse<PaymentResponse>> {

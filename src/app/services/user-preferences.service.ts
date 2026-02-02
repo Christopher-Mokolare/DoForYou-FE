@@ -28,7 +28,7 @@ export interface BankDetails {
   providedIn: 'root'
 })
 export class UserPreferencesService {
-  private apiUrl = `${environment.apiUrl}/api/UserPreferences`;
+  private apiUrl = `${environment.apiUrl}/UserPreferences`;
 
   constructor(private http: HttpClient) {}
 

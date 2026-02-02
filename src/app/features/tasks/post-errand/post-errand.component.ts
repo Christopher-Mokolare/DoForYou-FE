@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -13,19 +13,26 @@ import { LoadingService } from '../../../services/loading.service';
   templateUrl: './post-errand.component.html',
   styleUrls: ['./post-errand.component.scss']
 })
-export class PostErrandComponent implements OnInit {
+export class PostErrandComponent implements OnInit, AfterViewInit {
+  @ViewChild('locationInput', { static: false }) locationInput!: ElementRef;
+  
   taskForm: FormGroup;
   isSubmitting = false;
   submitted = false;
   currentUser: any;
   categoryOptions: any[] = [];
+  showCustomCategory = false;
+  currentStep = 1;
+  totalSteps = 3;
+  autocomplete: any;
 
   constructor(
     private fb: FormBuilder,
     private errandsService: ErrandsService,
     private authService: AuthService,
     private loadingService: LoadingService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {
     this.taskForm = this.createForm();
   }
@@ -61,10 +68,228 @@ export class PostErrandComponent implements OnInit {
     this.loadCategoryOptions();
   }
 
+  ngAfterViewInit(): void {
+    // Initialize location autocomplete after view is ready
+    this.initializeNominatimAutocomplete();
+  }
+
+  private initializeNominatimAutocomplete(): void {
+    if (this.locationInput?.nativeElement) {
+      const input = this.locationInput.nativeElement;
+      let debounceTimer: any;
+      
+      input.addEventListener('input', (e: any) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          this.searchLocations(e.target.value);
+        }, 300);
+      });
+      
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', (e: any) => {
+        if (!input.contains(e.target)) {
+          const suggestions = document.querySelector('.location-suggestions');
+          if (suggestions) {
+            suggestions.remove();
+          }
+        }
+      });
+    }
+  }
+
+  private searchLocations(query: string): void {
+    if (query.length < 2) {
+      const existingSuggestions = document.querySelector('.location-suggestions');
+      if (existingSuggestions) {
+        existingSuggestions.remove();
+      }
+      return;
+    }
+    
+    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=za&limit=8&addressdetails=1&q=${encodeURIComponent(query)}`;
+    
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        this.showLocationSuggestions(data);
+      })
+      .catch(error => {
+        console.error('Location search error:', error);
+      });
+  }
+
+  private showLocationSuggestions(locations: any[]): void {
+    // Remove existing suggestions
+    const existingSuggestions = document.querySelector('.location-suggestions');
+    if (existingSuggestions) {
+      existingSuggestions.remove();
+    }
+
+    if (locations.length === 0) {
+      // Show "No locations found" message for misspellings
+      const suggestionsDiv = document.createElement('div');
+      suggestionsDiv.className = 'location-suggestions';
+      suggestionsDiv.style.cssText = `
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        display: block;
+        width: 100%;
+      `;
+      
+      const noResultsItem = document.createElement('div');
+      noResultsItem.style.cssText = `
+        padding: 12px 15px;
+        font-size: 14px;
+        color: #666;
+        font-style: italic;
+      `;
+      noResultsItem.textContent = 'No locations found. Please check spelling.';
+      suggestionsDiv.appendChild(noResultsItem);
+      
+      const inputContainer = this.locationInput.nativeElement.parentElement;
+      inputContainer.appendChild(suggestionsDiv);
+      return;
+    }
+
+    // Create suggestions dropdown
+    const suggestionsDiv = document.createElement('div');
+    suggestionsDiv.className = 'location-suggestions';
+    suggestionsDiv.style.cssText = `
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      max-height: 200px;
+      overflow-y: auto;
+      display: block;
+      width: 100%;
+    `;
+
+    // Track unique locations to avoid duplicates
+    const uniqueLocations = new Set();
+
+    locations.forEach((location) => {
+      // Extract meaningful location parts
+      const parts = location.display_name.split(',').map((p: string) => p.trim());
+      let displayName = '';
+      let selectedValue = '';
+      
+      // First, try to find the main location name that matches the search
+      const mainLocation = parts[0]; // This is usually the primary location name
+      
+      // Prioritize different location types
+      if (location.address) {
+        const road = location.address.road;
+        const houseNumber = location.address.house_number;
+        const city = location.address.city;
+        const town = location.address.town;
+        const village = location.address.village;
+        const suburb = location.address.suburb;
+        const county = location.address.county;
+        const province = location.address.state;
+        const postcode = location.address.postcode;
+        
+        // Handle complex addresses (intersections, corners, etc.)
+        if (mainLocation && (mainLocation.includes('Cnr') || mainLocation.includes('&') || mainLocation.includes('Corner'))) {
+          displayName = `${mainLocation}, ${suburb || city || town}, ${province || 'South Africa'}`;
+          selectedValue = `${mainLocation}, ${suburb || city || town}`;
+        }
+        // Handle streets/roads with house numbers
+        else if (road && houseNumber && (city || town || suburb)) {
+          displayName = `${houseNumber} ${road}, ${suburb || city || town}, ${province || 'South Africa'}`;
+          selectedValue = `${houseNumber} ${road}, ${suburb || city || town}`;
+        }
+        // Handle streets/roads without house numbers
+        else if (road && (city || town || suburb)) {
+          displayName = `${road}, ${suburb || city || town}, ${province || 'South Africa'}`;
+          selectedValue = `${road}, ${suburb || city || town}`;
+        }
+        // Use the main location name (what user typed) as the primary option
+        else if (mainLocation && mainLocation !== county && mainLocation !== province) {
+          displayName = `${mainLocation}, ${province || county || 'South Africa'}`;
+          selectedValue = mainLocation;
+        } else if (city) {
+          displayName = `${city}, ${province || county || 'South Africa'}`;
+          selectedValue = city;
+        } else if (town) {
+          displayName = `${town}, ${province || county || 'South Africa'}`;
+          selectedValue = town;
+        } else if (suburb) {
+          displayName = `${suburb}, ${city || town || province || 'South Africa'}`;
+          selectedValue = suburb;
+        } else if (village) {
+          displayName = `${village}, ${province || county || 'South Africa'}`;
+          selectedValue = village;
+        } else {
+          displayName = parts.slice(0, 2).join(', ');
+          selectedValue = parts[0];
+        }
+      } else {
+        displayName = parts.slice(0, 2).join(', ');
+        selectedValue = parts[0];
+      }
+      
+      // Skip duplicates
+      if (uniqueLocations.has(displayName)) {
+        return;
+      }
+      uniqueLocations.add(displayName);
+      
+      const suggestionItem = document.createElement('div');
+      suggestionItem.className = 'suggestion-item';
+      suggestionItem.style.cssText = `
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        color: #333;
+        display: block;
+      `;
+      suggestionItem.textContent = displayName;
+      
+      suggestionItem.addEventListener('click', () => {
+        this.ngZone.run(() => {
+          this.taskForm.patchValue({ area: selectedValue });
+          suggestionsDiv.remove();
+        });
+      });
+      
+      suggestionItem.addEventListener('mouseenter', () => {
+        suggestionItem.style.backgroundColor = '#f8f9fa';
+      });
+      
+      suggestionItem.addEventListener('mouseleave', () => {
+        suggestionItem.style.backgroundColor = 'white';
+      });
+      
+      suggestionsDiv.appendChild(suggestionItem);
+    });
+
+    // Ensure parent container has relative positioning
+    const inputContainer = this.locationInput.nativeElement.parentElement;
+    inputContainer.style.position = 'relative';
+    inputContainer.style.zIndex = '1';
+    inputContainer.appendChild(suggestionsDiv);
+  }
+
   private loadCategoryOptions(): void {
     this.errandsService.getFilterOptions().subscribe({
       next: (options) => {
+        console.log('Categories response:', options);
         this.categoryOptions = options.categories || [];
+        console.log('Category options:', this.categoryOptions);
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
@@ -74,16 +299,59 @@ export class PostErrandComponent implements OnInit {
 
   private createForm(): FormGroup {
     return this.fb.group({
-      // REMOVED: name and contact fields - they come from user profile
       taskDescription: ['', [Validators.required, Validators.minLength(10)]],
       category: ['', [Validators.required]],
-      area: ['', [Validators.required]],
+      customCategory: [''],
+      area: ['', [Validators.required]], // Remove custom validator, Google Places ensures valid locations
       priority: ['standard', [Validators.required]],
       dateNeeded: ['', [Validators.required, this.futureDateValidator]],
       budget: ['', [Validators.required, Validators.min(0)]],
       notes: [''],
       termsAccepted: [false, [Validators.requiredTrue]]
     });
+  }
+
+  maxWordsValidator(maxWords: number) {
+    return (control: any) => {
+      if (!control.value) return null;
+      const wordCount = control.value.trim().split(/\s+/).length;
+      return wordCount > maxWords ? { maxWords: { actual: wordCount, max: maxWords } } : null;
+    };
+  }
+
+  locationValidator(control: any) {
+    if (!control.value) return null;
+    
+    const location = control.value.trim();
+    
+    // Check minimum length for meaningful location names
+    if (location.length < 4) {
+      return { invalidLocation: { message: 'Please enter a complete location name (minimum 4 characters)' } };
+    }
+    
+    // Check for valid characters (letters, spaces, hyphens, apostrophes)
+    const validPattern = /^[a-zA-Z\s\-']+$/;
+    if (!validPattern.test(location)) {
+      return { invalidLocation: { message: 'Location can only contain letters, spaces, hyphens, and apostrophes' } };
+    }
+    
+    // Check for reasonable length
+    if (location.length > 50) {
+      return { invalidLocation: { message: 'Location name is too long' } };
+    }
+    
+    // Reject common abbreviations and invalid patterns
+    const invalidPatterns = /^(CAP|JHB|DBN|PTA|CPT|GP|WC|KZN|EC|NC|NW|MP|LP|FS)$/i;
+    if (invalidPatterns.test(location)) {
+      return { invalidLocation: { message: 'Please enter the full location name, not an abbreviation' } };
+    }
+    
+    // Check for at least one vowel (most real place names have vowels)
+    if (!/[aeiouAEIOU]/.test(location)) {
+      return { invalidLocation: { message: 'Please enter a valid location name' } };
+    }
+    
+    return null;
   }
 
   futureDateValidator(control: any) {
@@ -99,6 +367,50 @@ export class PostErrandComponent implements OnInit {
     return null;
   }
 
+  onCategoryChange(event: any): void {
+    const selectedCategory = event.target.value;
+    this.showCustomCategory = selectedCategory === 'Other';
+    
+    if (this.showCustomCategory) {
+      this.taskForm.get('customCategory')?.setValidators([
+        Validators.required,
+        Validators.maxLength(30),
+        this.maxWordsValidator(3)
+      ]);
+    } else {
+      this.taskForm.get('customCategory')?.clearValidators();
+      this.taskForm.get('customCategory')?.setValue('');
+    }
+    this.taskForm.get('customCategory')?.updateValueAndValidity();
+  }
+
+  nextStep(): void {
+    if (this.currentStep < this.totalSteps && this.isCurrentStepValid()) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  isCurrentStepValid(): boolean {
+    if (this.currentStep === 1) {
+      return !!(this.taskForm.get('taskDescription')?.valid && 
+               this.taskForm.get('category')?.valid &&
+               (!this.showCustomCategory || this.taskForm.get('customCategory')?.valid) &&
+               this.taskForm.get('area')?.valid &&
+               this.taskForm.get('priority')?.valid);
+    }
+    if (this.currentStep === 2) {
+      return !!(this.taskForm.get('dateNeeded')?.valid && 
+               this.taskForm.get('budget')?.valid);
+    }
+    return true;
+  }
+
   onSubmit(): void {
     this.submitted = true;
     
@@ -108,9 +420,14 @@ export class PostErrandComponent implements OnInit {
       
       try {
         // Validate and sanitize form data
+        const selectedCategory = this.taskForm.value.category;
+        const finalCategory = selectedCategory === 'Other' 
+          ? this.sanitizeInput(this.taskForm.value.customCategory)
+          : selectedCategory;
+          
         const formData: CreateTaskData = {
           taskDescription: this.sanitizeInput(this.taskForm.value.taskDescription),
-          category: this.taskForm.value.category,
+          category: finalCategory,
           area: this.sanitizeInput(this.taskForm.value.area),
           priority: this.taskForm.value.priority,
           dateNeeded: new Date(this.taskForm.value.dateNeeded).toISOString(),
@@ -180,7 +497,13 @@ export class PostErrandComponent implements OnInit {
     
     const errors = field.errors;
     
-    if (errors['required']) return 'This field is required';
+    if (errors['required']) {
+      if (fieldName === 'customCategory') return 'Please specify your custom category';
+      return 'This field is required';
+    }
+    if (errors['invalidLocation']) return errors['invalidLocation'].message;
+    if (errors['maxWords']) return `Maximum ${errors['maxWords'].max} words allowed`;
+    if (errors['maxlength']) return `Maximum ${errors['maxlength'].requiredLength} characters allowed`;
     if (errors['minlength']) return `Minimum ${errors['minlength'].requiredLength} characters required`;
     if (errors['min']) return 'Budget must be at least R0';
     if (errors['futureDate']) return 'Please select a future date';

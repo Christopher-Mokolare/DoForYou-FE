@@ -1,43 +1,43 @@
-<div class="admin-users">
+<div class="page-container">
   <div class="page-header">
-    <h1>User Management</h1>
+    <h1 class="page-title">User Management</h1>
     <div class="header-stats">
-      <span class="badge bg-primary">Total: {{pagination.totalCount}}</span>
-      <span class="badge bg-success">Verified: {{verifiedCount}}</span>
-      <span class="badge bg-warning">Unverified: {{unverifiedCount}}</span>
+      <span class="stat-badge total">Total: {{pagination.totalCount}}</span>
+      <span class="stat-badge verified">Verified: {{verifiedCount}}</span>
+      <span class="stat-badge unverified">Unverified: {{unverifiedCount}}</span>
     </div>
   </div>
 
   <!-- Filters -->
-  <div class="filters-card">
-    <div class="row">
-      <div class="col-md-3">
-        <label>Role</label>
-        <select class="form-select" [(ngModel)]="filters.role" (change)="applyFilters()">
+  <div class="filters-section">
+    <div class="filters-grid grid-3">
+      <div class="filter-group">
+        <label class="filter-label">Role</label>
+        <select class="filter-select" [(ngModel)]="filters.role" (change)="applyFilters()">
           <option value="">All Roles</option>
           <option value="Admin">Admin</option>
           <option value="User">User</option>
           <option value="Helper">Helper</option>
         </select>
       </div>
-      <div class="col-md-3">
-        <label>Verification Status</label>
-        <select class="form-select" [(ngModel)]="filters.isVerified" (change)="applyFilters()">
+      <div class="filter-group">
+        <label class="filter-label">Verification Status</label>
+        <select class="filter-select" [(ngModel)]="filters.isVerified" (change)="applyFilters()">
           <option value="">All</option>
           <option value="true">Verified</option>
           <option value="false">Unverified</option>
         </select>
       </div>
-      <div class="col-md-6">
-        <label>Search</label>
-        <input type="text" class="form-control" [(ngModel)]="filters.search" 
+      <div class="filter-group search-group">
+        <label class="filter-label">Search</label>
+        <input type="text" class="filter-input" [(ngModel)]="filters.search" 
                (keyup.enter)="applyFilters()" placeholder="Search by name, email, or contact...">
       </div>
     </div>
   </div>
 
   <!-- Users Table -->
-  <div class="card">
+  <div class="data-table">
     <div class="card-body">
       <div class="table-responsive" *ngIf="!loading; else loadingTemplate">
         <!-- Mobile Card View -->
@@ -81,36 +81,58 @@
                     <span class="fw-medium">{{user.rating | number:'1.1-1'}}</span>
                   </div>
                 </div>
-                <div class="d-flex gap-2 flex-wrap">
-                  <button class="btn btn-sm btn-outline-success" 
-                          *ngIf="!user.isVerified"
-                          (click)="updateUserStatus(user.id, true)"
-                          [disabled]="updating.includes(user.id)">
-                    <i class="fas fa-check"></i> Verify
+                <div class="action-buttons-mobile d-flex gap-2 flex-wrap">
+                  <!-- Verification Toggle -->
+                  <button class="btn btn-sm flex-fill" 
+                          [ngClass]="user.isVerified ? 'btn-outline-warning' : 'btn-outline-success'"
+                          (click)="updateUserStatus(user.id, !user.isVerified)"
+                          [disabled]="updating.includes(user.id)"
+                          [title]="user.isVerified ? 'Click to unverify this user' : 'Click to verify this user'">
+                    <i class="fas" [ngClass]="user.isVerified ? 'fa-user-times' : 'fa-user-check'"></i>
+                    {{user.isVerified ? 'Unverify' : 'Verify'}}
                   </button>
-                  <button class="btn btn-sm btn-outline-warning" 
-                          *ngIf="user.isVerified"
-                          (click)="updateUserStatus(user.id, false)"
-                          [disabled]="updating.includes(user.id)">
-                    <i class="fas fa-times"></i> Unverify
-                  </button>
-                  <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" 
-                            data-bs-toggle="dropdown">
-                      <i class="fas fa-user-cog"></i> Role
+                  
+                  <!-- Role Dropdown -->
+                  <div class="dropdown flex-fill">
+                    <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100" 
+                            data-bs-toggle="dropdown"
+                            [disabled]="updating.includes(user.id)"
+                            title="Change user role">
+                      <i class="fas fa-user-cog"></i> Change Role
                     </button>
-                    <ul class="dropdown-menu">
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'User')">
-                        Make User
+                    <ul class="dropdown-menu w-100">
+                      <li><h6 class="dropdown-header">Select New Role</h6></li>
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'User')"
+                                  [class.active]="user.role === 'User'">
+                        <i class="fas fa-user me-2"></i>User
                       </button></li>
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'Helper')">
-                        Make Helper
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'Helper')"
+                                  [class.active]="user.role === 'Helper'">
+                        <i class="fas fa-hands-helping me-2"></i>Helper
                       </button></li>
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'Admin')" 
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'Admin')"
+                                  [class.active]="user.role === 'Admin'"
                                   *ngIf="user.role !== 'Admin'">
-                        Make Admin
+                        <i class="fas fa-user-shield me-2"></i>Admin
                       </button></li>
                     </ul>
+                  </div>
+                  
+                  <!-- View Details -->
+                  <button class="btn btn-sm btn-outline-info" 
+                          (click)="viewUserDetails(user)"
+                          style="min-width: 60px;"
+                          title="View user details">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  
+                  <!-- Loading Indicator -->
+                  <div class="w-100 text-center mt-2" *ngIf="updating.includes(user.id)">
+                    <i class="fas fa-spinner fa-spin text-primary"></i>
+                    <small class="text-muted ms-2">Updating...</small>
                   </div>
                 </div>
               </div>
@@ -184,40 +206,56 @@
                 </ng-template>
               </td>
               <td>
-                <div class="btn-group btn-group-sm">
-                  <button class="btn btn-outline-success" 
-                          *ngIf="!user.isVerified"
-                          (click)="updateUserStatus(user.id, true)"
-                          [disabled]="updating.includes(user.id)">
-                    <i class="fas fa-check"></i>
+                <div class="action-buttons">
+                  <!-- Verification Toggle -->
+                  <button class="btn btn-xs" 
+                          [ngClass]="user.isVerified ? 'btn-outline-warning' : 'btn-outline-success'"
+                          (click)="updateUserStatus(user.id, !user.isVerified)"
+                          [disabled]="updating.includes(user.id)"
+                          [title]="user.isVerified ? 'Unverify User' : 'Verify User'">
+                    <i class="fas" [ngClass]="user.isVerified ? 'fa-times' : 'fa-check'" style="font-size: 10px;"></i>
                   </button>
-                  <button class="btn btn-outline-warning" 
-                          *ngIf="user.isVerified"
-                          (click)="updateUserStatus(user.id, false)"
-                          [disabled]="updating.includes(user.id)">
-                    <i class="fas fa-times"></i>
-                  </button>
-                  <div class="dropdown">
-                    <button class="btn btn-outline-primary dropdown-toggle" 
-                            data-bs-toggle="dropdown">
-                      <i class="fas fa-user-cog"></i>
+                  
+                  <!-- Role Dropdown -->
+                  <div class="dropdown d-inline-block">
+                    <button class="btn btn-xs btn-outline-primary dropdown-toggle" 
+                            data-bs-toggle="dropdown" 
+                            [disabled]="updating.includes(user.id)"
+                            title="Change Role">
+                      <i class="fas fa-user-cog" style="font-size: 10px;"></i>
                     </button>
-                    <ul class="dropdown-menu">
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'User')">
-                        Make User
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><h6 class="dropdown-header">Change Role</h6></li>
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'User')"
+                                  [class.active]="user.role === 'User'">
+                        <i class="fas fa-user me-2"></i>User
                       </button></li>
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'Helper')">
-                        Make Helper
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'Helper')"
+                                  [class.active]="user.role === 'Helper'">
+                        <i class="fas fa-hands-helping me-2"></i>Helper
                       </button></li>
-                      <li><button class="dropdown-item" (click)="changeUserRole(user, 'Admin')" 
+                      <li><button class="dropdown-item" 
+                                  (click)="changeUserRole(user, 'Admin')"
+                                  [class.active]="user.role === 'Admin'"
                                   *ngIf="user.role !== 'Admin'">
-                        Make Admin
+                        <i class="fas fa-user-shield me-2"></i>Admin
                       </button></li>
                     </ul>
                   </div>
-                  <button class="btn btn-outline-info" (click)="viewUserDetails(user)">
-                    <i class="fas fa-eye"></i>
+                  
+                  <!-- View Details -->
+                  <button class="btn btn-xs btn-outline-info" 
+                          (click)="viewUserDetails(user)"
+                          title="View Details">
+                    <i class="fas fa-eye" style="font-size: 10px;"></i>
                   </button>
+                  
+                  <!-- Loading Indicator -->
+                  <div class="loading-indicator" *ngIf="updating.includes(user.id)">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 10px;"></i>
+                  </div>
                 </div>
               </td>
             </tr>

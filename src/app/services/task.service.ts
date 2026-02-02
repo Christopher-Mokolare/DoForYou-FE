@@ -58,7 +58,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly apiUrl = `${environment.apiUrl}/api/v1/tasks`;
+  private readonly apiUrl = `${environment.apiUrl}/tasks`;
   
   // Real-time updates subject
   private taskUpdatesSubject = new BehaviorSubject<any>(null);
@@ -85,6 +85,10 @@ export class TaskService {
   // Task Status Management
   completeTask(taskId: string): Observable<ApiResponse<boolean>> {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/complete`, {});
+  }
+
+  confirmTask(taskId: string): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/confirm`, {});
   }
 
   cancelTask(taskId: string, reason: string): Observable<ApiResponse<boolean>> {

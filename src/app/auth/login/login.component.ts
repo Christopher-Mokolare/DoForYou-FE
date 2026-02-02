@@ -45,7 +45,12 @@ export class LoginComponent implements OnInit {
         next: (response: any) => {
           this.loadingService.hide();
           if (response.success) {
-            this.router.navigateByUrl(this.returnUrl);
+            // Check if user is admin and redirect accordingly
+            if (response.user?.isAdmin || response.user?.roles?.includes('Admin')) {
+              this.router.navigate(['/admin/dashboard']);
+            } else {
+              this.router.navigateByUrl(this.returnUrl);
+            }
           } else {
             this.errorMessage = response.message || 'Login failed. Please try again.';
           }

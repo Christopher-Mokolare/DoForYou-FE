@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ErrandsService } from '../../../services/errands.service';
+import { TaskService } from '../../../services/task.service';
 import { AuthService } from '../../../services/auth.service';
 import { ModalService } from '../../../services/modal.service';
 
@@ -21,6 +22,7 @@ export class TaskDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private errandsService: ErrandsService,
+    private taskService: TaskService,
     private authService: AuthService,
     private modalService: ModalService
   ) {}
@@ -90,7 +92,17 @@ export class TaskDetailsComponent implements OnInit {
   }
 
   markComplete() {
-    // TODO: Implement mark complete functionality
-    this.modalService.showAlert('Info', 'Mark complete functionality coming soon!', 'info');
+    if (confirm('Are you sure you want to mark this task as completed?')) {
+      this.taskService.completeTask(this.taskId).subscribe({
+        next: () => {
+          this.modalService.showAlert('Success', 'Task marked as completed!', 'success');
+          this.loadTaskDetails();
+        },
+        error: (error: any) => {
+          console.error('Error completing task:', error);
+          this.modalService.showAlert('Error', 'Failed to complete task. Please try again.', 'error');
+        }
+      });
+    }
   }
 }

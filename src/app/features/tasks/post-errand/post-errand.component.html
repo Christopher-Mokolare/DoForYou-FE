@@ -32,24 +32,24 @@
             <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
               <!-- Progress Steps -->
               <div class="form-steps">
-                <div class="step active">
+                <div class="step" [class.active]="currentStep >= 1">
                   <span class="step-number">1</span>
                   <span class="step-label">Details</span>
                 </div>
                 <div class="step-line"></div>
-                <div class="step">
+                <div class="step" [class.active]="currentStep >= 2">
                   <span class="step-number">2</span>
                   <span class="step-label">Budget</span>
                 </div>
                 <div class="step-line"></div>
-                <div class="step">
+                <div class="step" [class.active]="currentStep >= 3">
                   <span class="step-number">3</span>
                   <span class="step-label">Payment</span>
                 </div>
               </div>
 
-              <!-- Task Details Section -->
-              <div class="form-section">
+              <!-- Step 1: Task Details -->
+              <div *ngIf="currentStep === 1" class="form-section">
                 <div class="section-header">
                   <div class="section-icon">
                     <i class="fas fa-clipboard-list"></i>
@@ -86,18 +86,34 @@
                       class="unique-input"
                       formControlName="category"
                       [class.is-invalid]="isFieldInvalid('category')"
+                      (change)="onCategoryChange($event)"
                     >
                       <option value="">Select a category...</option>
-                      <option *ngFor="let category of categoryOptions" [value]="category.value">
-                        {{ category.label }}
+                      <option *ngFor="let category of categoryOptions" [value]="category">
+                        {{ category }}
                       </option>
                     </select>
                   </div>
+                  
+                  <!-- Custom category input when "Other" is selected -->
+                  <div *ngIf="showCustomCategory" class="mt-2">
+                    <input
+                      type="text"
+                      class="unique-input"
+                      formControlName="customCategory"
+                      placeholder="Enter your custom category..."
+                      [class.is-invalid]="isFieldInvalid('customCategory')"
+                    />
+                    <div class="field-hint">
+                      This will help us improve our category options
+                    </div>
+                  </div>
+                  
                   <div
                     class="invalid-feedback"
-                    *ngIf="isFieldInvalid('category')"
+                    *ngIf="isFieldInvalid('category') || isFieldInvalid('customCategory')"
                   >
-                    {{ getFieldError("category") }}
+                    {{ getFieldError("category") || getFieldError("customCategory") }}
                   </div>
                 </div>
 
@@ -108,12 +124,16 @@
                       <div class="input-with-icon">
                         <i class="fas fa-map-marker-alt"></i>
                         <input
+                          #locationInput
                           type="text"
                           class="unique-input"
                           formControlName="area"
-                          placeholder="Sandton, Cape Town, etc."
+                          placeholder="Start typing a South African location..."
                           [class.is-invalid]="isFieldInvalid('area')"
                         />
+                      </div>
+                      <div class="field-hint">
+                        Select from suggested locations
                       </div>
                       <div
                         class="invalid-feedback"
@@ -157,8 +177,8 @@
                 </div>
               </div>
 
-              <!-- Budget & Timing Section -->
-              <div class="form-section">
+              <!-- Step 2: Budget & Timing -->
+              <div *ngIf="currentStep === 2" class="form-section">
                 <div class="section-header">
                   <div class="section-icon">
                     <i class="fas fa-calendar-dollar"></i>
@@ -217,8 +237,10 @@
                 </div>
               </div>
 
-              <!-- Additional Notes -->
-              <div class="form-section">
+              <!-- Step 3: Final Details & Payment -->
+              <div *ngIf="currentStep === 3">
+                <!-- Additional Notes -->
+                <div class="form-section">
                 <div class="unique-field">
                   <label class="unique-label">
                     <i class="fas fa-lightbulb me-2"></i>Anything else?
@@ -260,38 +282,56 @@
                 </div>
               </div>
 
-              <!-- Payment Info Card -->
-              <div class="payment-info-card">
-                <div class="payment-header">
-                  <i class="fas fa-shield-alt"></i>
-                  <h4 class="brand-font">Secure Payment</h4>
+                <!-- Payment Info Card -->
+                <div class="payment-info-card">
+                  <div class="payment-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4 class="brand-font">Secure Payment</h4>
+                  </div>
+                  <div class="payment-features">
+                    <div class="feature">
+                      <i class="fas fa-lock"></i>
+                      <span>Bank-level security</span>
+                    </div>
+                    <div class="feature">
+                      <i class="fas fa-zap"></i>
+                      <span>Instant activation</span>
+                    </div>
+                    <div class="feature">
+                      <i class="fas fa-undo"></i>
+                      <span>Money-back guarantee</span>
+                    </div>
+                  </div>
+                  <p class="payment-note">
+                    Powered by PayFast - South Africa's leading payment gateway
+                  </p>
                 </div>
-                <div class="payment-features">
-                  <div class="feature">
-                    <i class="fas fa-lock"></i>
-                    <span>Bank-level security</span>
-                  </div>
-                  <div class="feature">
-                    <i class="fas fa-zap"></i>
-                    <span>Instant activation</span>
-                  </div>
-                  <div class="feature">
-                    <i class="fas fa-undo"></i>
-                    <span>Money-back guarantee</span>
-                  </div>
-                </div>
-                <p class="payment-note">
-                  Powered by PayFast - South Africa's leading payment gateway
-                </p>
               </div>
 
-              <!-- Unique Submit Button -->
-              <div class="submit-section">
-                <button
-                  type="submit"
-                  class="unique-submit-btn"
-                  [disabled]="taskForm.invalid || isSubmitting"
-                >
+              <!-- Navigation Buttons -->
+              <div class="step-navigation">
+                <button 
+                  *ngIf="currentStep > 1"
+                  type="button" 
+                  class="btn-secondary" 
+                  (click)="prevStep()">
+                  <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                
+                <button 
+                  *ngIf="currentStep < totalSteps"
+                  type="button" 
+                  class="btn-primary" 
+                  [disabled]="!isCurrentStepValid()"
+                  (click)="nextStep()">
+                  Next <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <button 
+                  *ngIf="currentStep === totalSteps"
+                  type="submit" 
+                  class="unique-submit-btn" 
+                  [disabled]="taskForm.invalid || isSubmitting">
                   <span class="btn-content" *ngIf="!isSubmitting">
                     <i class="fas fa-rocket"></i>
                     <span class="btn-text">Launch My Task</span>

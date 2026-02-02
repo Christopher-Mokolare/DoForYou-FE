@@ -97,7 +97,34 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.taskService.getTaskDetail(taskId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.task = response.data;
+          // Map API response to component interface
+          const data = response.data as any; // Use any to access API fields
+          this.task = {
+            id: data.id?.toString() || '',
+            taskId: data.taskId,
+            title: data.taskDescription, // API uses taskDescription
+            description: data.taskDescription,
+            category: data.category,
+            location: data.area, // API uses area
+            budget: data.budget,
+            status: data.status || data.taskStatus, // Try both fields
+            priority: data.priority,
+            createdAt: data.createdAt,
+            dueDate: data.dateNeeded, // API uses dateNeeded
+            creatorName: data.userName || data.name, // Try both fields
+            creatorContact: data.userContact || data.contact, // Try both fields
+            runnerName: data.helperName,
+            runnerContact: data.helperContact,
+            runnerId: data.acceptedByUserId?.toString(),
+            createdByUserId: data.createdByUserId?.toString() || '',
+            completedAt: data.completedAt,
+            notes: data.notes,
+            progressUpdates: [], // Will be loaded separately if needed
+            canEdit: false,
+            canComplete: false,
+            canCancel: false
+          };
+          
           this.isCreator = this.task.createdByUserId === this.currentUserId;
           this.isRunner = this.task.runnerId === this.currentUserId;
           this.loadMessages();
@@ -119,7 +146,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     this.taskService.getTaskMessages(this.task.taskId).subscribe({
       next: (response) => {
         if (response.success) {
-          this.messages = response.data || [];
+          this.messages = (response.data || []).map((message: any) => ({
+            ...message,
+            isCurrentUser: message.senderId?.toString() === this.currentUserId
+          }));
         }
       },
       error: (error) => {
@@ -156,19 +186,37 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   completeTask(): void {
     if (!this.task || !this.isRunner) return;
 
+    if (confirm('Are you sure you want to mark this task as completed?')) {
+      this.taskService.completeTask(this.task.taskId).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.loadTaskDetail(this.task!.taskId);
+            alert('Task marked as completed!');
+          }
+        },
+        error: (error) => {
+          alert('Failed to complete task');
+        }
+      });
+    }
+  }
+
+  confirmCompletion(): void {
+    if (!this.task || !this.isCreator) return;
+
     this.modalService.showConfirm(
-      'Complete Task',
-      'Are you sure you want to mark this task as completed?',
+      'Confirm Task Completion',
+      'Are you sure you want to confirm this task is completed? This will release payment to the runner.',
       () => {
-        this.taskService.completeTask(this.task!.taskId).subscribe({
+        this.taskService.confirmTask(this.task!.taskId).subscribe({
           next: (response) => {
             if (response.success) {
               this.loadTaskDetail(this.task!.taskId);
-              this.modalService.showAlert('Success', 'Task marked as completed!', 'success');
+              this.modalService.showAlert('Success', 'Task confirmed and payment released!', 'success');
             }
           },
           error: (error) => {
-            this.modalService.showAlert('Error', 'Failed to complete task', 'error');
+            this.modalService.showAlert('Error', 'Failed to confirm task completion', 'error');
           }
         });
       }
@@ -196,6 +244,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       case 'posted': return 'badge-success';
       case 'claimed': return 'badge-warning';
       case 'completed': return 'badge-primary';
+      case 'runnerpaid': return 'badge-info';
       case 'cancelled': return 'badge-danger';
       default: return 'badge-secondary';
     }

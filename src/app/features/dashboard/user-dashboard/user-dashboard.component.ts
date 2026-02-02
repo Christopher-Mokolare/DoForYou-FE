@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TaskService } from '../../../services/task.service';
 import { AuthService } from '../../../services/auth.service';
+import { ErrandsService } from '../../../services/errands.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -15,6 +16,7 @@ export class UserDashboardComponent implements OnInit {
   creatorStats = { active: 0, inProgress: 0, completed: 0, pending: 0, totalSpent: 0, thisMonth: 0, averageCost: 0, mostExpensive: 0 };
   runnerStats = { available: 0, myActive: 0, completed: 0, totalEarnings: 0, thisMonth: 0, completionRate: 0, averageEarning: 0 };
   recentActivity: any[] = [];
+  paymentHistory: any[] = [];
   canCreateTasks = false;
   canAcceptTasks = false;
   needsProfileUpdate = false;
@@ -24,6 +26,7 @@ export class UserDashboardComponent implements OnInit {
 
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
+  private errandsService = inject(ErrandsService);
   
   cleanupInProgress = false;
 
@@ -84,9 +87,36 @@ export class UserDashboardComponent implements OnInit {
     this.taskService.getDashboardStats().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.creatorStats = response.data.creator;
-          this.runnerStats = response.data.runner;
-          console.log('Dashboard stats loaded:', response.data);
+          const data = response.data;
+          const userType = data.userType || 'both';
+          
+          // Map backend stats to frontend format based on user type
+          if (userType === 'creator' || userType === 'both') {
+            this.creatorStats = {
+              active: data.postedTasks || 0,
+              inProgress: data.tasksInProgress || 0,
+              completed: data.completedTasks || 0,
+              pending: data.pendingTasks || 0,
+              totalSpent: data.totalSpent || 0,
+              thisMonth: 0, // TODO: Add to backend
+              averageCost: 0, // TODO: Add to backend
+              mostExpensive: 0 // TODO: Add to backend
+            };
+          }
+          
+          if (userType === 'runner' || userType === 'both') {
+            this.runnerStats = {
+              available: 0, // TODO: Add to backend
+              myActive: data.tasksInProgress || 0,
+              completed: data.completedTasks || 0,
+              totalEarnings: data.totalEarned || 0,
+              thisMonth: 0, // TODO: Add to backend
+              completionRate: 0, // TODO: Add to backend
+              averageEarning: 0 // TODO: Add to backend
+            };
+          }
+          
+          console.log('Dashboard stats loaded:', data);
         }
       },
       error: (error) => {
@@ -127,12 +157,28 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+  loadPaymentHistory(): void {
+    this.errandsService.getPaymentHistory().subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          this.paymentHistory = response.data;
+          console.log('Payment history loaded:', response.data);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading payment history:', error);
+        alert('Failed to load payment history.');
+      }
+    });
+  }
+
   getActivityIcon(type: string): string {
     switch (type) {
       case 'task_created': return 'fas fa-plus-circle';
       case 'task_claimed': return 'fas fa-handshake';
       case 'task_completed_creator': return 'fas fa-check-circle';
       case 'task_completed_runner': return 'fas fa-trophy';
+      case 'payment_received': return 'fas fa-money-bill-wave';
       default: return 'fas fa-info-circle';
     }
   }
@@ -143,6 +189,7 @@ export class UserDashboardComponent implements OnInit {
       case 'task_claimed': return 'activity-icon-warning';
       case 'task_completed_creator': return 'activity-icon-success';
       case 'task_completed_runner': return 'activity-icon-success';
+      case 'payment_received': return 'activity-icon-success';
       default: return 'activity-icon-info';
     }
   }
