@@ -88,7 +88,7 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
           <div class="col-md-6">
             <div class="card">
               <div class="card-header">
-                <h5>Quick Actionsssss</h5>
+                <h5>Quick Actions</h5>
               </div>
               <div class="card-body">
                 <div class="quick-actions">
