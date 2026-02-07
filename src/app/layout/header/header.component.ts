@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
 import { AuthService } from '../../services/auth.service';
+import { GlobalStateService } from '../../services/global-state.service';
 import { User } from '../../models/auth.models';
 import { ProfileCompletionModalComponent } from '../../shared/components/profile-completion-modal/profile-completion-modal.component';
 
@@ -19,21 +20,27 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   isAdmin = false;
   currentUser: User | null = null;
   showProfileModal = false;
+  canShowPostErrandButton = false;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
 
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private globalState: GlobalStateService
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to user changes
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.currentUser = user;
-      // Updated: Use proper role checking
-      this.isAdmin = this.checkIfAdmin(user);
-      console.log('Header - Auth status:', this.isLoggedIn, 'User:', user, 'Is Admin:', this.isAdmin, 'UserType:', (user as any)?.userType);
+      this.isAdmin = this.authService.isAdmin();
+    });
+    
+    // Subscribe to global state for POST ERRAND button visibility
+    this.globalState.canCreateTasks$.subscribe(canCreate => {
+      this.canShowPostErrandButton = canCreate && !this.isAdmin;
     });
   }
 
@@ -89,7 +96,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
       return;
     }
     
-    if (!this.authService.canCreateTasks()) {
+    if (!this.globalState.canCreateTasks()) {
       this.router.navigate(['/profile'], {
         queryParams: { message: 'Enable task creation in your profile to post errands' }
       });
@@ -110,9 +117,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   }
 
   canShowPostErrand(): boolean {
-    const user = this.authService.getCurrentUser();
-    const userType = (user as any)?.userType;
-    return userType === 'creator' || userType === 'both';
+    return this.canShowPostErrandButton;
   }
 
   onModalClosed() {

@@ -14,7 +14,19 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
         <p class="text-muted">Manage your DoForYou platform</p>
       </div>
 
-      <div class="stats-grid" *ngIf="dashboard">
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="error">
+        <i class="fas fa-exclamation-circle"></i> {{error}}
+      </div>
+
+      <!-- Loading State -->
+      <div class="text-center py-5" *ngIf="loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div class="stats-grid" *ngIf="dashboard && !loading">
         <!-- Task Stats -->
         <div class="stat-card">
           <div class="stat-icon bg-primary">
@@ -356,6 +368,24 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
     .bg-success { background-color: #28a745 !important; }
     .bg-warning { background-color: #ffc107 !important; }
     .bg-danger { background-color: #dc3545 !important; }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c2c7;
+      color: #842029;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      border-width: 0.3rem;
+    }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
@@ -380,9 +410,15 @@ export class AdminDashboardComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: () => {
-        console.error('Failed to load dashboard');
-        this.error = 'Failed to load dashboard';
+      error: (err) => {
+        console.error('Failed to load dashboard:', err);
+        if (err.status === 403) {
+          this.error = 'Access denied. Admin privileges required.';
+        } else if (err.status === 401) {
+          this.error = 'Authentication failed. Please login again.';
+        } else {
+          this.error = `Failed to load dashboard: ${err.message || 'Unknown error'}`;
+        }
         this.loading = false;
       }
     });

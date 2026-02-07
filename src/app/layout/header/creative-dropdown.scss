@@ -1,0 +1,239 @@
+/* Creative User Dropdown Design */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.dropdown-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.dropdown-toggle::after {
+  content: '▼';
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-toggle.active::after {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: white;
+  border-radius: 20px;
+  min-width: 280px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.dropdown-header {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.user-role {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 5px 0 0;
+}
+
+.dropdown-body {
+  padding: 10px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s ease;
+  z-index: -1;
+}
+
+.dropdown-item:hover::before {
+  width: 100%;
+}
+
+.dropdown-item:hover {
+  color: white;
+  transform: translateX(5px);
+}
+
+.dropdown-item i {
+  width: 20px;
+  margin-right: 15px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+  margin: 10px 0;
+}
+
+.post-errand-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 25px;
+  margin: 15px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.post-errand-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.post-errand-btn:hover::before {
+  left: 100%;
+}
+
+.post-errand-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+}
+
+.logout-item {
+  color: #e74c3c !important;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 10px;
+}
+
+.logout-item::before {
+  background: linear-gradient(90deg, #e74c3c, #c0392b) !important;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    min-width: 250px;
+    right: -20px;
+  }
+  
+  .dropdown-item {
+    padding: 12px 15px;
+  }
+  
+  .post-errand-btn {
+    margin: 10px 15px;
+    padding: 10px 20px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .dropdown-menu {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .dropdown-item {
+    color: #e2e8f0;
+  }
+  
+  .dropdown-divider {
+    background: linear-gradient(90deg, transparent, #4a5568, transparent);
+  }
+}

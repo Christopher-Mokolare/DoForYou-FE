@@ -18,6 +18,10 @@ export class LoginComponent implements OnInit {
   returnUrl: string = '/';
   showPassword = false;
 
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -45,6 +49,18 @@ export class LoginComponent implements OnInit {
         next: (response: any) => {
           this.loadingService.hide();
           if (response.success) {
+            // Debug: Log token claims
+            const token = response.token;
+            if (token) {
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('Token payload:', payload);
+                console.log('Role claim:', payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']);
+              } catch (e) {
+                console.error('Failed to decode token:', e);
+              }
+            }
+
             // Check if user is admin and redirect accordingly
             if (response.user?.isAdmin || response.user?.roles?.includes('Admin')) {
               this.router.navigate(['/admin/dashboard']);

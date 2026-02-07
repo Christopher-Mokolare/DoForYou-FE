@@ -31,11 +31,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   getHeaderClass(): string {
     if (!this.config) return '';
     switch (this.config.type) {
-      case 'success': return 'bg-success text-white';
-      case 'warning': return 'bg-warning text-dark';
-      case 'error': return 'bg-danger text-white';
-      case 'confirm': return 'bg-primary text-white';
-      default: return 'bg-info text-white';
+      case 'success': return 'header-success';
+      case 'warning': return 'header-warning';
+      case 'error': return 'header-error';
+      case 'confirm': return 'header-confirm';
+      default: return 'header-info';
     }
   }
 

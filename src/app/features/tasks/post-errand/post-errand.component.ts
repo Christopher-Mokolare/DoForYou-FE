@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ErrandsService, CreateTaskData } from '../../../services/errands.service';
 import { AuthService } from '../../../services/auth.service';
+import { GlobalStateService } from '../../../services/global-state.service';
 import { LoadingService } from '../../../services/loading.service';
 
 @Component({
@@ -30,6 +31,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private errandsService: ErrandsService,
     private authService: AuthService,
+    private globalState: GlobalStateService,
     private loadingService: LoadingService,
     private router: Router,
     private ngZone: NgZone
@@ -50,8 +52,8 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
 
     this.currentUser = this.authService.getCurrentUser();
     
-    // Check if user preferences allow task creation
-    if (this.currentUser?.canCreateTasks === false) {
+    // Check if user preferences allow task creation using GlobalStateService
+    if (!this.globalState.canCreateTasks()) {
       alert('You have selected "Task Runner" mode. To post errands, please update your preferences to "Task Creator" or "Both" in your profile settings.');
       this.router.navigate(['/profile/preferences']);
       return;

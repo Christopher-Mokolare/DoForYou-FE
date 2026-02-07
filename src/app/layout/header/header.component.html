@@ -48,34 +48,34 @@
 
         <ng-template #userMenu>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ currentUser?.name }}
             </a>
             <ul class="dropdown-menu">
               <!-- Regular User Links - Only show for non-admin users -->
               <div *ngIf="!isAdmin">
-                <li><a class="dropdown-item" routerLink="/dashboard">Dashboard</a></li>
-                <li *ngIf="canShowPostErrand() && !authService.isProfileIncomplete()"><a class="dropdown-item" routerLink="/post-errand">Post Errand</a></li>
-                <li *ngIf="canShowPostErrand() && authService.isProfileIncomplete()"><a class="dropdown-item text-muted" routerLink="/profile" title="Complete your profile to post tasks">Complete Profile to Post Tasks</a></li>
-                <li><a class="dropdown-item" routerLink="/profile">My Profile</a></li>
-                <li><a class="dropdown-item" routerLink="/wallet">Wallet</a></li>
-                <li><a class="dropdown-item" routerLink="/notifications">Notifications</a></li>
+                <li><a class="dropdown-item" routerLink="/dashboard" (click)="scrollToTop()">Dashboard</a></li>
+                <li *ngIf="canShowPostErrand() && !authService.isProfileIncomplete()"><a class="dropdown-item" routerLink="/post-errand" (click)="scrollToTop()">Post Errand</a></li>
+                <li *ngIf="canShowPostErrand() && authService.isProfileIncomplete()"><a class="dropdown-item text-muted" routerLink="/profile" title="Complete your profile to post tasks" (click)="scrollToTop()">Complete Profile to Post Tasks</a></li>
+                <li><a class="dropdown-item" routerLink="/profile" (click)="scrollToTop()">My Profile</a></li>
+                <li><a class="dropdown-item" routerLink="/wallet" (click)="scrollToTop()">Wallet</a></li>
+                <li><a class="dropdown-item" routerLink="/notifications" (click)="scrollToTop()">Notifications</a></li>
                 <li><hr class="dropdown-divider"></li>
               </div>
 
               <!-- Admin Links - Only show for admin users -->
               <div *ngIf="isAdmin">
                 <li><h6 class="dropdown-header">Admin Panel</h6></li>
-                <li><a class="dropdown-item" routerLink="/admin/dashboard">
+                <li><a class="dropdown-item" routerLink="/admin/dashboard" (click)="scrollToTop()">
                   <i class="bi bi-speedometer2"></i> Dashboard
                 </a></li>
-                <li><a class="dropdown-item" routerLink="/admin/users">
+                <li><a class="dropdown-item" routerLink="/admin/users" (click)="scrollToTop()">
                   <i class="bi bi-people"></i> Manage Users
                 </a></li>
-                <li><a class="dropdown-item" routerLink="/admin/tasks">
+                <li><a class="dropdown-item" routerLink="/admin/tasks" (click)="scrollToTop()">
                   <i class="bi bi-list-task"></i> Manage Tasks
                 </a></li>
-                <li><a class="dropdown-item" routerLink="/admin/payments">
+                <li><a class="dropdown-item" routerLink="/admin/payments" (click)="scrollToTop()">
                   <i class="bi bi-credit-card"></i> Manage Payments
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -90,7 +90,7 @@
         </ng-template>
 
         <!-- Post Errand Button - Only show for creators and users with 'both' role -->
-        <li class="nav-item" *ngIf="!isAdmin && canShowPostErrand()">
+        <li class="nav-item" *ngIf="isLoggedIn && !isAdmin && canShowPostErrand()">
           <a class="nav-link post-errand-link" (click)="postErrand()">
             POST AN ERRAND
             <span class="pulse-dot"></span>

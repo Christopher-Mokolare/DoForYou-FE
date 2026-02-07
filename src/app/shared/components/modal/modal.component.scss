@@ -1,7 +1,4 @@
-.modal { 
-  z-index: 1050; 
-}
+@import '../../../../design-system.scss';
 
-.modal-backdrop { 
-  z-index: 1040; 
-}
+// Modal component uses design system styles
+// Additional component-specific overrides can be added here if needed

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TaskService } from '../../../services/task.service';
 import { AuthService } from '../../../services/auth.service';
+import { GlobalStateService } from '../../../services/global-state.service';
 import { ErrandsService } from '../../../services/errands.service';
 
 @Component({
@@ -26,13 +27,21 @@ export class UserDashboardComponent implements OnInit {
 
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
+  private globalState = inject(GlobalStateService);
   private errandsService = inject(ErrandsService);
   
   cleanupInProgress = false;
 
   ngOnInit() {
-    this.canCreateTasks = this.authService.canCreateTasks();
-    this.canAcceptTasks = this.authService.canAcceptTasks();
+    // Subscribe to global state for reactive updates
+    this.globalState.canCreateTasks$.subscribe(canCreate => {
+      this.canCreateTasks = canCreate;
+    });
+    
+    this.globalState.canAcceptTasks$.subscribe(canAccept => {
+      this.canAcceptTasks = canAccept;
+    });
+    
     const user = this.authService.getCurrentUser();
     this.userType = (user as any)?.userType || '';
     
@@ -51,9 +60,7 @@ export class UserDashboardComponent implements OnInit {
           localStorage.setItem('currentUser', JSON.stringify(response.data));
           this.authService.refreshCurrentUser();
           
-          // Refresh permissions and userType based on fresh data
-          this.canCreateTasks = this.authService.canCreateTasks();
-          this.canAcceptTasks = this.authService.canAcceptTasks();
+          // Refresh userType based on fresh data
           this.userType = response.data.userType || '';
           this.checkProfileCompletion();
         }

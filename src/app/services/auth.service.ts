@@ -21,19 +21,13 @@ export class AuthService {
     const token = this.getToken();
     const userStr = localStorage.getItem('currentUser');
     
-    console.log('Loading current user - Token exists:', !!token, 'User exists:', !!userStr);
-    
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
-        console.log('User loaded successfully');
       } catch (error) {
-        console.error('Error parsing user data:', error);
         this.logout();
       }
-    } else {
-      console.log('No user data found in localStorage');
     }
   }
 
@@ -45,7 +39,6 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
     .pipe(
       tap(response => {
-        console.log('Login response received');
         if (response.success && response.token && response.user) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
@@ -65,15 +58,9 @@ login(loginData: LoginModel): Observable<AuthResponse> {
             };
             localStorage.setItem('userPreferences', JSON.stringify(defaultPreferences));
           }
-          
-          console.log('User logged in successfully');
         }
       }),
       catchError(error => {
-        console.error('Login failed with status:', error?.status || 'unknown');
-        if (error.status === 0) {
-          console.error('Backend connection failed');
-        }
         return throwError(() => error);
       })
     );
@@ -84,7 +71,6 @@ login(loginData: LoginModel): Observable<AuthResponse> {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('refreshToken');
     this.currentUserSubject.next(null);
-    console.log('User logged out');
   }
 
   getToken(): string | null {
@@ -113,6 +99,11 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   isAdmin(): boolean {
     const user = this.getCurrentUser();
+    // Check the IsAdmin flag first (from API response)
+    if (typeof (user as any)?.isAdmin === 'boolean') {
+      return (user as any).isAdmin;
+    }
+    // Fallback to checking roles
     return user?.roles?.includes('Admin') || false;
   }
 
@@ -152,20 +143,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   // Business rule: Check if user can create tasks
   canCreateTasks(): boolean {
-    if (!this.isAuthenticated() || this.isAdmin()) {
-      return false;
-    }
-    
-    const user = this.getCurrentUser();
-    const userType = (user as any)?.userType;
-    
-    // Check userType first, then fall back to preferences
-    if (userType) {
-      return userType === 'creator' || userType === 'both';
-    }
-    
-    const preferences = this.getUserPreferences();
-    return preferences?.canCreateTasks === true;
+    return this.canPostErrands();
   }
 
   // Business rule: Check if user can claim tasks
@@ -180,7 +158,8 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   private getUserPreferences() {
     const saved = localStorage.getItem('userPreferences');
-    return saved ? JSON.parse(saved) : { canCreateTasks: true, canAcceptTasks: false };
+    // Default to allowing both creating and accepting tasks for regular users
+    return saved ? JSON.parse(saved) : { canCreateTasks: true, canAcceptTasks: true };
   }
 
   refreshCurrentUser(): void {
@@ -190,7 +169,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
       } catch (error) {
-        console.error('Error refreshing user data:', error);
+        // Handle error silently
       }
     }
   }
@@ -254,8 +233,6 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   getProfile(): Observable<any> {
     return this.http.get(`${environment.apiUrl}/user/profile`);
   }
-
-
 
   verifyEmail(): Observable<any> {
     return this.http.post(`${environment.apiUrl}/user/send-verification-email`, {});

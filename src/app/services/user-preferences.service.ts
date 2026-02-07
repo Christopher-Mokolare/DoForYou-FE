@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface UserPreferences {
@@ -29,11 +29,15 @@ export interface BankDetails {
 })
 export class UserPreferencesService {
   private apiUrl = `${environment.apiUrl}/UserPreferences`;
+  private preferencesSubject = new BehaviorSubject<UserPreferences | null>(null);
+  public preferences$ = this.preferencesSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   getUserPreferences(): Observable<UserPreferences> {
-    return this.http.get<UserPreferences>(this.apiUrl);
+    return this.http.get<UserPreferences>(this.apiUrl).pipe(
+      tap(preferences => this.preferencesSubject.next(preferences))
+    );
   }
 
   getPreferences(): Observable<UserPreferences> {
@@ -41,7 +45,9 @@ export class UserPreferencesService {
   }
 
   updateUserPreferences(preferences: UserPreferences): Observable<any> {
-    return this.http.put(this.apiUrl, preferences);
+    return this.http.put(this.apiUrl, preferences).pipe(
+      tap(() => this.preferencesSubject.next(preferences))
+    );
   }
 
   updatePreferences(preferences: UserPreferences): Observable<any> {
@@ -54,5 +60,9 @@ export class UserPreferencesService {
 
   saveToLocalStorage(preferences: UserPreferences): void {
     localStorage.setItem('userPreferences', JSON.stringify(preferences));
+  }
+
+  getCurrentPreferences(): UserPreferences | null {
+    return this.preferencesSubject.value;
   }
 }

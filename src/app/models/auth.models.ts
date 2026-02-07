@@ -10,7 +10,9 @@ export interface RegisterModel {
   phoneNumber: string;
   userType: string;
   idNumber?: string;
-  address?: string;
+  address: string;
+  dateOfBirth?: string;
+  username?: string;
   password: string;
   confirmPassword?: string;
 }

@@ -1,7 +1,8 @@
-// Enhanced Tasks Page with Brand Colors
+// Ultra-Modern Browse Errands Page
 .modern-tasks-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-color) 100%);
+  background: var(--background-color, #f8f9fa);
+  position: relative;
   
   .container {
     max-width: 1000px;
@@ -9,27 +10,31 @@
   
   // Hero Header
   .hero-header {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 2rem 0;
+    background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #6c757d) 100%);
+    border-radius: 16px;
+    padding: 3rem 0;
     margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     
     .hero-title {
       font-size: 2.5rem;
       font-weight: 700;
       color: white;
-      margin-bottom: 0.5rem;
-      font-family: 'Special Elite', serif;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
       
       i {
-        color: var(--light-color);
+        color: white;
       }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
     
     .hero-subtitle {
       font-size: 1.2rem;
-      color: rgba(255, 255, 255, 0.9);
+      color: white;
       margin-bottom: 1.5rem;
       font-family: 'Work Sans', sans-serif;
     }
@@ -65,22 +70,25 @@
     }
     
     .refresh-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 50px;
-      font-weight: 500;
-      font-family: 'Special Elite', serif;
+      background: white;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      color: var(--primary-color, #007bff);
+      padding: 0.875rem 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
       transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       
       &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.3);
+        background: #f8f9fa;
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
       
       &:disabled {
-        opacity: 0.6;
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       
       i {
@@ -103,15 +111,21 @@
       gap: 1.5rem;
       
       .alert-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 50%;
+        width: 64px;
+        height: 64px;
+        background: var(--warning-color, #ffc107);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 1.5rem;
+        font-size: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
       }
       
       .alert-content {
@@ -486,7 +500,7 @@
       .empty-icon {
         width: 100px;
         height: 100px;
-        background: rgba(255, 255, 255, 0.2);
+        background: #e9ecef;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -495,18 +509,18 @@
         
         i {
           font-size: 2.5rem;
-          color: white;
+          color: var(--text-color, #333);
         }
       }
       
       h3 {
-        color: white;
+        color: var(--text-color, #333);
         font-size: 2rem;
         margin-bottom: 1rem;
       }
       
       p {
-        color: rgba(255, 255, 255, 0.8);
+        color: #6c757d;
         font-size: 1.1rem;
         margin-bottom: 2rem;
       }
@@ -539,9 +553,8 @@
   
   // Modern Pagination
   .pagination-section {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    background: white;
+    border-top: 1px solid #dee2e6;
     padding: 2rem 0;
     
     .pagination-wrapper {
@@ -557,7 +570,7 @@
         gap: 2rem;
         
         .results-text {
-          color: white;
+          color: var(--text-color, #333);
           font-size: 0.9rem;
         }
         
@@ -567,14 +580,14 @@
           gap: 0.5rem;
           
           label {
-            color: white;
+            color: var(--text-color, #333);
             font-size: 0.9rem;
           }
           
           select {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: white;
+            border: 1px solid #dee2e6;
+            color: var(--text-color, #333);
             padding: 0.25rem 0.5rem;
             border-radius: 5px;
             
@@ -592,9 +605,9 @@
         gap: 0.5rem;
         
         .page-btn {
-          background: rgba(255, 255, 255, 0.2);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          color: white;
+          background: white;
+          border: 1px solid #dee2e6;
+          color: var(--text-color, #333);
           width: 40px;
           height: 40px;
           border-radius: 8px;
@@ -619,9 +632,9 @@
           margin: 0 0.5rem;
           
           .page-number {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: white;
+            border: 1px solid #dee2e6;
+            color: var(--text-color, #333);
             width: 40px;
             height: 40px;
             border-radius: 8px;
@@ -636,8 +649,8 @@
             }
             
             &.active {
-              background: white;
-              color: #667eea;
+              background: var(--primary-color, #007bff);
+              color: white;
               font-weight: 700;
             }
           }
@@ -649,19 +662,19 @@
 
 // Loading State
 .text-center.py-5 {
-  color: white;
+  color: var(--text-color, #333);
   
   .spinner-border {
-    border-color: rgba(255, 255, 255, 0.3);
-    border-left-color: white;
+    border-color: rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color, #007bff);
   }
 }
 
 // Error State
 .alert-danger {
-  background: rgba(220, 53, 69, 0.1);
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  color: white;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
   border-radius: 10px;
 }
 

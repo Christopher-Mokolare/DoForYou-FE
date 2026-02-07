@@ -74,7 +74,7 @@
         <div class="info-card mb-4">
           <div class="card-header">
             <h5>Progress Updates</h5>
-            <span class="update-count">{{ task.progressUpdates?.length || 0 }} updates</span>
+            <span class="update-count">{{ task.progressUpdates.length || 0 }} updates</span>
           </div>
           <div class="card-content">
             <!-- Add Progress Update (Runner Only) -->
@@ -85,7 +85,7 @@
                        rows="3"></textarea>
               <button class="btn btn-primary" 
                       (click)="addProgressUpdate()" 
-                      [disabled]="!progressMessage?.trim()">
+                      [disabled]="!progressMessage.trim()">
                 Add Update
               </button>
             </div>
@@ -145,7 +145,7 @@
                        (keyup.enter)="sendMessage()">
                 <button class="btn btn-primary" 
                         (click)="sendMessage()" 
-                        [disabled]="!newMessage?.trim()">
+                        [disabled]="!newMessage.trim()">
                   Send
                 </button>
               </div>

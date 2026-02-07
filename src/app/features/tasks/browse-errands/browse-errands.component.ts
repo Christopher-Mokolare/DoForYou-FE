@@ -22,6 +22,7 @@ import { environment } from '../../../../environments/environment';
 export class BrowseErrandsComponent implements OnInit, OnDestroy {
   errands: Errand[] = [];
   isLoading = true;
+  isLoadingTasks = false;
   error: string | null = null;
   lastUpdated?: Date;
   refreshSubscription?: Subscription;
@@ -83,12 +84,10 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   loadErrands(): void {
-    this.loadingService.show();
+    this.isLoadingTasks = true;
     this.error = null;
     
     const filters = this.buildFilters();
-
-    console.log('Loading errands with filters');
 
     this.errandsService.getVerifiedTasks(this.currentPage, this.itemsPerPage, filters).subscribe({
       next: (data: PaginatedResponse) => {
@@ -96,21 +95,27 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         this.totalItems = data.count;
         this.totalPages = data.totalPages;
         this.lastUpdated = new Date();
-        this.loadingService.hide();
-        console.log('Errands loaded successfully');
+        this.isLoadingTasks = false;
+        this.isLoading = false;
       },
       error: () => {
-        console.error('Failed to load errands');
         this.error = 'Failed to load errands. Please try again later.';
-        this.loadingService.hide();
+        this.isLoadingTasks = false;
+        this.isLoading = false;
       }
     });
   }
 
   private loadFilterOptions(): void {
     this.errandsService.getFilterOptions().subscribe({
-      next: (options) => {
-        this.categoryOptions = options.categories || [];
+      next: (response) => {
+        console.log('Filter options received:', response);
+        const categories = response?.data?.categories || response?.categories || [];
+        this.categoryOptions = categories.map((cat: string) => ({
+          value: cat,
+          label: cat
+        }));
+        console.log('Category options:', this.categoryOptions);
       },
       error: (error) => {
         console.error('Failed to load filter options:', error);
@@ -121,7 +126,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   private buildFilters(): any {
     const filters: any = {};
     
-    if (this.searchTerm) filters.search = this.searchTerm;
+    if (this.searchTerm) filters.search = this.searchTerm.toUpperCase();
     if (this.categoryFilter && this.categoryFilter !== '') filters.category = this.categoryFilter;
 
     return filters;
@@ -133,12 +138,12 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   private setupSearch(): void {
     this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(300),
+      debounceTime(500),
       distinctUntilChanged()
     ).subscribe(term => {
       this.searchTerm = term;
       this.currentPage = 1;
-      this.errandsService.clearCache(); // Clear cache on search change
+      this.errandsService.clearCache();
       this.loadErrands();
     });
   }
@@ -174,9 +179,11 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
       
       this.modalService.showConfirm(
         'Login Required',
-        'You need to be logged in to accept tasks. Do you want to login or register?',
+        'You need to be logged in to accept tasks.',
         () => window.location.href = `/login?returnUrl=${returnUrl}`,
-        () => window.location.href = `/register?returnUrl=${returnUrl}`
+        () => window.location.href = `/register?returnUrl=${returnUrl}`,
+        'Login',
+        'Register'
       );
       return;
     }
@@ -304,7 +311,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   getButtonText(errand: Errand): string {
-    if (!this.isLoggedIn) return 'Register to Accept';
+    if (!this.isLoggedIn) return 'Login to Accept';
     if (!this.authService.canAcceptTasks()) return 'Task Creator Mode';
     
     const status = errand.taskStatus || errand.status || '';
@@ -332,7 +339,14 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   postErrand(): void {
     if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/post-errand' } });
+      this.modalService.showConfirm(
+        'Login Required',
+        'You need to be logged in to post a task.',
+        () => this.router.navigate(['/login'], { queryParams: { returnUrl: '/post-errand' } }),
+        () => this.router.navigate(['/register'], { queryParams: { returnUrl: '/post-errand' } }),
+        'Login',
+        'Register'
+      );
       return;
     }
     this.router.navigate(['/post-errand']);

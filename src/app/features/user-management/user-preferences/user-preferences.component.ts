@@ -64,7 +64,7 @@ export class UserPreferencesComponent implements OnInit {
         
         const roleMessage = this.preferences.canCreateTasks ? 'Task Creator' : 'Task Runner';
         alert(`Preferences saved! You are now set as: ${roleMessage}`);
-        window.location.reload();
+        // Remove window.location.reload() - let reactive updates handle UI changes
       },
       error: () => {
         console.error('Error saving preferences');

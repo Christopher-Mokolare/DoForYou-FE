@@ -72,7 +72,6 @@ export class ProfileComponent implements OnInit {
     // Always try to load from current user first
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
-      console.log('Loading profile from current user:', currentUser);
       const user = currentUser as any;
       this.profile = {
         name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '',
@@ -114,13 +113,10 @@ export class ProfileComponent implements OnInit {
           // Update localStorage with fresh profile data
           localStorage.setItem('currentUser', JSON.stringify(userData));
           this.authService.refreshCurrentUser();
-          
-          console.log('Profile updated from API:', userData);
-          console.log('UserType set to:', this.userType);
         }
       },
       error: (error) => {
-        console.log('API profile load failed, using current user data');
+        // Handle error silently
       }
     });
   }
@@ -130,11 +126,8 @@ export class ProfileComponent implements OnInit {
       next: (response: UserPreferences) => {
         this.preferences = response;
         // Don't override userType here - it's already set from API profile response
-        console.log('Preferences loaded:', response);
-        console.log('Current userType:', this.userType);
       },
       error: (error) => {
-        console.error('Error loading preferences:', error);
         const saved = localStorage.getItem('userPreferences');
         if (saved) {
           this.preferences = { ...this.preferences, ...JSON.parse(saved) };
@@ -227,7 +220,9 @@ export class ProfileComponent implements OnInit {
                 };
               }
             },
-            error: (error) => console.error('Error fetching updated profile:', error)
+            error: (error) => {
+              // Handle error silently
+            }
           });
           
           this.modalService.showModal({
@@ -333,7 +328,6 @@ export class ProfileComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error updating preferences:', error);
         this.userPreferencesService.saveToLocalStorage(this.preferences);
         this.modalService.showModal({
           type: 'warning',

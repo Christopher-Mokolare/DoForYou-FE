@@ -20,8 +20,9 @@ export class ProfileCompletionGuard implements CanActivate {
       return false;
     }
 
-    if (!this.isProfileComplete(user)) {
-      this.router.navigate(['/profile']);
+    // Use AuthService method for consistency
+    if (this.authService.isProfileIncomplete()) {
+      this.router.navigate(['/user/profile']);
       return false;
     }
 
@@ -29,13 +30,13 @@ export class ProfileCompletionGuard implements CanActivate {
   }
 
   private isProfileComplete(user: any): boolean {
-    const preferences = this.getUserPreferences();
+    // Check required fields using the current user object structure
+    const hasBasicInfo = (user.firstName && user.lastName) || user.name;
+    const hasEmail = user.email;
+    const hasContact = user.contact || user.phoneNumber;
+    const hasUserType = user.userType;
     
-    // Check required fields
-    const hasBasicInfo = user.name && user.email && user.contact;
-    const hasUserType = preferences && (preferences.canCreateTasks || preferences.canAcceptTasks);
-    
-    return hasBasicInfo && hasUserType;
+    return hasBasicInfo && hasEmail && hasContact && hasUserType;
   }
 
   private getUserPreferences() {
