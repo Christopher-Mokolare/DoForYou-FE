@@ -1,0 +1,26 @@
+name: Auto Create PR
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'fix/**'
+      - 'hotfix/**'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          destination_branch: "main"
+          pr_title: "Auto PR: ${{ github.ref_name }}"
+          pr_body: |
+            **Automated Pull Request**
+            
+            Branch: `${{ github.ref_name }}`
+            Latest commit: ${{ github.sha }}
+            
+            Please review the changes before merging.
