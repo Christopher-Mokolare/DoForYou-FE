@@ -1,0 +1,53 @@
+<div class="chat-container card">
+  <div class="card-header">
+    <h3 class="card-title">{{ taskTitle.length > 50 ? (taskTitle.substring(0, 50) + '...') : taskTitle }}</h3>
+  </div>
+  
+  <div class="card-body">
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner-border text-primary"></div>
+      <p>Loading messages...</p>
+    </div>
+
+    <div *ngIf="!loading && messages.length === 0" class="empty-state">
+      <div class="empty-icon">💬</div>
+      <p>No messages yet. Start the conversation!</p>
+    </div>
+
+    <div *ngIf="!loading && messages.length > 0" class="messages-list" #messagesContainer (scroll)="onScroll()">
+      <div *ngFor="let message of messages" 
+           class="message"
+           [class.message-mine]="isMyMessage(message)"
+           [class.message-theirs]="!isMyMessage(message)">
+        <div class="message-header">
+          <span class="message-sender">{{ message.senderName }}</span>
+          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+        </div>
+        <div class="message-content">{{ message.content }}</div>
+      </div>
+    </div>
+
+    <button *ngIf="showNewMessageIndicator" class="new-message-indicator" (click)="scrollToBottom()">
+      <i class="fas fa-arrow-down"></i> New message
+    </button>
+  </div>
+
+  <div class="card-footer">
+    <form (ngSubmit)="sendMessage()" class="message-form">
+      <input 
+        type="text" 
+        class="form-input" 
+        [(ngModel)]="newMessage"
+        name="message"
+        placeholder="Type your message..."
+        [disabled]="sending"
+        required>
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="!newMessage.trim() || sending">
+        {{ sending ? 'Sending...' : 'Send' }}
+      </button>
+    </form>
+  </div>
+</div>

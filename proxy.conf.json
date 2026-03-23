@@ -1,0 +1,13 @@
+{
+  "/api": {
+    "target": "http://localhost:5001",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/taskHub": {
+    "target": "http://localhost:5001",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true
+  }
+}

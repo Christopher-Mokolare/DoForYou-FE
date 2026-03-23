@@ -1,0 +1,506 @@
+@import './design-tokens';
+
+// ============================================
+// BUTTONS
+// ============================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  border: none;
+  border-radius: $radius-md;
+  font-family: $font-primary;
+  font-size: $font-base;
+  font-weight: $font-semibold;
+  line-height: $leading-normal;
+  cursor: pointer;
+  transition: all $transition-base;
+  text-decoration: none;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.btn-primary {
+  @extend .btn;
+  background: $primary;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  @extend .btn;
+  background: transparent;
+  color: $primary;
+  border: 2px solid $primary;
+  
+  &:hover:not(:disabled) {
+    background: $primary-light;
+  }
+}
+
+.btn-outline {
+  @extend .btn;
+  background: white;
+  color: $text-dark;
+  border: 1px solid $border;
+  
+  &:hover:not(:disabled) {
+    border-color: $primary;
+    color: $primary;
+  }
+}
+
+.btn-success {
+  @extend .btn;
+  background: $success;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: darken($success, 10%);
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.btn-danger {
+  @extend .btn;
+  background: $danger;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: darken($danger, 10%);
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.btn-sm {
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-sm;
+}
+
+.btn-lg {
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-lg;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+// ============================================
+// CARDS
+// ============================================
+
+.card {
+  background: $card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base;
+  border: 1px solid $border-light;
+}
+
+.card-hover {
+  @extend .card;
+  cursor: pointer;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
+
+.task-card {
+  @extend .card;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: $primary;
+    transform: scaleY(0);
+    transition: transform $transition-base;
+  }
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-lg;
+    transform: translateY(-4px);
+    
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $border-light;
+}
+
+.card-body {
+  padding: $spacing-md 0;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-light;
+}
+
+// ============================================
+// BADGES
+// ============================================
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-full;
+  font-size: $font-sm;
+  font-weight: $font-medium;
+  line-height: 1;
+}
+
+.badge-posted {
+  @extend .badge;
+  background: rgba(255, 138, 0, 0.1);
+  color: $status-posted;
+}
+
+.badge-claimed {
+  @extend .badge;
+  background: rgba(52, 152, 219, 0.1);
+  color: $status-claimed;
+}
+
+.badge-in-progress {
+  @extend .badge;
+  background: rgba(255, 193, 7, 0.1);
+  color: $status-in-progress;
+}
+
+.badge-completed {
+  @extend .badge;
+  background: rgba(46, 204, 113, 0.1);
+  color: $status-completed;
+}
+
+.badge-paid {
+  @extend .badge;
+  background: rgba(39, 174, 96, 0.1);
+  color: $status-paid;
+}
+
+.badge-cancelled {
+  @extend .badge;
+  background: rgba(231, 76, 60, 0.1);
+  color: $status-cancelled;
+}
+
+.badge-disputed {
+  @extend .badge;
+  background: rgba(155, 89, 182, 0.1);
+  color: $status-disputed;
+}
+
+// ============================================
+// INPUT FIELDS
+// ============================================
+
+.form-group {
+  margin-bottom: $spacing-lg;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: $spacing-sm;
+  font-size: $font-sm;
+  font-weight: $font-medium;
+  color: $text-dark;
+}
+
+.form-input {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  font-size: $font-base;
+  font-family: $font-primary;
+  transition: all $transition-base;
+  background: white;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.1);
+  }
+  
+  &:disabled {
+    background: $background-dark;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  &.error {
+    border-color: $danger;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+    }
+  }
+}
+
+.form-textarea {
+  @extend .form-input;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-select {
+  @extend .form-input;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $spacing-md center;
+  padding-right: $spacing-xl;
+}
+
+.form-error {
+  display: block;
+  margin-top: $spacing-xs;
+  font-size: $font-sm;
+  color: $danger;
+}
+
+.form-help {
+  display: block;
+  margin-top: $spacing-xs;
+  font-size: $font-sm;
+  color: $text-muted;
+}
+
+// ============================================
+// MODALS
+// ============================================
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-modal-backdrop;
+  animation: fadeIn $transition-base;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: $z-modal;
+  box-shadow: $shadow-2xl;
+  animation: slideUp $transition-slow;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+  
+  h2 {
+    margin: 0;
+    font-size: $font-2xl;
+    font-weight: $font-semibold;
+    color: $text-dark;
+  }
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: $font-2xl;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+  
+  &:hover {
+    background: $background;
+    color: $text-dark;
+  }
+}
+
+.modal-body {
+  margin-bottom: $spacing-lg;
+}
+
+.modal-footer {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: flex-end;
+}
+
+// ============================================
+// TOAST NOTIFICATIONS
+// ============================================
+
+.toast-container {
+  position: fixed;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  z-index: $z-tooltip;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xl;
+  min-width: 300px;
+  animation: slideDown $transition-base;
+  border-left: 4px solid;
+  
+  &.toast-success {
+    border-left-color: $success;
+  }
+  
+  &.toast-error {
+    border-left-color: $danger;
+  }
+  
+  &.toast-info {
+    border-left-color: $info;
+  }
+  
+  &.toast-warning {
+    border-left-color: $warning;
+  }
+}
+
+.toast-icon {
+  font-size: $font-xl;
+}
+
+.toast-content {
+  flex: 1;
+  
+  .toast-title {
+    font-weight: $font-semibold;
+    color: $text-dark;
+    margin-bottom: $spacing-xs;
+  }
+  
+  .toast-message {
+    font-size: $font-sm;
+    color: $text-muted;
+  }
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0;
+  font-size: $font-lg;
+  
+  &:hover {
+    color: $text-dark;
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

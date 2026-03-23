@@ -10,7 +10,7 @@ import { LoadingService } from '../../services/loading.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register.component.html',
-  styles: []
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -18,6 +18,8 @@ export class RegisterComponent {
   showPassword = false;
   showConfirmPassword = false;
   dateOfBirth = '';
+  currentStep = 1;
+  totalSteps = 3;
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -31,8 +33,9 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9+\\-\\s()]+$')]],
       userType: ['', [Validators.required]],
-      idNumber: ['', [Validators.pattern('^[0-9]{13}$')]],
-      address: [''],
+      idNumber: ['', [Validators.required, Validators.pattern('^[0-9]{13}$')]],
+      address: ['', [Validators.required]],
+      dateOfBirth: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -46,6 +49,55 @@ export class RegisterComponent {
       return { 'passwordMismatch': true };
     }
     return null;
+  }
+
+  nextStep(): void {
+    if (this.currentStep < this.totalSteps) {
+      if (this.isStepValid(this.currentStep)) {
+        this.currentStep++;
+      } else {
+        this.markStepTouched(this.currentStep);
+      }
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  isStepValid(step: number): boolean {
+    switch(step) {
+      case 1:
+        return !!(this.registerForm.get('firstName')?.valid && 
+                 this.registerForm.get('lastName')?.valid &&
+                 this.registerForm.get('email')?.valid &&
+                 this.registerForm.get('phoneNumber')?.valid);
+      case 2:
+        return !!(this.registerForm.get('userType')?.valid &&
+                 this.registerForm.get('idNumber')?.valid &&
+                 this.registerForm.get('address')?.valid &&
+                 this.registerForm.get('dateOfBirth')?.valid);
+      case 3:
+        return !!(this.registerForm.get('password')?.valid && 
+                 this.registerForm.get('confirmPassword')?.valid &&
+                 !this.registerForm.hasError('passwordMismatch'));
+      default:
+        return false;
+    }
+  }
+
+  markStepTouched(step: number): void {
+    const fields: { [key: number]: string[] } = {
+      1: ['firstName', 'lastName', 'email', 'phoneNumber'],
+      2: ['userType', 'idNumber', 'address', 'dateOfBirth'],
+      3: ['password', 'confirmPassword']
+    };
+    
+    fields[step]?.forEach(field => {
+      this.registerForm.get(field)?.markAsTouched();
+    });
   }
 
   onSubmit(): void {
@@ -79,23 +131,35 @@ export class RegisterComponent {
 
   onIdNumberChange(): void {
     const idNumber = this.registerForm.get('idNumber')?.value;
+    console.log('=== ID NUMBER CHANGE EVENT ===');
+    console.log('ID Number changed:', idNumber);
+    console.log('ID length:', idNumber?.length);
+    console.log('ID regex test:', /^\d{13}$/.test(idNumber));
+    
     if (idNumber && idNumber.length === 13 && /^\d{13}$/.test(idNumber)) {
-      this.dateOfBirth = this.extractDateFromIdNumber(idNumber);
+      console.log('✅ Calling API to validate ID:', idNumber);
+      
+      this.authService.validateIdNumber(idNumber).subscribe({
+        next: (response: any) => {
+          console.log('✅ API Response:', response);
+          if (response.success && response.data.isValid) {
+            console.log('✅ Setting date of birth:', response.data.dateOfBirth);
+            this.registerForm.patchValue({
+              dateOfBirth: response.data.dateOfBirth
+            });
+            console.log('✅ Form updated, new value:', this.registerForm.get('dateOfBirth')?.value);
+          }
+        },
+        error: (error) => {
+          console.error('❌ ID validation error:', error);
+        }
+      });
     } else {
-      this.dateOfBirth = '';
+      console.log('❌ ID number validation failed');
+      console.log('- Has value:', !!idNumber);
+      console.log('- Length is 13:', idNumber?.length === 13);
+      console.log('- Regex passes:', /^\d{13}$/.test(idNumber));
     }
-  }
-
-  private extractDateFromIdNumber(idNumber: string): string {
-    const year = idNumber.substring(0, 2);
-    const month = idNumber.substring(2, 4);
-    const day = idNumber.substring(4, 6);
-    
-    const currentYear = new Date().getFullYear();
-    const currentCentury = Math.floor(currentYear / 100) * 100;
-    const fullYear = parseInt(year) <= (currentYear % 100) ? currentCentury + parseInt(year) : currentCentury - 100 + parseInt(year);
-    
-    return `${day}/${month}/${fullYear}`;
   }
 
   hasError(fieldName: string, errorType: string): boolean {

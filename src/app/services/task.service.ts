@@ -91,6 +91,10 @@ export class TaskService {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/confirm`, {});
   }
 
+  getPaymentUrl(taskId: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/${taskId}/payment-url`);
+  }
+
   cancelTask(taskId: string, reason: string): Observable<ApiResponse<boolean>> {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/cancel`, {
       reason: reason

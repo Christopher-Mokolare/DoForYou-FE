@@ -35,6 +35,10 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, registerData);
   }
 
+  validateIdNumber(idNumber: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/user/validate-id`, { idNumber });
+  }
+
 login(loginData: LoginModel): Observable<AuthResponse> {
   return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginData)
     .pipe(
@@ -108,7 +112,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   }
 
   canPostErrands(): boolean {
-    if (!this.isAuthenticated() || this.isAdmin()) {
+    if (!this.isAuthenticated() || this.isAdmin() || !this.isProfileComplete()) {
       return false;
     }
     
@@ -125,7 +129,7 @@ login(loginData: LoginModel): Observable<AuthResponse> {
   }
 
   canAcceptTasks(): boolean {
-    if (!this.isAuthenticated() || this.isAdmin()) {
+    if (!this.isAuthenticated() || this.isAdmin() || !this.isProfileComplete()) {
       return false;
     }
     

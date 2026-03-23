@@ -9,10 +9,10 @@
               <i class="fas fa-magic"></i>
             </div>
             <h1 class="unique-title brand-font">
-              Create Your Task<span class="dot">.</span>
+              {{ isEditMode ? 'Edit Your Task' : 'Create Your Task' }}<span class="dot">.</span>
             </h1>
             <p class="unique-subtitle">
-              Transform your to-do into someone else's opportunity
+              {{ isEditMode ? 'Update your task details before completing payment' : 'Transform your to-do into someone else\'s opportunity' }}
             </p>
 
             <!-- User Welcome Card -->
@@ -226,6 +226,25 @@
                       <div class="field-hint">
                         Fair pricing attracts quality helpers
                       </div>
+                      
+                      <!-- Commission Breakdown -->
+                      <div *ngIf="taskForm.get('budget')?.value > 0" class="commission-breakdown mt-3">
+                        <div class="breakdown-card">
+                          <div class="breakdown-row">
+                            <span>Task Budget:</span>
+                            <span>R{{ commissionBreakdown.total.toFixed(2) }}</span>
+                          </div>
+                          <div class="breakdown-row text-muted">
+                            <span>Platform Fee (15%):</span>
+                            <span>-R{{ commissionBreakdown.commission.toFixed(2) }}</span>
+                          </div>
+                          <div class="breakdown-row total">
+                            <span><strong>Runner Receives:</strong></span>
+                            <span class="text-success"><strong>R{{ commissionBreakdown.payout.toFixed(2) }}</strong></span>
+                          </div>
+                        </div>
+                      </div>
+                      
                       <div
                         class="invalid-feedback"
                         *ngIf="isFieldInvalid('budget')"
@@ -333,13 +352,13 @@
                   class="unique-submit-btn" 
                   [disabled]="taskForm.invalid || isSubmitting">
                   <span class="btn-content" *ngIf="!isSubmitting">
-                    <i class="fas fa-rocket"></i>
-                    <span class="btn-text">Launch My Task</span>
+                    <i [class]="isEditMode ? 'fas fa-save' : 'fas fa-rocket'"></i>
+                    <span class="btn-text">{{ isEditMode ? 'Save Changes' : 'Launch My Task' }}</span>
                     <span class="btn-arrow">→</span>
                   </span>
                   <span class="btn-content" *ngIf="isSubmitting">
                     <i class="fas fa-spinner fa-spin"></i>
-                    <span class="btn-text">Creating Magic...</span>
+                    <span class="btn-text">{{ isEditMode ? 'Saving...' : 'Creating Magic...' }}</span>
                   </span>
                 </button>
               </div>

@@ -14,8 +14,8 @@ declare var Chart: any;
       <div class="page-header">
         <h1 class="page-title">Payment Overview</h1>
         <div class="header-stats">
-          <span class="stat-badge success">Revenue: R{{paymentsData?.totalCommission | number:'1.2-2'}}</span>
-          <span class="stat-badge warning">Pending: R{{paymentsData?.pendingCommission | number:'1.2-2'}}</span>
+          <span class="stat-badge" style="background: #FFAB40; color: white;">Revenue: R{{paymentsData?.totalRevenue | number:'1.2-2'}}</span>
+          <span class="stat-badge" style="background: #FFD180; color: white;">Pending: R{{paymentsData?.pendingRevenue | number:'1.2-2'}}</span>
         </div>
       </div>
 
@@ -26,7 +26,7 @@ declare var Chart: any;
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="text-muted text-uppercase small mb-1">Platform Revenue</div>
-                <div class="h4 mb-0 text-success">R{{paymentsData.totalCommission | number:'1.2-2'}}</div>
+                <div class="h4 mb-0" style="color: #FFAB40;">R{{paymentsData.totalRevenue | number:'1.2-2'}}</div>
                 <small class="text-muted">15% Commission</small>
               </div>
               <i class="fas fa-dollar-sign fa-2x text-muted opacity-50"></i>
@@ -39,7 +39,7 @@ declare var Chart: any;
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Revenue</div>
-                <div class="h4 mb-0 text-warning">R{{paymentsData.pendingCommission | number:'1.2-2'}}</div>
+                <div class="h4 mb-0" style="color: #FFD180;">R{{paymentsData.pendingRevenue | number:'1.2-2'}}</div>
                 <small class="text-muted">Awaiting verification</small>
               </div>
               <i class="fas fa-clock fa-2x text-muted opacity-50"></i>
@@ -52,7 +52,7 @@ declare var Chart: any;
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="text-muted text-uppercase small mb-1">Helper Payouts</div>
-                <div class="h4 mb-0 text-info">R{{paymentsData.runnerPayouts | number:'1.2-2'}}</div>
+                <div class="h4 mb-0" style="color: #FF9E40;">R{{(paymentsData.totalRevenue * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">85% to helpers</small>
               </div>
               <i class="fas fa-hand-holding-usd fa-2x text-muted opacity-50"></i>
@@ -65,7 +65,7 @@ declare var Chart: any;
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Payouts</div>
-                <div class="h4 mb-0 text-danger">{{paymentsData.pendingPayouts}}</div>
+                <div class="h4 mb-0" style="color: #FF8A00;">R{{(paymentsData.pendingRevenue * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">Tasks awaiting payment</small>
               </div>
               <i class="fas fa-exclamation-triangle fa-2x text-muted opacity-50"></i>
@@ -79,28 +79,28 @@ declare var Chart: any;
         <h5 class="mb-3">Quick Actions</h5>
         <div class="row">
           <div class="col-md-3 mb-3">
-            <a class="btn btn-warning w-100" routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
+            <a class="btn w-100" style="background: #FFE57F; color: #333;" routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
               <i class="fas fa-check-circle me-2"></i>
               <span class="d-none d-lg-inline">Verify Payments</span>
               <span class="d-lg-none">Verify</span>
             </a>
           </div>
           <div class="col-md-3 mb-3">
-            <a class="btn btn-success w-100" routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
+            <a class="btn w-100" style="background: #FFAB40; color: white;" routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
               <i class="fas fa-money-bill-wave me-2"></i>
               <span class="d-none d-lg-inline">Process Payouts</span>
               <span class="d-lg-none">Payouts</span>
             </a>
           </div>
           <div class="col-md-3 mb-3">
-            <button class="btn btn-info w-100" (click)="exportPaymentReport()">
+            <button class="btn w-100" style="background: #FFD180; color: white;" (click)="exportPaymentReport()">
               <i class="fas fa-download me-2"></i>
               <span class="d-none d-lg-inline">Export Report</span>
               <span class="d-lg-none">Export</span>
             </button>
           </div>
           <div class="col-md-3 mb-3">
-            <button class="btn btn-primary w-100" (click)="refreshData()">
+            <button class="btn w-100" style="background: #FF9E40; color: white;" (click)="refreshData()">
               <i class="fas fa-sync-alt me-2"></i>
               <span class="d-none d-lg-inline">Refresh Data</span>
               <span class="d-lg-none">Refresh</span>
@@ -113,51 +113,72 @@ declare var Chart: any;
       <div class="content-card">
         <h5 class="mb-4">Payment Flow</h5>
         <div class="row">
-          <div class="col-md-3 mb-4">
-            <div class="text-center">
-              <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                <span class="fw-bold">1</span>
+          <div class="col-lg mb-4">
+            <div class="text-center p-3 border rounded h-100">
+              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFAB40;">
+                <span class="fw-bold fs-4">1</span>
               </div>
-              <h6 class="mt-3">User Payment</h6>
-              <p class="small text-muted">Customer pays upfront</p>
+              <h6 class="fw-bold">User Payment</h6>
+              <p class="small text-muted mb-2">Customer pays task amount upfront via PayFast</p>
+              <div class="badge" style="background: #FFAB40;">Status: PendingPayment</div>
             </div>
           </div>
-          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
-            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
+            <i class="fas fa-arrow-right fa-2x" style="color: #FFAB40;"></i>
           </div>
-          <div class="col-md-3 mb-4">
-            <div class="text-center">
-              <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                <span class="fw-bold">2</span>
+          <div class="col-lg mb-4">
+            <div class="text-center p-3 border rounded h-100">
+              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFD180;">
+                <span class="fw-bold fs-4">2</span>
               </div>
-              <h6 class="mt-3">Auto Verification</h6>
-              <p class="small text-muted">PayFast ITN confirms payment</p>
+              <h6 class="fw-bold">Auto Verification</h6>
+              <p class="small text-muted mb-2">PayFast ITN webhook confirms payment received</p>
+              <div class="badge" style="background: #FFD180;">Status: Posted</div>
             </div>
           </div>
-          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
-            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
+            <i class="fas fa-arrow-right fa-2x" style="color: #FFD180;"></i>
           </div>
-          <div class="col-md-3 mb-4">
-            <div class="text-center">
-              <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                <span class="fw-bold">3</span>
+          <div class="col-lg mb-4">
+            <div class="text-center p-3 border rounded h-100">
+              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFE57F;">
+                <span class="fw-bold fs-4">3</span>
               </div>
-              <h6 class="mt-3">Task Completion</h6>
-              <p class="small text-muted">Helper completes task</p>
+              <h6 class="fw-bold">Task Completion</h6>
+              <p class="small text-muted mb-2">Helper marks task as complete, funds held in escrow</p>
+              <div class="badge" style="background: #FFE57F; color: #333;">Status: Completed</div>
             </div>
           </div>
-          <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
-            <i class="fas fa-arrow-down fa-2x text-muted"></i>
+          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
+            <i class="fas fa-arrow-right fa-2x" style="color: #FFE57F;"></i>
           </div>
-          <div class="col-md-3 mb-4">
-            <div class="text-center">
-              <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                <span class="fw-bold">4</span>
+          <div class="col-lg mb-4">
+            <div class="text-center p-3 border rounded h-100">
+              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FF9E40;">
+                <span class="fw-bold fs-4">4</span>
               </div>
-              <h6 class="mt-3">Auto Payout</h6>
-              <p class="small text-muted">85% to helper, 15% commission (1hr delay)</p>
+              <h6 class="fw-bold">48hr Escrow Hold</h6>
+              <p class="small text-muted mb-2">Creator confirms OR auto-release after 48 hours</p>
+              <div class="badge" style="background: #FF9E40;">EscrowReleaseService</div>
             </div>
           </div>
+          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
+            <i class="fas fa-arrow-right fa-2x" style="color: #FF9E40;"></i>
+          </div>
+          <div class="col-lg mb-4">
+            <div class="text-center p-3 border rounded h-100">
+              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FF8A00;">
+                <span class="fw-bold fs-4">5</span>
+              </div>
+              <h6 class="fw-bold">Wallet Credit</h6>
+              <p class="small text-muted mb-2">85% credited to helper, 15% platform commission</p>
+              <div class="badge" style="background: #FF8A00;">Status: RunnerPaid</div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info mt-4 mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Protection:</strong> Helpers are guaranteed payment after 48 hours even if creator doesn't respond. Funds remain in helper's wallet until they initiate withdrawal to their bank account.
         </div>
       </div>
 
@@ -368,7 +389,7 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
       return numValue.toFixed(2);
     };
     
-    return `Date,Total Revenue,Pending Revenue,Runner Payouts,Pending Payouts\n${date},${sanitizeValue(this.paymentsData?.totalCommission)},${sanitizeValue(this.paymentsData?.pendingCommission)},${sanitizeValue(this.paymentsData?.runnerPayouts)},${sanitizeValue(this.paymentsData?.pendingPayouts)}`;
+    return `Date,Total Revenue,Pending Revenue,Runner Payouts,Pending Payouts\n${date},${sanitizeValue(this.paymentsData?.totalRevenue)},${sanitizeValue(this.paymentsData?.pendingRevenue)},${sanitizeValue(this.paymentsData?.totalRevenue * 0.85)},${sanitizeValue(this.paymentsData?.pendingRevenue * 0.85)}`;
   }
 
   private loadChartScript() {
@@ -390,10 +411,10 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
         labels: ['Platform Revenue (15%)', 'Runner Payouts (85%)'],
         datasets: [{
           data: [
-            this.paymentsData?.totalCommission || 0,
-            this.paymentsData?.runnerPayouts || 0
+            (this.paymentsData?.totalRevenue || 0) * 0.15,
+            (this.paymentsData?.totalRevenue || 0) * 0.85
           ],
-          backgroundColor: ['#28a745', '#17a2b8'],
+          backgroundColor: ['#FFAB40', '#FFD180'],
           borderWidth: 0
         }]
       },
@@ -412,8 +433,8 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
   private updateChart() {
     if (this.chart && this.paymentsData) {
       this.chart.data.datasets[0].data = [
-        this.paymentsData.totalCommission,
-        this.paymentsData.runnerPayouts
+        this.paymentsData.totalRevenue * 0.15,
+        this.paymentsData.totalRevenue * 0.85
       ];
       this.chart.update();
     }

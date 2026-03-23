@@ -1,27 +1,43 @@
-<div class="modal fade" [class.show]="isVisible" [style.display]="isVisible ? 'block' : 'none'" 
-     tabindex="-1" *ngIf="config">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header" [ngClass]="getHeaderClass()">
-        <h5 class="modal-title">
-          <i [class]="getIconClass()"></i>
-          <span class="title-text">{{ config.title }}</span>
+<div class="modal-backdrop" *ngIf="isVisible" (click)="close()"></div>
+
+<div class="modal-container" *ngIf="config && isVisible">
+  <div class="modal-content rounded-lg shadow-xl border-0">
+    
+    <!-- Modal Header -->
+    <div class="modal-header border-0 pb-0">
+      <div class="w-full text-center">
+        <div class="mb-3">
+          <i [class]="getIconClass()" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="modal-title font-semibold text-xl mb-0">
+          {{ config.title }}
         </h5>
-        <button type="button" class="btn-close" (click)="close()"></button>
       </div>
-      <div class="modal-body">
-        <p>{{ config.message }}</p>
-      </div>
-      <div class="modal-footer">
-        <button *ngIf="config.type === 'confirm'" 
-                type="button" class="btn btn-secondary" (click)="cancel()">
-          {{ config.cancelText || 'Cancel' }}
-        </button>
-        <button type="button" [class]="getButtonClass()" (click)="confirm()">
-          {{ config.confirmText || 'OK' }}
-        </button>
-      </div>
+      <button type="button" class="btn-close position-absolute" 
+              style="top: 1rem; right: 1rem;" 
+              (click)="close()" 
+              aria-label="Close"></button>
     </div>
+    
+    <!-- Modal Body -->
+    <div class="modal-body px-4 py-3" style="text-align: center;">
+      <div [innerHTML]="config.message"></div>
+    </div>
+    
+    <!-- Modal Footer -->
+    <div class="modal-footer border-0 justify-content-center pt-2 pb-4">
+      <button *ngIf="config.type === 'confirm'" 
+              type="button" 
+              class="btn-outline me-2" 
+              (click)="cancel()">
+        {{ config.cancelText || 'Cancel' }}
+      </button>
+      <button type="button" 
+              [class]="getButtonClass()" 
+              (click)="confirm()">
+        {{ config.confirmText || 'OK' }}
+      </button>
+    </div>
+    
   </div>
 </div>
-<div class="modal-backdrop fade" [class.show]="isVisible" *ngIf="isVisible"></div>

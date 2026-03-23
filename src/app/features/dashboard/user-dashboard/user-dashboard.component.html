@@ -53,7 +53,7 @@
             <i class="fas fa-hand-paper"></i>
           </div>
           <div class="stat-content">
-            <h3>{{creatorStats.inProgress}}</h3>
+            <h3>{{creatorStats.active}}</h3>
             <p>Tasks In Progress</p>
           </div>
         </div>
@@ -93,7 +93,7 @@
             <i class="fas fa-clock"></i>
           </div>
           <div class="stat-content">
-            <h3>{{creatorStats.pending}}</h3>
+            <h3>{{creatorStats.pendingPayment}}</h3>
             <p>Pending Tasks</p>
           </div>
         </div>
@@ -110,8 +110,38 @@
             <i class="fas fa-tasks"></i>
           </div>
           <div class="stat-content">
+            <h3>{{creatorStats.posted}}</h3>
+            <p>Posted Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-danger">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.pendingPayment}}</h3>
+            <p>Pending Payment</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="fas fa-spinner"></i>
+          </div>
+          <div class="stat-content">
             <h3>{{creatorStats.active}}</h3>
             <p>Active Tasks</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-info">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{creatorStats.awaitingConfirmation}}</h3>
+            <p>Awaiting Confirmation</p>
           </div>
         </div>
         
@@ -126,17 +156,7 @@
         </div>
         
         <div class="stat-card">
-          <div class="stat-icon bg-warning">
-            <i class="fas fa-clock"></i>
-          </div>
-          <div class="stat-content">
-            <h3>{{creatorStats.pending}}</h3>
-            <p>Pending Tasks</p>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-icon bg-info">
+          <div class="stat-icon bg-dark">
             <i class="fas fa-money-bill-wave"></i>
           </div>
           <div class="stat-content">
@@ -156,7 +176,7 @@
         </div>
         
         <div class="stat-card">
-          <div class="stat-icon bg-dark">
+          <div class="stat-icon bg-primary">
             <i class="fas fa-chart-line"></i>
           </div>
           <div class="stat-content">
@@ -193,6 +213,16 @@
         </div>
         
         <div class="stat-card">
+          <div class="stat-icon bg-secondary">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{runnerStats.awaitingConfirmation}}</h3>
+            <p>Awaiting Confirmation</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
           <div class="stat-icon bg-success">
             <i class="fas fa-trophy"></i>
           </div>
@@ -213,7 +243,27 @@
         </div>
         
         <div class="stat-card">
-          <div class="stat-icon bg-secondary">
+          <div class="stat-icon bg-success">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.availableBalance}}</h3>
+            <p>Available Balance</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-warning">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.pendingPayouts}}</h3>
+            <p>Pending Payouts</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-info">
             <i class="fas fa-calendar-month"></i>
           </div>
           <div class="stat-content">
@@ -229,6 +279,16 @@
           <div class="stat-content">
             <h3>{{runnerStats.completionRate | number:'1.0-0'}}%</h3>
             <p>Completion Rate</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon bg-secondary">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="stat-content">
+            <h3>R{{runnerStats.averageEarning | number:'1.0-0'}}</h3>
+            <p>Avg per Task</p>
           </div>
         </div>
       </div>
@@ -287,14 +347,19 @@
 
       <!-- Recent Activity Section -->
       <div class="activity-section" *ngIf="recentActivity.length > 0">
-        <h2><i class="fas fa-history me-2"></i>Recent Activity</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="margin: 0;"><i class="fas fa-history me-2"></i>Recent Activity</h2>
+          <button (click)="clearActivity()" class="btn btn-outline-secondary btn-sm" style="border-radius: 20px;">
+            <i class="fas fa-trash-alt"></i> Clear
+          </button>
+        </div>
         <div class="activity-feed">
           <div *ngFor="let activity of recentActivity" class="activity-item">
             <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
               <i [class]="getActivityIcon(activity.type)"></i>
             </div>
             <div class="activity-content">
-              <p class="activity-message">{{ activity.description || activity.message }}</p>
+              <p class="activity-message">{{ (activity.description || activity.message)?.length > 80 ? ((activity.description || activity.message) | slice:0:80) + '...' : (activity.description || activity.message) }}</p>
               <div class="activity-meta">
                 <span class="activity-time">{{ activity.timestamp | date:'MMM d, HH:mm' }}</span>
                 <span class="activity-amount" *ngIf="activity.amount">R{{ activity.amount }}</span>

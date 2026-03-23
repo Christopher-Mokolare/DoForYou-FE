@@ -62,24 +62,24 @@ export class AdminTasksComponent implements OnInit {
       next: (response) => {
         console.log('Raw API response:', response);
         
-        // Handle both old and new response formats
-        if (Array.isArray(response)) {
-          // Old format: direct array
-          this.tasks = response;
+        // Handle nested data structure
+        const data = response.data || response;
+        
+        if (Array.isArray(data)) {
+          this.tasks = data;
           this.pagination = {
             page: 1,
             pageSize: 20,
-            totalCount: response.length,
+            totalCount: data.length,
             totalPages: 1
           };
         } else {
-          // New format: object with tasks property
-          this.tasks = response.tasks || [];
+          this.tasks = data.tasks || [];
           this.pagination = {
-            page: response.page || 1,
-            pageSize: response.pageSize || 20,
-            totalCount: response.totalCount || 0,
-            totalPages: response.totalPages || 0
+            page: data.page || 1,
+            pageSize: data.pageSize || 20,
+            totalCount: data.count || data.totalCount || 0,
+            totalPages: data.totalPages || 1
           };
         }
         

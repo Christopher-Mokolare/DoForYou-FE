@@ -1,0 +1,258 @@
+// DoForYou - Main Styles Entry Point
+// Import this file in your angular.json or main component
+
+// ============================================
+// DESIGN SYSTEM IMPORTS
+// ============================================
+
+@import './assets/styles/design-tokens';
+@import './assets/styles/components';
+@import './assets/styles/utilities';
+
+// ============================================
+// GLOBAL RESETS
+// ============================================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-primary;
+  font-size: $font-base;
+  line-height: $leading-normal;
+  color: $text-dark;
+  background: $background;
+  min-height: 100vh;
+}
+
+// ============================================
+// TYPOGRAPHY DEFAULTS
+// ============================================
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-heading;
+  font-weight: $font-semibold;
+  line-height: $leading-tight;
+  color: $text-dark;
+  margin-bottom: $spacing-md;
+}
+
+h1 { font-size: $font-4xl; }
+h2 { font-size: $font-3xl; }
+h3 { font-size: $font-2xl; }
+h4 { font-size: $font-xl; }
+h5 { font-size: $font-lg; }
+h6 { font-size: $font-base; }
+
+p {
+  margin-bottom: $spacing-md;
+  line-height: $leading-relaxed;
+}
+
+a {
+  color: $primary;
+  text-decoration: none;
+  transition: color $transition-base;
+  
+  &:hover {
+    color: $primary-dark;
+  }
+}
+
+// ============================================
+// CONTAINER & LAYOUT
+// ============================================
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 0 $spacing-md;
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 $spacing-lg;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 0 $spacing-md;
+  }
+}
+
+.section {
+  padding: $spacing-3xl 0;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-2xl 0;
+  }
+}
+
+// ============================================
+// GRID SYSTEM
+// ============================================
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 (-$spacing-md);
+}
+
+.col {
+  flex: 1;
+  padding: 0 $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.col-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+.col-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+.col-3 { flex: 0 0 25%; max-width: 25%; }
+.col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.col-6 { flex: 0 0 50%; max-width: 50%; }
+.col-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+
+@media (max-width: $breakpoint-md) {
+  .col-1, .col-2, .col-3, .col-4, .col-6, .col-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+// ============================================
+// LOADING STATES
+// ============================================
+
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    $background-dark 0%,
+    $border-light 50%,
+    $background-dark 100%
+  );
+  background-size: 200% 100%;
+  animation: pulse 1.5s ease-in-out infinite;
+  border-radius: $radius-md;
+}
+
+// ============================================
+// EMPTY STATES
+// ============================================
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-3xl $spacing-lg;
+  
+  .empty-icon {
+    font-size: $font-5xl;
+    color: $text-light;
+    margin-bottom: $spacing-lg;
+  }
+  
+  .empty-title {
+    font-size: $font-2xl;
+    font-weight: $font-semibold;
+    color: $text-dark;
+    margin-bottom: $spacing-md;
+  }
+  
+  .empty-description {
+    font-size: $font-base;
+    color: $text-muted;
+    margin-bottom: $spacing-xl;
+  }
+}
+
+// ============================================
+// SCROLLBAR STYLING
+// ============================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $background;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border;
+  border-radius: $radius-full;
+  
+  &:hover {
+    background: $text-muted;
+  }
+}
+
+// ============================================
+// SELECTION STYLING
+// ============================================
+
+::selection {
+  background: $primary-light;
+  color: $primary-dark;
+}
+
+::-moz-selection {
+  background: $primary-light;
+  color: $primary-dark;
+}
+
+// ============================================
+// FOCUS VISIBLE
+// ============================================
+
+:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+}
+
+// ============================================
+// PRINT STYLES
+// ============================================
+
+@media print {
+  body {
+    background: white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

@@ -14,8 +14,28 @@ import { ErrandsService } from '../../../services/errands.service';
   styleUrls: ['./user-dashboard.component.scss']
 })
 export class UserDashboardComponent implements OnInit {
-  creatorStats = { active: 0, inProgress: 0, completed: 0, pending: 0, totalSpent: 0, thisMonth: 0, averageCost: 0, mostExpensive: 0 };
-  runnerStats = { available: 0, myActive: 0, completed: 0, totalEarnings: 0, thisMonth: 0, completionRate: 0, averageEarning: 0 };
+  creatorStats = { 
+    posted: 0, 
+    pendingPayment: 0, 
+    active: 0, 
+    awaitingConfirmation: 0, 
+    completed: 0, 
+    totalSpent: 0, 
+    thisMonth: 0, 
+    averageCost: 0 
+  };
+  runnerStats = { 
+    available: 0, 
+    myActive: 0, 
+    awaitingConfirmation: 0, 
+    completed: 0, 
+    totalEarnings: 0, 
+    availableBalance: 0, 
+    pendingPayouts: 0, 
+    thisMonth: 0, 
+    completionRate: 0, 
+    averageEarning: 0 
+  };
   recentActivity: any[] = [];
   paymentHistory: any[] = [];
   canCreateTasks = false;
@@ -24,6 +44,7 @@ export class UserDashboardComponent implements OnInit {
   isProfileIncomplete = false;
   profileCompletion = 0;
   userType = '';
+  activityCleared = false;
 
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
@@ -46,6 +67,9 @@ export class UserDashboardComponent implements OnInit {
     this.userType = (user as any)?.userType || '';
     
     console.log('Current userType:', this.userType);
+    
+    // Check if activity was cleared
+    this.activityCleared = localStorage.getItem('activityCleared') === 'true';
     
     this.loadFreshProfileData();
     this.loadUserStats();
@@ -90,40 +114,42 @@ export class UserDashboardComponent implements OnInit {
   }
 
   private loadUserStats() {
-    // Load enhanced dashboard stats
     this.taskService.getDashboardStats().subscribe({
       next: (response) => {
         if (response.success && response.data) {
           const data = response.data;
-          const userType = data.userType || 'both';
           
-          // Map backend stats to frontend format based on user type
-          if (userType === 'creator' || userType === 'both') {
+          console.log('Raw dashboard stats from API:', data);
+          
+          if (this.userType === 'creator' || this.userType === 'both') {
             this.creatorStats = {
-              active: data.postedTasks || 0,
-              inProgress: data.tasksInProgress || 0,
+              posted: data.postedTasks || 0,
+              pendingPayment: data.pendingPayment || 0,
+              active: data.activeTasks || 0,
+              awaitingConfirmation: data.awaitingConfirmation || 0,
               completed: data.completedTasks || 0,
-              pending: data.pendingTasks || 0,
               totalSpent: data.totalSpent || 0,
-              thisMonth: 0, // TODO: Add to backend
-              averageCost: 0, // TODO: Add to backend
-              mostExpensive: 0 // TODO: Add to backend
+              thisMonth: data.thisMonthSpending || 0,
+              averageCost: data.averageTaskCost || 0
             };
+            console.log('Creator stats:', this.creatorStats);
           }
           
-          if (userType === 'runner' || userType === 'both') {
+          if (this.userType === 'runner' || this.userType === 'both') {
             this.runnerStats = {
-              available: 0, // TODO: Add to backend
-              myActive: data.tasksInProgress || 0,
-              completed: data.completedTasks || 0,
-              totalEarnings: data.totalEarned || 0,
-              thisMonth: 0, // TODO: Add to backend
-              completionRate: 0, // TODO: Add to backend
-              averageEarning: 0 // TODO: Add to backend
+              available: data.availableTasks || 0,
+              myActive: data.myActiveTasks || data.activeTasks || 0,
+              awaitingConfirmation: data.awaitingConfirmation || 0,
+              completed: data.runnerCompletedTasks || data.completedTasks || 0,
+              totalEarnings: data.totalEarnings || 0,
+              availableBalance: data.availableBalance || 0,
+              pendingPayouts: data.pendingPayouts || 0,
+              thisMonth: data.thisMonthEarnings || 0,
+              completionRate: data.completionRate || 0,
+              averageEarning: data.averageEarning || 0
             };
+            console.log('Runner stats:', this.runnerStats);
           }
-          
-          console.log('Dashboard stats loaded:', data);
         }
       },
       error: (error) => {
@@ -131,12 +157,14 @@ export class UserDashboardComponent implements OnInit {
       }
     });
 
-    // Load recent activity
     this.taskService.getRecentActivity(5).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.recentActivity = response.data;
-          console.log('Recent activity loaded:', response.data);
+          // Only load if not cleared
+          if (!this.activityCleared) {
+            this.recentActivity = response.data;
+            console.log('Recent activity loaded:', response.data);
+          }
         }
       },
       error: (error) => {
@@ -199,5 +227,11 @@ export class UserDashboardComponent implements OnInit {
       case 'payment_received': return 'activity-icon-success';
       default: return 'activity-icon-info';
     }
+  }
+
+  clearActivity(): void {
+    this.recentActivity = [];
+    this.activityCleared = true;
+    localStorage.setItem('activityCleared', 'true');
   }
 }

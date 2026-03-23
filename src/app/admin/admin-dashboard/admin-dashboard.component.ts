@@ -29,54 +29,50 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
       <div class="stats-grid" *ngIf="dashboard && !loading">
         <!-- Task Stats -->
         <div class="stat-card">
-          <div class="stat-icon bg-primary">
+          <div class="stat-icon tasks">
             <i class="fas fa-tasks"></i>
           </div>
           <div class="stat-content">
-            <h3>{{dashboard.taskStats.totalTasks}}</h3>
+            <h3>{{dashboard.totalTasks}}</h3>
             <p>Total Tasks</p>
-            <small class="text-success" *ngIf="dashboard.taskStats.pendingVerification > 0">
-              {{dashboard.taskStats.pendingVerification}} pending verification
+            <small class="text-success" *ngIf="dashboard.pendingTasks > 0">
+              {{dashboard.pendingTasks}} pending
             </small>
           </div>
         </div>
 
         <!-- User Stats -->
         <div class="stat-card">
-          <div class="stat-icon bg-success">
+          <div class="stat-icon users">
             <i class="fas fa-users"></i>
           </div>
           <div class="stat-content">
-            <h3>{{dashboard.userStats.totalUsers}}</h3>
+            <h3>{{dashboard.totalUsers}}</h3>
             <p>Total Users</p>
-            <small class="text-info">{{dashboard.userStats.newUsers}} new this week</small>
           </div>
         </div>
 
         <!-- Revenue Stats -->
         <div class="stat-card">
-          <div class="stat-icon bg-warning">
+          <div class="stat-icon revenue">
             <i class="fas fa-dollar-sign"></i>
           </div>
           <div class="stat-content">
-            <h3>R{{dashboard.financialStats.totalRevenue | number:'1.2-2'}}</h3>
+            <h3>R{{dashboard.totalRevenue | number:'1.2-2'}}</h3>
             <p>Total Revenue</p>
-            <small class="text-warning" *ngIf="dashboard.financialStats.pendingRevenue > 0">
-              R{{dashboard.financialStats.pendingRevenue | number:'1.2-2'}} pending
-            </small>
           </div>
         </div>
 
-        <!-- Urgent Tasks -->
+        <!-- Active Tasks -->
         <div class="stat-card">
-          <div class="stat-icon bg-danger">
+          <div class="stat-icon urgent">
             <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div class="stat-content">
-            <h3>{{dashboard.taskStats.urgentTasks}}</h3>
+            <h3>{{dashboard.activeTasks}}</h3>
             <p>Urgent Tasks</p>
-            <small class="text-danger" *ngIf="dashboard.taskStats.unclaimedTasks > 0">
-              {{dashboard.taskStats.unclaimedTasks}} unclaimed
+            <small class="text-info" *ngIf="dashboard.completedTasks > 0">
+              {{dashboard.completedTasks}} completed
             </small>
           </div>
         </div>
@@ -92,22 +88,22 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
               </div>
               <div class="card-body">
                 <div class="quick-actions">
-                  <button class="btn btn-primary btn-sm" routerLink="/admin/tasks" 
+                  <button class="btn btn-sm" style="background: #FFE57F; color: #333;" routerLink="/admin/tasks" 
                           [queryParams]="{paymentStatus: 'pending'}">
                     <i class="fas fa-check-circle"></i>
-                    Verify Payments ({{dashboard?.taskStats?.pendingVerification || 0}})
+                    Verify Payments ({{dashboard?.pendingTasks || 0}})
                   </button>
-                  <button class="btn btn-success btn-sm" routerLink="/admin/users" 
+                  <button class="btn btn-sm" style="background: #FFAB40; color: white;" routerLink="/admin/users" 
                           [queryParams]="{isVerified: false}">
                     <i class="fas fa-user-check"></i>
                     Verify Users
                   </button>
-                  <button class="btn btn-warning btn-sm" routerLink="/admin/tasks" 
+                  <button class="btn btn-sm" style="background: #FFD180; color: white;" routerLink="/admin/tasks" 
                           [queryParams]="{priority: 'urgent'}">
                     <i class="fas fa-bolt"></i>
                     Urgent Tasks
                   </button>
-                  <button class="btn btn-info btn-sm" routerLink="/admin/payments">
+                  <button class="btn btn-sm" style="background: #FF9E40; color: white;" routerLink="/admin/payments">
                     <i class="fas fa-money-bill-wave"></i>
                     Payment Overview
                   </button>
@@ -123,15 +119,15 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
                 <h5>Recent Activity</h5>
               </div>
               <div class="card-body">
-                <div class="activity-list" *ngIf="dashboard?.recentActivity?.length; else noActivity">
-                  <div class="activity-item" *ngFor="let activity of dashboard?.recentActivity">
+                <div class="activity-list" *ngIf="dashboard?.recentTasks?.length; else noActivity">
+                  <div class="activity-item" *ngFor="let task of dashboard?.recentTasks">
                     <div class="activity-icon">
-                      <i class="fas fa-plus-circle text-success"></i>
+                      <i class="fas fa-tasks text-primary"></i>
                     </div>
                     <div class="activity-content">
-                      <p class="mb-1">{{activity?.description}}</p>
+                      <p class="mb-1"><strong>{{task?.taskId}}</strong> - {{task?.description}}</p>
                       <small class="text-muted">
-                        by {{activity?.userName}} • {{activity?.timestamp | date:'short'}}
+                        by {{task?.userName}} • R{{task?.budget | number:'1.2-2'}} • {{task?.status}}
                       </small>
                     </div>
                   </div>
@@ -242,6 +238,11 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
         font-size: 1.5rem;
       }
     }
+
+    .stat-icon.tasks { background: #FFAB40 !important; }
+    .stat-icon.users { background: #FFD180 !important; }
+    .stat-icon.revenue { background: #FF9E40 !important; }
+    .stat-icon.urgent { background: #FF8A00 !important; }
 
     .stat-content h3 {
       font-size: 1.5rem;

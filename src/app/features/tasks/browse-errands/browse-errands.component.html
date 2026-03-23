@@ -24,7 +24,7 @@
           </div>
         </div>
         <div class="col-lg-4 text-end">
-          <button (click)="refreshErrands()" class="refresh-btn" [disabled]="isLoading">
+          <button (click)="refreshErrands()" class="btn-secondary" [disabled]="isLoading">
             <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
             <span>{{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}</span>
           </button>
@@ -58,7 +58,7 @@
       <div class="filters-card">
         <div class="filters-header">
           <h3><i class="fas fa-filter me-2"></i>Find Your Perfect Task</h3>
-          <button class="clear-btn" (click)="clearFilters()" *ngIf="searchTerm || categoryFilter">
+          <button class="btn-outline btn-sm" (click)="clearFilters()" *ngIf="searchTerm || categoryFilter">
             <i class="fas fa-times"></i> Clear All
           </button>
         </div>
@@ -67,7 +67,7 @@
             <div class="search-box">
               <div class="search-input-wrapper">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search tasks..." 
+                <input type="text" class="form-input" placeholder="Search tasks..." 
                        [(ngModel)]="searchTerm" 
                        (ngModelChange)="onSearchChange($event)">
                 <button class="search-clear" *ngIf="searchTerm" (click)="searchTerm = ''; onSearchChange('')">
@@ -76,7 +76,7 @@
               </div>
             </div>
             <div class="category-filters">
-              <select class="category-select" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
+              <select class="form-select" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
                 <option value="">All Categories</option>
                 <option *ngFor="let category of categoryOptions" [value]="category.value">
                   {{ category.label }}
@@ -125,7 +125,7 @@
               </div>
               <div class="task-budget">
                 <span class="currency">R</span>
-                <span class="amount">{{ errand.budget || '0' }}</span>
+                <span class="amount">{{ getRunnerPayout(errand.budget || 0) }}</span>
               </div>
             </div>
 
@@ -154,7 +154,7 @@
                   <span>{{ errand.timestamp | date:'MMM d, HH:mm' }}</span>
                 </div>
                 <div class="task-status">
-                  <span class="status-badge" [class]="'status-' + getStatusClass(errand.status)">
+                  <span [ngClass]="'badge-' + getStatusClass(errand.status)">
                     {{ errand.status || 'Unknown' }}
                   </span>
                 </div>
@@ -164,8 +164,7 @@
             <!-- Card Footer -->
             <div class="task-footer">
               <button (click)="acceptErrand(errand)" 
-                      class="accept-btn"
-                      [class.disabled]="isLoggedIn && (!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING'))"
+                      class="btn-primary btn-block"
                       [disabled]="isLoggedIn && (!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING'))"
                       [title]="getButtonTooltip(errand)">
                 <i class="fas fa-handshake"></i>

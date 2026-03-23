@@ -138,13 +138,17 @@ export class ErrandsService {
 
   // Accept/claim a task (requires authentication)
   claimTask(taskId: string, helperName: string, helperContact: string): Observable<any> {
+    console.log('ClaimTask called with:', { taskId, helperName, helperContact });
+    
     const claimData = {
-      helperName: helperName,
-      helperContact: helperContact
+      HelperName: helperName,
+      HelperContact: helperContact
     };
     
+    console.log('Sending claim data:', claimData);
+    
     const url = `${this.apiBaseUrl}/tasks/${taskId}/claim`;
-    console.log('Claiming task');
+    console.log('Claiming task at URL:', url);
     
     return this.http.post(url, claimData).pipe(
       tap(() => {
@@ -167,6 +171,24 @@ export class ErrandsService {
       catchError(error => {
         console.error('Error fetching task:', error);
         return throwError(() => new Error('Failed to fetch task details.'));
+      })
+    );
+  }
+
+  // Get task by ID for editing
+  getTaskById(taskId: string): Observable<any> {
+    const url = `${this.apiBaseUrl}/tasks/${taskId}`;
+    return this.http.get(url);
+  }
+
+  // Update existing task
+  updateTask(taskId: string, taskData: CreateTaskData): Observable<any> {
+    const url = `${this.apiBaseUrl}/tasks/${taskId}`;
+    return this.http.put(url, taskData).pipe(
+      tap(() => this.clearCache()),
+      catchError(error => {
+        console.error('Error updating task:', error);
+        return throwError(() => error);
       })
     );
   }

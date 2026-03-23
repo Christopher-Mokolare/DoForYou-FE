@@ -1,4 +1,45 @@
-@import '../../../../design-system.scss';
+@use 'src/assets/styles/design-tokens' as *;
 
-// Modal component uses design system styles
-// Additional component-specific overrides can be added here if needed
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-modal-backdrop;
+  backdrop-filter: blur(2px);
+}
+
+.modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: $z-modal;
+  max-width: 500px;
+  width: 90%;
+}
+
+.modal-content {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-2xl;
+}
+
+.modal-header {
+  position: relative;
+  padding: $spacing-xl;
+}
+
+.modal-body {
+  padding: $spacing-md $spacing-xl;
+}
+
+.modal-footer {
+  padding: $spacing-md $spacing-xl $spacing-xl;
+}
+
+.w-full {
+  width: 100%;
+}

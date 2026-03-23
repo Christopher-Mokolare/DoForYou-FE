@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ErrandsService, CreateTaskData } from '../../../services/errands.service';
 import { AuthService } from '../../../services/auth.service';
 import { GlobalStateService } from '../../../services/global-state.service';
 import { LoadingService } from '../../../services/loading.service';
+import { WalletService } from '../../../services/wallet.service';
 
 @Component({
   selector: 'app-post-errand',
@@ -26,6 +27,10 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
   currentStep = 1;
   totalSteps = 3;
   autocomplete: any;
+  isEditMode = false;
+  taskId: string | null = null;
+  
+  commissionBreakdown = { commission: 0, payout: 0, total: 0 };
 
   constructor(
     private fb: FormBuilder,
@@ -34,7 +39,9 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     private globalState: GlobalStateService,
     private loadingService: LoadingService,
     private router: Router,
-    private ngZone: NgZone
+    private route: ActivatedRoute,
+    private ngZone: NgZone,
+    private walletService: WalletService
   ) {
     this.taskForm = this.createForm();
   }
@@ -52,15 +59,24 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
 
     this.currentUser = this.authService.getCurrentUser();
     
+    // Check for edit mode
+    this.taskId = this.route.snapshot.paramMap.get('taskId');
+    this.isEditMode = !!this.taskId;
+    
+    // Skip to last step in edit mode to show all fields
+    if (this.isEditMode) {
+      this.currentStep = this.totalSteps;
+    }
+    
     // Check if user preferences allow task creation using GlobalStateService
-    if (!this.globalState.canCreateTasks()) {
+    if (!this.isEditMode && !this.globalState.canCreateTasks()) {
       alert('You have selected "Task Runner" mode. To post errands, please update your preferences to "Task Creator" or "Both" in your profile settings.');
       this.router.navigate(['/profile/preferences']);
       return;
     }
 
     // Check if profile is complete
-    if (this.authService.isProfileIncomplete()) {
+    if (!this.isEditMode && this.authService.isProfileIncomplete()) {
       alert('Please complete your profile before posting tasks. Your profile is only ' + this.authService.getProfileCompletion() + '% complete.');
       this.router.navigate(['/profile']);
       return;
@@ -68,6 +84,13 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
 
     // Load category options
     this.loadCategoryOptions();
+    
+    // Watch budget changes to update commission
+    this.taskForm.get('budget')?.valueChanges.subscribe(budget => {
+      if (budget && budget > 0) {
+        this.commissionBreakdown = this.walletService.calculateCommission(budget);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -290,11 +313,61 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     this.errandsService.getFilterOptions().subscribe({
       next: (options) => {
         console.log('Categories response:', options);
-        this.categoryOptions = options.categories || [];
+        // categories are in options.data.categories, not options.categories
+        this.categoryOptions = options.data?.categories || options.categories || [];
         console.log('Category options:', this.categoryOptions);
+        
+        // Load task data after categories are loaded (for edit mode)
+        if (this.isEditMode && this.taskId) {
+          this.loadTaskData(this.taskId);
+        }
       },
       error: (error) => {
         console.error('Failed to load categories:', error);
+      }
+    });
+  }
+
+  private loadTaskData(taskId: string): void {
+    this.loadingService.show();
+    this.errandsService.getTaskById(taskId).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          const task = response.data;
+          console.log('Task data loaded:', task);
+          console.log('Category from task:', task.category);
+          console.log('Available categories:', this.categoryOptions);
+          
+          // Convert dueDate to datetime-local format (YYYY-MM-DDTHH:mm)
+          let dateTimeValue = '';
+          if (task.dueDate) {
+            const date = new Date(task.dueDate);
+            dateTimeValue = date.toISOString().slice(0, 16); // Gets YYYY-MM-DDTHH:mm
+          }
+          
+          this.taskForm.patchValue({
+            taskDescription: task.description || task.taskDescription,
+            category: task.category,
+            area: task.location || task.area,
+            priority: (task.priority || 'standard').toLowerCase(),
+            dateNeeded: dateTimeValue,
+            budget: task.budget,
+            notes: task.notes || ''
+          });
+          
+          console.log('Form values after patch:', this.taskForm.value);
+          
+          if (task.budget) {
+            this.commissionBreakdown = this.walletService.calculateCommission(task.budget);
+          }
+        }
+        this.loadingService.hide();
+      },
+      error: (error: any) => {
+        console.error('Failed to load task:', error);
+        this.loadingService.hide();
+        alert('Failed to load task data');
+        this.router.navigate(['/tasks/my-posted']);
       }
     });
   }
@@ -421,7 +494,6 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
       this.loadingService.show();
       
       try {
-        // Validate and sanitize form data
         const selectedCategory = this.taskForm.value.category;
         const finalCategory = selectedCategory === 'Other' 
           ? this.sanitizeInput(this.taskForm.value.customCategory)
@@ -438,27 +510,49 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
           termsAccepted: this.taskForm.value.termsAccepted
         };
 
-        // Create task via backend API
-        this.errandsService.createTask(formData).subscribe({
-          next: (response) => {
-            console.log('Task created successfully:', response);
-            this.loadingService.hide();
-            this.isSubmitting = false;
-            
-            // Redirect to PayFast payment URL
-            if (response.data?.paymentUrl) {
-              window.location.href = response.data.paymentUrl;
-            } else {
-              alert('Payment URL not received. Please try again.');
+        if (this.isEditMode && this.taskId) {
+          // Update existing task
+          this.errandsService.updateTask(this.taskId, formData).subscribe({
+            next: (response) => {
+              this.loadingService.hide();
+              this.isSubmitting = false;
+              alert('Task updated successfully!');
+              this.router.navigate(['/tasks/my-posted']);
+            },
+            error: (error) => {
+              console.error('Error updating task:', error);
+              this.loadingService.hide();
+              this.isSubmitting = false;
+              
+              if (error.status === 405) {
+                alert('Task update is not yet supported by the backend. The PUT /api/v1/tasks/{taskId} endpoint needs to be implemented.');
+              } else {
+                alert('Failed to update task. Please try again.');
+              }
             }
-          },
-          error: (error) => {
-            console.error('Error creating task:', error);
-            this.loadingService.hide();
-            this.isSubmitting = false;
-            alert('Failed to create task. Please try again.');
-          }
-        });
+          });
+        } else {
+          // Create new task
+          this.errandsService.createTask(formData).subscribe({
+            next: (response) => {
+              console.log('Task created successfully:', response);
+              this.loadingService.hide();
+              this.isSubmitting = false;
+              
+              if (response.data?.paymentUrl) {
+                window.location.href = response.data.paymentUrl;
+              } else {
+                alert('Payment URL not received. Please try again.');
+              }
+            },
+            error: (error) => {
+              console.error('Error creating task:', error);
+              this.loadingService.hide();
+              this.isSubmitting = false;
+              alert('Failed to create task. Please try again.');
+            }
+          });
+        }
       } catch (error) {
         console.error('Error processing task submission');
         this.loadingService.hide();

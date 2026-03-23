@@ -67,15 +67,16 @@ export class AdminUsersComponent implements OnInit {
 
     this.adminService.getUsers(query).subscribe({
       next: (response) => {
-        // Backend returns data directly, not wrapped in success object
-        this.users = response.users || [];
+        // Handle nested data structure
+        const data = response.data || response;
+        this.users = data.users || [];
         this.pagination = {
-          page: response.page || 1,
-          pageSize: response.pageSize || 20,
-          totalCount: response.totalCount || 0,
-          totalPages: response.totalPages || 0,
-          verifiedCount: response.verifiedCount || 0,
-          unverifiedCount: response.unverifiedCount || 0
+          page: data.page || 1,
+          pageSize: data.pageSize || 20,
+          totalCount: data.totalCount || 0,
+          totalPages: data.totalPages || 0,
+          verifiedCount: data.verifiedCount || 0,
+          unverifiedCount: data.unverifiedCount || 0
         };
         this.loading = false;
       },

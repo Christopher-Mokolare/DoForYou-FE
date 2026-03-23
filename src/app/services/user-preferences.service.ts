@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface UserPreferences {
@@ -35,8 +35,12 @@ export class UserPreferencesService {
   constructor(private http: HttpClient) {}
 
   getUserPreferences(): Observable<UserPreferences> {
-    return this.http.get<UserPreferences>(this.apiUrl).pipe(
-      tap(preferences => this.preferencesSubject.next(preferences))
+    return this.http.get<any>(this.apiUrl).pipe(
+      tap(response => {
+        const preferences = response.data || response;
+        this.preferencesSubject.next(preferences);
+      }),
+      map(response => response.data || response)
     );
   }
 

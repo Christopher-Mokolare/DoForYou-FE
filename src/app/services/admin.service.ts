@@ -4,21 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface AdminDashboard {
-  taskStats: {
-    totalTasks: number;
-    pendingVerification: number;
-    urgentTasks: number;
-    unclaimedTasks: number;
-  };
-  userStats: {
-    totalUsers: number;
-    newUsers: number;
-  };
-  financialStats: {
-    totalRevenue: number;
-    pendingRevenue: number;
-  };
-  recentActivity: any[];
+  totalUsers: number;
+  totalTasks: number;
+  pendingTasks: number;
+  activeTasks: number;
+  completedTasks: number;
+  totalRevenue: number;
+  recentTasks: any[];
 }
 
 export interface AdminUser {

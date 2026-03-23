@@ -22,13 +22,20 @@ export interface Task {
   completedAt?: string;
   paidToRunnerAt?: string;
   
+  // Escrow fields
+  commissionPercentage?: number;
+  commissionAmount?: number;
+  payoutAmount?: number;
+  escrowStatus?: 'none' | 'pending' | 'held' | 'released' | 'refunded';
+  escrowHoldUntil?: string;
+  
   // Automation fields
   autoActions?: AutoAction[];
   predictions?: TaskPrediction;
   reminders?: TaskReminder[];
 }
 
-export type PaymentStatus = 'pending' | 'verified' | 'failed' | 'expired' | 'refunded';
+export type PaymentStatus = 'pending' | 'verified' | 'failed' | 'expired' | 'refunded' | 'escrow_held';
 
 export type TaskStatus = 
   | 'draft' 

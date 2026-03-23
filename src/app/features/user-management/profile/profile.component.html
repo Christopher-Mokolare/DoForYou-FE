@@ -1,6 +1,18 @@
 <div class="profile">
   <h2>My Profile</h2>
   
+  <!-- Profile Completion Status -->
+  <div class="profile-completion-card" *ngIf="!isProfileComplete()">
+    <div class="completion-header">
+      <h3>Complete Your Profile</h3>
+      <span class="completion-percentage">{{getProfileCompletion()}}% Complete</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress" [style.width.%]="getProfileCompletion()"></div>
+    </div>
+    <p class="completion-message">Complete all required fields to access full platform features</p>
+  </div>
+  
   <div class="profile-sections">
     <div class="profile-card">
       <h3>Personal Information</h3>
@@ -30,9 +42,9 @@
           <small class="text-muted">Optional display name</small>
         </div>
         <div class="form-group">
-          <label>ID Number</label>
-          <input type="text" class="form-control" [(ngModel)]="profile.idNumber" name="idNumber" maxlength="13" (input)="onIdNumberChange()" [readonly]="verificationStatus.idNumberVerified">
-          <small class="text-muted" *ngIf="!verificationStatus.idNumberVerified">South African ID number for verification</small>
+          <label>ID Number *</label>
+          <input type="text" class="form-control" [(ngModel)]="profile.idNumber" name="idNumber" maxlength="13" (input)="onIdNumberChange()" [readonly]="verificationStatus.idNumberVerified" required>
+          <small class="text-muted" *ngIf="!verificationStatus.idNumberVerified">South African ID number for verification (Required)</small>
           <small class="text-muted" *ngIf="verificationStatus.idNumberVerified">
             <i class="fas fa-check-circle text-success"></i> ID verified - cannot be changed
           </small>
@@ -40,12 +52,13 @@
         <div class="form-group">
           <label>Address *</label>
           <textarea class="form-control" [(ngModel)]="profile.address" name="address" rows="3" placeholder="e.g. 123 Main Street, Sandton, Johannesburg, 2196" required (blur)="validateAddress()"></textarea>
-          <small class="text-muted">Full address including street, suburb, city, and postal code</small>
+          <small class="text-muted">Full address including street, suburb, city, and postal code (Required)</small>
           <small class="text-danger" *ngIf="addressError">{{addressError}}</small>
         </div>
         <div class="form-group">
-          <label>Date of Birth</label>
-          <input type="date" class="form-control" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth">
+          <label>Date of Birth *</label>
+          <input type="date" class="form-control" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required>
+          <small class="text-muted">Required for age verification</small>
         </div>
         <button type="submit" class="btn btn-primary" [disabled]="updating">Update Profile</button>
       </form>

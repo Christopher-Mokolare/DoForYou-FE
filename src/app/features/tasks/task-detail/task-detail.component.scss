@@ -605,3 +605,54 @@
     padding: 0.8rem 1.5rem;
   }
 }
+
+.escrow-info {
+  .status-badge {
+    text-align: center;
+    margin-bottom: 1rem;
+    
+    .badge {
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+  
+  .escrow-details {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.25rem;
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      
+      &:not(:last-child) {
+        border-bottom: 1px solid #e9ecef;
+      }
+      
+      .label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+      
+      .value {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.bg-secondary { background: #6c757d !important; }
+.bg-warning { background: #ffc107 !important; }
+.bg-info { background: #17a2b8 !important; }
+.bg-success { background: #28a745 !important; }
+.bg-danger { background: #dc3545 !important; }
+.bg-dark { background: #343a40 !important; }

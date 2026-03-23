@@ -1,3 +1,47 @@
+.profile-completion-card {
+  background: linear-gradient(135deg, #FF6B35, #FF8A65);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+
+  .completion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 {
+      margin: 0;
+      color: white;
+    }
+
+    .completion-percentage {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+  }
+
+  .progress-bar {
+    background: rgba(255, 255, 255, 0.3);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+
+    .progress {
+      background: white;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+  }
+
+  .completion-message {
+    margin: 0;
+    opacity: 0.9;
+  }
+}
+
 .profile {
   padding: 1rem;
   max-width: 1200px;

@@ -367,6 +367,10 @@ export class ProfileComponent implements OnInit {
     return this.authService.isProfileComplete();
   }
 
+  getProfileCompletion(): number {
+    return this.authService.getProfileCompletion();
+  }
+
   private loadVerificationStatus() {
     this.verificationStatus = {
       idNumberVerified: false,

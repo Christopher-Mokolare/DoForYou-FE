@@ -7,12 +7,13 @@ import { environment } from '../../../../environments/environment';
 
 interface Notification {
   id: number;
+  userId: number;
+  type: string;
   title: string;
   message: string;
-  type: 'task' | 'payment' | 'message' | 'system';
-  read: boolean;
-  timestamp: Date;
-  taskId?: number;
+  isRead: boolean;
+  relatedTaskId?: number;
+  createdAt: Date;
 }
 
 @Component({
@@ -25,11 +26,6 @@ interface Notification {
 export class NotificationsComponent implements OnInit {
   notifications: Notification[] = [];
   currentUser: any = null;
-  preferences = {
-    taskCreator: true,
-    taskRunner: true,
-    payments: true
-  };
   loading = false;
 
   constructor(
@@ -40,19 +36,18 @@ export class NotificationsComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     this.loadNotifications();
-    this.loadPreferences();
   }
 
   get hasUnreadNotifications(): boolean {
-    return this.notifications.some(n => !n.read);
+    return this.notifications.some(n => !n.isRead);
   }
 
   private loadNotifications(): void {
     this.loading = true;
-    this.http.get(`${environment.apiUrl}/api/notifications`).subscribe({
+    this.http.get(`${environment.apiUrl}/notifications`).subscribe({
       next: (response: any) => {
         if (response.success) {
-          this.notifications = response.notifications || [];
+          this.notifications = response.data || [];
         }
         this.loading = false;
       },
@@ -63,32 +58,29 @@ export class NotificationsComponent implements OnInit {
     });
   }
 
-  private loadPreferences(): void {
-    const saved = localStorage.getItem('notificationPreferences');
-    if (saved) {
-      this.preferences = JSON.parse(saved);
-    }
-  }
-
   getIconClass(type: string): string {
     const icons: Record<string, string> = {
-      'task': 'fa-tasks',
-      'payment': 'fa-money-bill-wave',
-      'message': 'fa-envelope',
+      'task_claimed': 'fa-hand-paper',
+      'task_completed': 'fa-check-circle',
+      'payment_received': 'fa-money-bill-wave',
+      'new_message': 'fa-envelope',
       'system': 'fa-cog'
     };
     return icons[type] || 'fa-bell';
   }
 
   getIconBgClass(type: string): string {
-    return `bg-${type}`;
+    if (type.includes('task')) return 'bg-task';
+    if (type.includes('payment')) return 'bg-payment';
+    if (type.includes('message')) return 'bg-message';
+    return 'bg-system';
   }
 
   markAsRead(notification: Notification): void {
-    this.http.post(`${environment.apiUrl}/api/notifications/${notification.id}/mark-read`, {}).subscribe({
+    this.http.post(`${environment.apiUrl}/notifications/${notification.id}/mark-read`, {}).subscribe({
       next: (response: any) => {
         if (response.success) {
-          notification.read = true;
+          notification.isRead = true;
         }
       },
       error: () => {
@@ -98,10 +90,10 @@ export class NotificationsComponent implements OnInit {
   }
 
   markAllAsRead(): void {
-    this.http.post(`${environment.apiUrl}/api/notifications/mark-all-read`, {}).subscribe({
+    this.http.post(`${environment.apiUrl}/notifications/mark-all-read`, {}).subscribe({
       next: (response: any) => {
         if (response.success) {
-          this.notifications.forEach(n => n.read = true);
+          this.notifications.forEach(n => n.isRead = true);
         }
       },
       error: () => {
@@ -112,7 +104,7 @@ export class NotificationsComponent implements OnInit {
 
   clearAll(): void {
     const deletePromises = this.notifications.map(n => 
-      this.http.delete(`${environment.apiUrl}/api/notifications/${n.id}`).toPromise()
+      this.http.delete(`${environment.apiUrl}/notifications/${n.id}`).toPromise()
     );
     
     Promise.all(deletePromises).then(() => {
@@ -123,7 +115,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   deleteNotification(notification: Notification): void {
-    this.http.delete(`${environment.apiUrl}/api/notifications/${notification.id}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/notifications/${notification.id}`).subscribe({
       next: (response: any) => {
         if (response.success) {
           const index = this.notifications.indexOf(notification);
@@ -139,12 +131,8 @@ export class NotificationsComponent implements OnInit {
   }
 
   viewTask(notification: Notification): void {
-    if (notification.taskId) {
-      window.location.href = `/task-details/${notification.taskId}`;
+    if (notification.relatedTaskId) {
+      window.location.href = `/task-details/${notification.relatedTaskId}`;
     }
-  }
-
-  updatePreferences(): void {
-    localStorage.setItem('notificationPreferences', JSON.stringify(this.preferences));
   }
 }

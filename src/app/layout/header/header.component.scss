@@ -51,6 +51,40 @@
     }
   }
 
+  .dropdown-item {
+    &:active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  }
+  
+  .notification-bell {
+    position: relative;
+    padding: 0.5rem 1rem;
+    
+    i {
+      font-size: 1.2rem;
+    }
+    
+    .badge {
+      position: absolute;
+      top: 0.2rem;
+      right: 0.4rem;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 10px;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      min-width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+  }
+
   .btn-orange {
     background-color: var(--primary-color);
     border-color: color.adjust(#ffab40, $lightness: -5%);

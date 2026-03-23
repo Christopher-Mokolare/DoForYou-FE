@@ -1,89 +1,194 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TaskService } from '../../../services/task.service';
+import { ModalService } from '../../../services/modal.service';
 
 @Component({
   selector: 'app-my-posted-tasks',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="tasks-container">
-      <div class="container-fluid py-4">
-        <div class="page-header">
-          <h1 class="page-title">My Posted Tasks</h1>
-          <p class="page-subtitle">Manage and track your posted tasks</p>
-        </div>
-        
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p>Loading your posted tasks...</p>
-        </div>
-        
-        <div *ngIf="!loading && tasks.length === 0" class="empty-state">
-          <div class="empty-icon">📝</div>
-          <h3>No Posted Tasks</h3>
-          <p>You haven't posted any tasks yet.</p>
-          <a routerLink="/tasks/post" class="btn btn-primary">Post Your First Task</a>
-        </div>
-        
-        <div *ngIf="!loading && tasks.length > 0" class="tasks-grid">
-          <div *ngFor="let task of tasks" class="task-card">
-            <div class="task-header">
-              <div class="task-status">
-                <span class="badge" [ngClass]="getStatusClass(task.taskStatus)">
-                  {{ task.taskStatus | titlecase }}
-                </span>
+    <div class="page-container">
+      <div class="page-header">
+        <h1><i class="fas fa-list-check"></i> My Posted Tasks</h1>
+        <p>Manage and track your posted tasks</p>
+      </div>
+
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading your posted tasks...</p>
+      </div>
+
+      <div *ngIf="!loading && tasks.length === 0" class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <h3>No Posted Tasks</h3>
+        <p>You haven't posted any tasks yet.</p>
+        <a routerLink="/post-errand" class="btn-primary">Post Your First Task</a>
+      </div>
+
+      <div *ngIf="!loading && tasks.length > 0">
+        <div *ngIf="groupedTasks.pendingPayment.length > 0" class="status-section">
+          <h2 class="status-heading" (click)="toggleSection('pendingPayment')">
+            <i class="fas fa-exclamation-circle"></i> Pending Payment ({{ groupedTasks.pendingPayment.length }})
+            <i class="fas" [ngClass]="expandedSections.pendingPayment ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </h2>
+          <div class="tasks-grid" *ngIf="expandedSections.pendingPayment">
+            <div *ngFor="let task of groupedTasks.pendingPayment" class="task-card">
+              <div class="task-header">
+                <span [ngClass]="getStatusBadge(task.taskStatus)">{{ task.taskStatus }}</span>
+                <div class="task-budget">R{{ task.budget }}</div>
               </div>
-              <div class="task-budget">R{{ task.budget }}</div>
+              <div class="task-content">
+                <h3 class="task-title">{{ task.taskDescription }}</h3>
+                <div class="task-details">
+                  <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-value">{{ task.category }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">{{ task.area?.length > 30 ? (task.area | slice:0:30) + '...' : task.area }}</span></div>
+                </div>
+              </div>
+              <div class="task-actions">
+                <div class="flex gap-2">
+                  <button (click)="editTask(task)" class="btn-outline flex-1"><i class="fas fa-edit"></i> Edit Task</button>
+                  <button (click)="completePayment(task.taskId)" class="btn-primary flex-1"><i class="fas fa-credit-card"></i> Pay Now</button>
+                </div>
+              </div>
             </div>
-            
-            <div class="task-content">
-              <h3 class="task-title">{{ task.taskDescription }}</h3>
-              <p class="task-description">{{ task.taskDescription | slice:0:120 }}...</p>
-              
-              <div class="task-details">
-                <div class="detail-row">
-                  <span class="detail-label">Category</span>
-                  <span class="detail-value">{{ task.category }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Due Date</span>
-                  <span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Location</span>
-                  <span class="detail-value">{{ task.area }}</span>
-                </div>
-                <div class="detail-row" *ngIf="task.helperName">
-                  <span class="detail-label">Runner</span>
-                  <span class="detail-value">{{ task.helperName }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="groupedTasks.posted.length > 0" class="status-section">
+          <h2 class="status-heading" (click)="toggleSection('posted')">
+            <i class="fas fa-bullhorn"></i> Live on Browse Errands ({{ groupedTasks.posted.length }})
+            <i class="fas" [ngClass]="expandedSections.posted ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </h2>
+          <div class="tasks-grid" *ngIf="expandedSections.posted">
+            <div *ngFor="let task of groupedTasks.posted" class="task-card">
+              <div class="task-header">
+                <span [ngClass]="getStatusBadge(task.taskStatus)">{{ task.taskStatus }}</span>
+                <div class="task-budget">R{{ task.budget }}</div>
+              </div>
+              <div class="task-content">
+                <h3 class="task-title">{{ task.taskDescription }}</h3>
+                <div class="task-details">
+                  <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-value">{{ task.category }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">{{ task.area?.length > 30 ? (task.area | slice:0:30) + '...' : task.area }}</span></div>
                 </div>
               </div>
-              
-              <div class="task-runner" *ngIf="task.helperName">
-                <div class="runner-info">
-                  <div class="runner-avatar">{{ getInitials(task.helperName) }}</div>
-                  <div class="runner-details">
-                    <div class="runner-name">{{ task.helperName }}</div>
-                    <div class="runner-contact">{{ task.helperContact }}</div>
+              <div class="task-actions">
+                <button (click)="viewTaskDetails(task)" class="btn-primary w-full">View Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="groupedTasks.completed.length > 0" class="status-section">
+          <h2 class="status-heading" (click)="toggleSection('completed')">
+            <i class="fas fa-clock"></i> Awaiting Confirmation ({{ groupedTasks.completed.length }})
+            <i class="fas" [ngClass]="expandedSections.completed ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </h2>
+          <div class="tasks-grid" *ngIf="expandedSections.completed">
+            <div *ngFor="let task of groupedTasks.completed" class="task-card">
+              <div class="task-header">
+                <span [ngClass]="getStatusBadge(task.taskStatus)">{{ task.taskStatus }}</span>
+                <div class="task-budget">R{{ task.budget }}</div>
+              </div>
+              <div class="task-content">
+                <h3 class="task-title">{{ task.taskDescription }}</h3>
+                <div class="task-details">
+                  <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-value">{{ task.category }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">{{ task.area?.length > 30 ? (task.area | slice:0:30) + '...' : task.area }}</span></div>
+                </div>
+                <div *ngIf="task.helperName" class="task-runner">
+                  <div class="runner-info">
+                    <div class="runner-avatar">{{ getInitials(task.helperName) }}</div>
+                    <div class="runner-details"><div class="runner-name">{{ task.helperName }}</div><div class="runner-contact">{{ task.helperContact }}</div></div>
                   </div>
                 </div>
               </div>
+              <div class="task-actions">
+                <div class="flex gap-2 mb-2">
+                  <button (click)="openChat(task)" class="btn-outline flex-1"><i class="fas fa-comment"></i> Chat</button>
+                  <a *ngIf="task.helperContact" [href]="'tel:' + task.helperContact" class="btn-outline flex-1"><i class="fas fa-phone"></i> Call</a>
+                </div>
+                <div class="flex gap-2">
+                  <button (click)="showTaskDetails(task)" class="btn-outline flex-1">View Details</button>
+                  <button (click)="confirmTaskCompletion(task)" class="btn-primary flex-1"><i class="fas fa-check"></i>Pay Now</button>
+                </div>
+              </div>
             </div>
-            
-            <div class="task-actions">
-              <a [routerLink]="['/tasks', task.taskId]" class="btn btn-primary">
-                View Details
-              </a>
-              <a *ngIf="task.helperContact" [href]="'tel:' + task.helperContact" class="btn btn-outline-primary">
-                Call Runner
-              </a>
-              <button *ngIf="task.taskStatus === 'completed'" 
-                      class="btn btn-success"
-                      (click)="confirmTask(task.taskId)">
-                Confirm & Pay
-              </button>
+          </div>
+        </div>
+
+        <div *ngIf="groupedTasks.claimed.length > 0" class="status-section">
+          <h2 class="status-heading" (click)="toggleSection('claimed')">
+            <i class="fas fa-spinner"></i> In Progress ({{ groupedTasks.claimed.length }})
+            <i class="fas" [ngClass]="expandedSections.claimed ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </h2>
+          <div class="tasks-grid" *ngIf="expandedSections.claimed">
+            <div *ngFor="let task of groupedTasks.claimed" class="task-card">
+              <div class="task-header">
+                <span [ngClass]="getStatusBadge(task.taskStatus)">{{ task.taskStatus }}</span>
+                <div class="task-budget">R{{ task.budget }}</div>
+              </div>
+              <div class="task-content">
+                <h3 class="task-title">{{ task.taskDescription }}</h3>
+                <div class="task-details">
+                  <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-value">{{ task.category }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">{{ task.area?.length > 30 ? (task.area | slice:0:30) + '...' : task.area }}</span></div>
+                </div>
+                <div *ngIf="task.helperName" class="task-runner">
+                  <div class="runner-info">
+                    <div class="runner-avatar">{{ getInitials(task.helperName) }}</div>
+                    <div class="runner-details"><div class="runner-name">{{ task.helperName }}</div><div class="runner-contact">{{ task.helperContact }}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="task-actions">
+                <div class="flex gap-2 mb-2">
+                  <button (click)="openChat(task)" class="btn-outline flex-1"><i class="fas fa-comment"></i> Chat</button>
+                  <a *ngIf="task.helperContact" [href]="'tel:' + task.helperContact" class="btn-outline flex-1"><i class="fas fa-phone"></i> Call</a>
+                </div>
+                <button (click)="showTaskDetails(task)" class="btn-primary w-full">View Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="groupedTasks.runnerPaid.length > 0" class="status-section">
+          <h2 class="status-heading" (click)="toggleSection('runnerPaid')">
+            <i class="fas fa-check-circle"></i> Completed ({{ groupedTasks.runnerPaid.length }})
+            <i class="fas" [ngClass]="expandedSections.runnerPaid ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </h2>
+          <div class="tasks-grid" *ngIf="expandedSections.runnerPaid">
+            <div *ngFor="let task of groupedTasks.runnerPaid" class="task-card">
+              <div class="task-header">
+                <span [ngClass]="getStatusBadge(task.taskStatus)">{{ task.taskStatus }}</span>
+                <div class="task-budget">R{{ task.budget }}</div>
+              </div>
+              <div class="task-content">
+                <h3 class="task-title">{{ task.taskDescription }}</h3>
+                <div class="task-details">
+                  <div class="detail-row"><span class="detail-label">Category:</span><span class="detail-value">{{ task.category }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span><span class="detail-value">{{ task.createdAt | date:'MMM d, y' }}</span></div>
+                  <div class="detail-row"><span class="detail-label">Location:</span><span class="detail-value">{{ task.area?.length > 30 ? (task.area | slice:0:30) + '...' : task.area }}</span></div>
+                </div>
+                <div *ngIf="task.helperName" class="task-runner">
+                  <div class="runner-info">
+                    <div class="runner-avatar">{{ getInitials(task.helperName) }}</div>
+                    <div class="runner-details"><div class="runner-name">{{ task.helperName }}</div><div class="runner-contact">{{ task.helperContact }}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="task-actions">
+                <div class="flex gap-2">
+                  <button (click)="viewTaskDetails(task)" class="btn-primary flex-1">View Details</button>
+                  <a *ngIf="task.helperContact" [href]="'tel:' + task.helperContact" class="btn-outline flex-1"><i class="fas fa-phone"></i> Call</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -91,10 +196,9 @@ import { TaskService } from '../../../services/task.service';
     </div>
   `,
   styles: [`
-    .tasks-container {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    .page-container {
+      background: var(--background, #f8f9fa);
       min-height: 100vh;
-      position: relative;
     }
 
     .page-header {
@@ -102,87 +206,81 @@ import { TaskService } from '../../../services/task.service';
       margin-bottom: 3rem;
     }
 
-    .page-title {
+    .page-header h1 {
       font-size: 2.5rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text-dark, #1F2937);
       margin-bottom: 0.5rem;
     }
 
-    .page-subtitle {
-      color: #6c757d;
+    .page-header p {
+      color: var(--text-muted, #6B7280);
       font-size: 1.1rem;
-      font-weight: 500;
     }
 
-    .loading-state {
+    .status-section {
+      margin-bottom: 3rem;
+    }
+
+    .status-heading {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark, #1F2937);
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-bottom: 2px solid var(--primary, #FF8A00);
+      cursor: pointer;
+      user-select: none;
       display: flex;
-      flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
-      justify-content: center;
-      padding: 4rem;
-      gap: 1rem;
+      gap: 0.5rem;
+      transition: background 0.2s;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      margin: 2rem auto;
-      max-width: 500px;
+    .status-heading:hover {
+      background: rgba(255, 138, 0, 0.05);
     }
 
-    .empty-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
+    .status-heading i:first-child {
+      color: var(--primary, #FF8A00);
     }
 
-    .empty-state h3 {
-      color: #495057;
-      margin-bottom: 1rem;
-    }
-
-    .empty-state p {
-      color: #6c757d;
-      margin-bottom: 2rem;
+    .status-heading i:last-child {
+      color: var(--text-muted, #6B7280);
+      font-size: 1rem;
+      margin-left: auto;
+      transition: transform 0.3s;
     }
 
     .tasks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 1.5rem;
       padding: 1rem 0;
+      max-width: 1400px;
     }
 
     .task-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(15px);
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       overflow: hidden;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255,255,255,0.2);
-      height: fit-content;
+      transition: all 0.2s;
+      border: 1px solid var(--border, #E5E7EB);
     }
 
     .task-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
     }
 
     .task-header {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      background: var(--background-dark, #F3F4F6);
       padding: 1rem 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
     .task-content {
@@ -191,18 +289,13 @@ import { TaskService } from '../../../services/task.service';
 
     .task-title {
       font-size: 1.1rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 0.75rem;
-      line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      font-weight: 600;
+      color: var(--text-dark, #1F2937);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+      white-space: nowrap;
       overflow: hidden;
-    }
-
-    .task-description {
-      display: none;
+      text-overflow: ellipsis;
     }
 
     .task-details {
@@ -212,9 +305,8 @@ import { TaskService } from '../../../services/task.service';
     .detail-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       padding: 0.5rem 0;
-      border-bottom: 1px solid #f1f3f4;
+      border-bottom: 1px solid var(--border-light, #F3F4F6);
     }
 
     .detail-row:last-child {
@@ -223,29 +315,21 @@ import { TaskService } from '../../../services/task.service';
 
     .detail-label {
       font-weight: 600;
-      color: #6c757d;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: var(--text-muted, #6B7280);
+      font-size: 0.85rem;
     }
 
     .detail-value {
-      color: #495057;
-      font-weight: 500;
+      color: var(--text-dark, #1F2937);
       font-size: 0.9rem;
-      text-align: right;
-      max-width: 60%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 500;
     }
 
     .task-runner {
-      background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
-      border-radius: 8px;
+      background: var(--background, #F9FAFB);
+      border-radius: 0.5rem;
       padding: 0.75rem;
-      border-left: 3px solid #28a745;
-      margin-bottom: 1rem;
+      border-left: 3px solid var(--success, #2ECC71);
     }
 
     .runner-info {
@@ -258,187 +342,57 @@ import { TaskService } from '../../../services/task.service';
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #28a745, #20c997);
+      background: var(--success, #2ECC71);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 0.8rem;
+      flex-shrink: 0;
     }
 
     .runner-name {
       font-weight: 600;
-      color: #495057;
+      color: var(--text-dark, #1F2937);
       font-size: 0.9rem;
     }
 
     .runner-contact {
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--text-muted, #6B7280);
     }
 
     .task-actions {
       padding: 1rem 1.25rem;
-      background: #f8f9fa;
+      background: var(--background, #F9FAFB);
       display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 80px;
     }
 
-    .btn {
-      border-radius: 8px;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      text-align: center;
-      flex: 1;
-      min-width: 80px;
+    .task-actions button,
+    .task-actions a {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .task-budget {
       font-size: 1.25rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .badge {
-      padding: 0.4rem 0.8rem;
-      border-radius: 16px;
-      font-weight: 600;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .badge-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
-    .badge-warning { background: linear-gradient(135deg, #ffc107, #e0a800); color: white; }
-    .badge-primary { background: linear-gradient(135deg, #007bff, #0056b3); color: white; }
-    .badge-info { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
-    .badge-danger { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }sk-stats {
-      display: flex;
-      gap: 2rem;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-radius: 12px;
-      padding: 1rem;
-      border-left: 4px solid #667eea;
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #495057;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: #6c757d;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .task-actions {
-      padding: 1.5rem;
-      background: #f8f9fa;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border-radius: 12px;
-      font-weight: 600;
-      padding: 0.75rem 1.5rem;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      text-align: center;
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-      color: white;
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    }
-
-    .btn-success:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-      color: white;
-    }
-
-    .btn-outline-primary {
-      border: 2px solid #007bff;
-      color: #007bff;
-      background: transparent;
-    }
-
-    .btn-outline-primary:hover {
-      background: #007bff;
-      color: white;
-      transform: translateY(-2px);
+      color: var(--success, #2ECC71);
     }
 
     @media (max-width: 768px) {
       .tasks-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
       }
 
-      .page-title {
+      .page-header h1 {
         font-size: 2rem;
-      }
-
-      .task-card {
-        margin: 0 1rem;
-      }
-
-      .task-actions {
-        flex-direction: column;
-      }
-
-      .task-stats {
-        justify-content: center;
       }
     }
   `]
@@ -446,8 +400,27 @@ import { TaskService } from '../../../services/task.service';
 export class MyPostedTasksComponent implements OnInit {
   tasks: any[] = [];
   loading = true;
+  groupedTasks = {
+    pendingPayment: [] as any[],
+    posted: [] as any[],
+    claimed: [] as any[],
+    completed: [] as any[],
+    runnerPaid: [] as any[]
+  };
+  
+  expandedSections = {
+    pendingPayment: true,
+    posted: true,
+    claimed: true,
+    completed: true,
+    runnerPaid: true
+  };
 
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private modalService: ModalService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadPostedTasks();
@@ -457,8 +430,8 @@ export class MyPostedTasksComponent implements OnInit {
     this.taskService.getMyPostedTasks().subscribe({
       next: (response) => {
         if (response.success) {
-          // Handle nested data structure from backend
           this.tasks = response.data?.tasks || response.data || [];
+          this.groupTasksByStatus();
         }
         this.loading = false;
       },
@@ -469,14 +442,29 @@ export class MyPostedTasksComponent implements OnInit {
     });
   }
 
-  getStatusClass(status: string): string {
+  private groupTasksByStatus(): void {
+    this.groupedTasks = {
+      pendingPayment: this.tasks.filter(t => t.taskStatus?.toLowerCase() === 'pendingpayment'),
+      posted: this.tasks.filter(t => t.taskStatus?.toLowerCase() === 'posted'),
+      claimed: this.tasks.filter(t => t.taskStatus?.toLowerCase() === 'claimed'),
+      completed: this.tasks.filter(t => t.taskStatus?.toLowerCase() === 'completed'),
+      runnerPaid: this.tasks.filter(t => t.taskStatus?.toLowerCase() === 'runnerpaid')
+    };
+  }
+
+  toggleSection(section: keyof typeof this.expandedSections): void {
+    this.expandedSections[section] = !this.expandedSections[section];
+  }
+
+  getStatusBadge(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'posted': return 'badge-success';
-      case 'claimed': return 'badge-warning';
-      case 'completed': return 'badge-primary';
-      case 'runnerpaid': return 'badge-info';
-      case 'cancelled': return 'badge-danger';
-      default: return 'badge-secondary';
+      case 'posted': return 'badge-posted';
+      case 'claimed': return 'badge-claimed';
+      case 'completed': return 'badge-completed';
+      case 'runnerpaid': return 'badge-paid';
+      case 'cancelled': return 'badge-cancelled';
+      case 'pendingpayment': return 'badge-pending';
+      default: return 'badge-posted';
     }
   }
 
@@ -484,16 +472,132 @@ export class MyPostedTasksComponent implements OnInit {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || '?';
   }
 
+  viewTaskDetails(task: any): void {
+    if (task.taskStatus?.toLowerCase() === 'completed') {
+      this.modalService.showConfirm(
+        'Confirm Task Completion',
+        `Are you sure you want to confirm and release payment for "${task.taskDescription}"?`,
+        () => this.confirmTask(task.taskId),
+        undefined,
+        'Pay Now',
+        'Cancel'
+      );
+    } else {
+      const details = `
+        <div style="text-align: center; padding: 1rem;">
+          <div style="margin-bottom: 1rem;">
+            <strong>Description:</strong><br/>
+            <span>${task.taskDescription}</span>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <strong>Category:</strong> ${task.category}<br/>
+            <strong>Budget:</strong> R${task.budget}<br/>
+            <strong>Due Date:</strong> ${new Date(task.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}<br/>
+            <strong>Location:</strong> ${task.area}
+          </div>
+          ${task.helperName ? `
+          <div style="margin-bottom: 1rem;">
+            <strong>Runner:</strong> ${task.helperName}<br/>
+            <strong>Contact:</strong> ${task.helperContact}
+          </div>
+          ` : ''}
+          <div>
+            <strong>Status:</strong> <span style="color: var(--primary);">${task.taskStatus}</span>
+          </div>
+        </div>
+      `;
+      
+      this.modalService.showModal({
+        title: 'Task Details',
+        message: details,
+        type: 'info',
+        confirmText: 'Close'
+      });
+    }
+  }
+
   confirmTask(taskId: string): void {
     this.taskService.confirmTask(taskId).subscribe({
       next: (response) => {
         if (response.success) {
+          this.modalService.showAlert('Success', 'Task confirmed and payment released!', 'success');
           this.loadPostedTasks();
+        } else {
+          this.modalService.showAlert('Error', response.error || 'Failed to confirm task', 'error');
         }
       },
       error: (error) => {
-        console.error('Failed to confirm task:', error);
+        this.modalService.showAlert('Error', error?.error?.title || 'Failed to confirm task', 'error');
       }
     });
+  }
+
+  completePayment(taskId: string): void {
+    this.taskService.getPaymentUrl(taskId).subscribe({
+      next: (response) => {
+        if (response.success && response.data?.paymentUrl) {
+          window.location.href = response.data.paymentUrl;
+        } else {
+          this.modalService.showAlert('Error', 'Failed to get payment URL', 'error');
+        }
+      },
+      error: (error) => {
+        this.modalService.showAlert('Error', error?.error?.message || 'Failed to get payment URL', 'error');
+      }
+    });
+  }
+
+  editTask(task: any): void {
+    this.router.navigate(['/tasks/edit', task.taskId]);
+  }
+
+  openChat(task: any): void {
+    this.router.navigate(['/tasks/chat', task.taskId], {
+      queryParams: { title: task.taskDescription }
+    });
+  }
+
+  showTaskDetails(task: any): void {
+    const details = `
+      <div style="text-align: center; padding: 1rem;">
+        <div style="margin-bottom: 1rem;">
+          <strong>Description:</strong><br/>
+          <span>${task.taskDescription}</span>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <strong>Category:</strong> ${task.category}<br/>
+          <strong>Budget:</strong> R${task.budget}<br/>
+          <strong>Due Date:</strong> ${new Date(task.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}<br/>
+          <strong>Location:</strong> ${task.area}
+        </div>
+        ${task.helperName ? `
+        <div style="margin-bottom: 1rem;">
+          <strong>Runner:</strong> ${task.helperName}<br/>
+          <strong>Contact:</strong> ${task.helperContact}
+        </div>
+        ` : ''}
+        <div>
+          <strong>Status:</strong> <span style="color: var(--primary);">${task.taskStatus}</span>
+        </div>
+      </div>
+    `;
+    
+    this.modalService.showModal({
+      title: 'Task Details',
+      message: details,
+      type: 'info',
+      confirmText: 'Close'
+    });
+  }
+
+  confirmTaskCompletion(task: any): void {
+    this.modalService.showConfirm(
+      'Confirm Task Completion',
+      `Are you sure you want to confirm and release payment for "${task.taskDescription}"?`,
+      () => this.confirmTask(task.taskId),
+      undefined,
+      'Pay Now',
+      'Cancel'
+    );
   }
 }

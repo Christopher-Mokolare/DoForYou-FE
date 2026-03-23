@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ErrandsService } from '../../../services/errands.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-payment-success',
@@ -12,19 +13,36 @@ import { ErrandsService } from '../../../services/errands.service';
 })
 export class PaymentSuccessComponent implements OnInit {
   processing = true;
+  isAuthenticated = false;
 
   constructor(
     private router: Router,
-    private errandsService: ErrandsService
+    private route: ActivatedRoute,
+    private errandsService: ErrandsService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    this.createTaskAfterPayment();
+    this.isAuthenticated = this.authService.isAuthenticated();
+    
+    // Check if status parameter indicates success
+    this.route.queryParams.subscribe(params => {
+      if (params['status'] === 'success') {
+        // Payment was processed by PayFast webhook, just show success
+        this.processing = false;
+      } else if (this.isAuthenticated) {
+        // Try to confirm payment via API if user is authenticated
+        this.createTaskAfterPayment();
+      } else {
+        // Not authenticated and no success status, show generic success
+        this.processing = false;
+      }
+    });
   }
 
   private createTaskAfterPayment() {
     const timeout = setTimeout(() => {
-      this.handleError('Payment confirmation timed out. Please contact support.');
+      this.handleError('Payment confirmation timed out. Your payment may still be processing.');
     }, 10000);
     
     this.errandsService.handlePaymentSuccess().subscribe({
@@ -33,24 +51,28 @@ export class PaymentSuccessComponent implements OnInit {
         if (response.success) {
           this.processing = false;
         } else {
-          this.handleError('Failed to confirm payment');
+          this.handleError('Payment confirmation pending');
         }
       },
       error: (error) => {
         clearTimeout(timeout);
         console.error('Payment confirmation error:', error);
-        this.handleError('Error confirming payment');
+        // Don't show error for authentication issues, payment might be processed by webhook
+        this.processing = false;
       }
     });
   }
 
   private handleError(message: string) {
     console.error(message);
-    alert(message + '. Please contact support.');
     this.processing = false;
   }
 
   goToDashboard() {
-    this.router.navigate(['/user-dashboard']);
+    if (this.isAuthenticated) {
+      this.router.navigate(['/user-dashboard']);
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
 }

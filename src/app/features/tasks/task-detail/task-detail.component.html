@@ -182,6 +182,38 @@
           </div>
         </div>
 
+        <!-- Escrow Status -->
+        <div *ngIf="escrowStatus" class="info-card mb-4">
+          <div class="card-header">
+            <h6>Payment Status</h6>
+          </div>
+          <div class="card-content">
+            <div class="escrow-info">
+              <div class="status-badge">
+                <span class="badge" [ngClass]="getEscrowStatusClass()">{{ getEscrowStatusText() }}</span>
+              </div>
+              <div class="escrow-details mt-3">
+                <div class="detail-row">
+                  <span class="label">Task Budget:</span>
+                  <span class="value">R{{ escrowStatus.budget }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Commission (15%):</span>
+                  <span class="value text-muted">-R{{ escrowStatus.commissionAmount }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Runner Payout:</span>
+                  <span class="value text-success"><strong>R{{ escrowStatus.payoutAmount }}</strong></span>
+                </div>
+                <div *ngIf="escrowStatus.escrowHoldUntil && escrowStatus.escrowStatus === 'held'" class="detail-row mt-2">
+                  <span class="label">Auto-release:</span>
+                  <span class="value text-info">{{ escrowTimeRemaining }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Timeline -->
         <div class="info-card mb-4">
           <div class="card-header">

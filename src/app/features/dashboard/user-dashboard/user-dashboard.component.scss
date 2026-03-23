@@ -1,6 +1,6 @@
 .user-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-color) 100%);
+  background: #FFAB40;
   padding: 0;
 }
 
@@ -74,43 +74,43 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
   margin: 2rem 0;
 }
 
 .stat-card {
   background: white;
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  min-height: 120px;
+  min-height: 100px;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   }
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 15px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 
   &.bg-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-color));
+    background: #FFAB40;
   }
 
   &.bg-success {
@@ -140,21 +140,26 @@
 
 .stat-content {
   flex: 1;
+  min-width: 0;
   
   h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 2.5rem;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-color);
     font-family: 'Special Elite', serif;
+    line-height: 1.2;
   }
 
   p {
     margin: 0;
     color: #6c757d;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 500;
     font-family: 'Work Sans', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -256,7 +261,7 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--orange), var(--primary-color));
+      background: #FFAB40;
       color: white;
       border: 2px solid transparent;
     }
@@ -346,7 +351,7 @@
         font-size: 1.2rem;
         
         &.activity-icon-primary {
-          background: linear-gradient(135deg, var(--primary), var(--primary-color));
+          background: #FFAB40;
         }
         
         &.activity-icon-success {

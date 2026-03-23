@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { GlobalStateService } from '../../services/global-state.service';
 import { User } from '../../models/auth.models';
 import { ProfileCompletionModalComponent } from '../../shared/components/profile-completion-modal/profile-completion-modal.component';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -21,13 +23,17 @@ export class HeaderComponent implements AfterViewInit, OnInit {
   currentUser: User | null = null;
   showProfileModal = false;
   canShowPostErrandButton = false;
+  canShowMyPostedTasks = false;
+  canShowMyActiveTasks = false;
+  unreadCount = 0;
   private hamburgerAnimation!: GSAPTimeline;
   private hamburgerInitialized = false;
 
   constructor(
     private router: Router,
     public authService: AuthService,
-    private globalState: GlobalStateService
+    private globalState: GlobalStateService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -36,11 +42,43 @@ export class HeaderComponent implements AfterViewInit, OnInit {
       this.isLoggedIn = !!user;
       this.currentUser = user;
       this.isAdmin = this.authService.isAdmin();
+      
+      // Update menu visibility when admin status changes
+      this.updateMenuVisibility();
+      
+      // Load unread count if logged in
+      if (user) {
+        this.loadUnreadCount();
+      }
     });
     
-    // Subscribe to global state for POST ERRAND button visibility
+    // Subscribe to global state for menu visibility
     this.globalState.canCreateTasks$.subscribe(canCreate => {
-      this.canShowPostErrandButton = canCreate && !this.isAdmin;
+      this.updateMenuVisibility();
+    });
+    
+    this.globalState.canAcceptTasks$.subscribe(canAccept => {
+      this.updateMenuVisibility();
+    });
+  }
+  
+  private updateMenuVisibility(): void {
+    const canCreate = this.globalState.canCreateTasks();
+    const canAccept = this.globalState.canAcceptTasks();
+    
+    this.canShowPostErrandButton = canCreate && !this.isAdmin;
+    this.canShowMyPostedTasks = canCreate && !this.isAdmin;
+    this.canShowMyActiveTasks = canAccept && !this.isAdmin;
+  }
+  
+  private loadUnreadCount(): void {
+    this.http.get<any>(`${environment.apiUrl}/notifications/unread-count`).subscribe({
+      next: (response) => {
+        this.unreadCount = response.data || 0;
+      },
+      error: () => {
+        this.unreadCount = 0;
+      }
     });
   }
 

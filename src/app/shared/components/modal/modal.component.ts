@@ -29,35 +29,28 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   getHeaderClass(): string {
-    if (!this.config) return '';
-    switch (this.config.type) {
-      case 'success': return 'header-success';
-      case 'warning': return 'header-warning';
-      case 'error': return 'header-error';
-      case 'confirm': return 'header-confirm';
-      default: return 'header-info';
-    }
+    return '';
   }
 
   getIconClass(): string {
     if (!this.config) return '';
     switch (this.config.type) {
-      case 'success': return 'fas fa-check-circle me-2';
-      case 'warning': return 'fas fa-exclamation-triangle me-2';
-      case 'error': return 'fas fa-times-circle me-2';
-      case 'confirm': return 'fas fa-question-circle me-2';
-      default: return 'fas fa-info-circle me-2';
+      case 'success': return 'fas fa-check-circle text-success';
+      case 'warning': return 'fas fa-exclamation-triangle text-warning';
+      case 'error': return 'fas fa-times-circle text-danger';
+      case 'confirm': return 'fas fa-question-circle text-primary';
+      default: return 'fas fa-info-circle text-info';
     }
   }
 
   getButtonClass(): string {
-    if (!this.config) return 'btn btn-primary';
+    if (!this.config) return 'btn-primary';
     switch (this.config.type) {
-      case 'success': return 'btn btn-success';
-      case 'warning': return 'btn btn-warning';
-      case 'error': return 'btn btn-danger';
-      case 'confirm': return 'btn btn-primary';
-      default: return 'btn btn-info';
+      case 'success': return 'btn-success';
+      case 'warning': return 'btn-warning';
+      case 'error': return 'btn-danger';
+      case 'confirm': return 'btn-primary';
+      default: return 'btn-primary';
     }
   }
 

@@ -7,6 +7,9 @@ import { Subscription, interval } from 'rxjs';
 import { TaskService } from '../../../services/task.service';
 import { AuthService } from '../../../services/auth.service';
 import { ModalService } from '../../../services/modal.service';
+import { EscrowService } from '../../../services/escrow.service';
+import { RealtimeService } from '../../../services/realtime.service';
+import { WalletService } from '../../../services/wallet.service';
 
 export interface TaskDetail {
   id: string;
@@ -62,14 +65,21 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   isCreator = false;
   isRunner = false;
   
+  escrowStatus: any = null;
+  escrowTimeRemaining = '';
+  
   refreshSubscription?: Subscription;
+  realtimeSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private taskService: TaskService,
     private authService: AuthService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private escrowService: EscrowService,
+    private realtimeService: RealtimeService,
+    private walletService: WalletService
   ) {}
 
   ngOnInit(): void {
@@ -88,6 +98,10 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.refreshSubscription?.unsubscribe();
+    this.realtimeSubscription?.unsubscribe();
+    if (this.task) {
+      this.realtimeService.leaveTaskChat(parseInt(this.task.taskId));
+    }
   }
 
   private loadTaskDetail(taskId: string): void {
@@ -128,6 +142,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           this.isCreator = this.task.createdByUserId === this.currentUserId;
           this.isRunner = this.task.runnerId === this.currentUserId;
           this.loadMessages();
+          this.loadEscrowStatus();
+          this.setupRealtimeChat();
         } else {
           this.error = 'Task not found';
         }
@@ -154,6 +170,38 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load messages:', error);
+      }
+    });
+  }
+
+  private loadEscrowStatus(): void {
+    if (!this.task) return;
+    
+    this.escrowService.getEscrowStatus(this.task.taskId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.escrowStatus = response.data;
+          if (this.escrowStatus.escrowHoldUntil) {
+            this.escrowTimeRemaining = this.escrowService.getTimeRemaining(this.escrowStatus.escrowHoldUntil);
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load escrow status:', error);
+      }
+    });
+  }
+
+  private setupRealtimeChat(): void {
+    if (!this.task) return;
+    
+    const taskIdNum = parseInt(this.task.taskId);
+    this.realtimeService.joinTaskChat(taskIdNum);
+    
+    this.realtimeSubscription = this.realtimeService.messages$.subscribe(messages => {
+      const taskMessages = messages.filter(m => m.taskId === taskIdNum);
+      if (taskMessages.length > 0) {
+        this.loadMessages();
       }
     });
   }
@@ -226,16 +274,21 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   sendMessage(): void {
     if (!this.task || !this.newMessage.trim()) return;
 
-    this.taskService.sendTaskMessage(this.task.taskId, this.newMessage).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.newMessage = '';
-          this.loadMessages();
+    const taskIdNum = parseInt(this.task.taskId);
+    this.realtimeService.sendMessage(taskIdNum, this.newMessage).then(() => {
+      this.newMessage = '';
+    }).catch(() => {
+      this.taskService.sendTaskMessage(this.task!.taskId, this.newMessage).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.newMessage = '';
+            this.loadMessages();
+          }
+        },
+        error: (error) => {
+          this.modalService.showAlert('Error', 'Failed to send message', 'error');
         }
-      },
-      error: (error) => {
-        this.modalService.showAlert('Error', 'Failed to send message', 'error');
-      }
+      });
     });
   }
 
@@ -248,6 +301,16 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       case 'cancelled': return 'badge-danger';
       default: return 'badge-secondary';
     }
+  }
+
+  getEscrowStatusClass(): string {
+    if (!this.escrowStatus) return 'badge-secondary';
+    return this.escrowService.getStatusBadgeClass(this.escrowStatus.escrowStatus);
+  }
+
+  getEscrowStatusText(): string {
+    if (!this.escrowStatus) return 'No Escrow';
+    return this.escrowService.getStatusText(this.escrowStatus.escrowStatus);
   }
 
   formatDate(dateString: string): string {

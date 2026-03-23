@@ -4,13 +4,14 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoadingService } from '../../services/loading.service';
+import { UserPreferencesService } from '../../services/user-preferences.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
-  styles: []
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -27,6 +28,7 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private loadingService = inject(LoadingService);
+  private preferencesService = inject(UserPreferencesService);
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -49,6 +51,9 @@ export class LoginComponent implements OnInit {
         next: (response: any) => {
           this.loadingService.hide();
           if (response.success) {
+            // Load user preferences immediately after login
+            this.preferencesService.getUserPreferences().subscribe();
+            
             // Debug: Log token claims
             const token = response.token;
             if (token) {

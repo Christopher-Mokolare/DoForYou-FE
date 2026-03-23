@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
-const publicEndpoints = ['/tasks/available', '/tasks/filters'];
+const publicEndpoints = ['/tasks/available', '/tasks/filters', '/tasks/payment-success'];
 
 export const appConfig: ApplicationConfig = {
   providers: [

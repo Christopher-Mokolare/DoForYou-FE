@@ -47,6 +47,14 @@
         </ng-container>
 
         <ng-template #userMenu>
+          <!-- Notification Bell -->
+          <li class="nav-item" *ngIf="isLoggedIn">
+            <a class="nav-link notification-bell" routerLink="/notifications">
+              <i class="fas fa-bell"></i>
+              <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </a>
+          </li>
+          
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ currentUser?.name }}
@@ -57,6 +65,8 @@
                 <li><a class="dropdown-item" routerLink="/dashboard" (click)="scrollToTop()">Dashboard</a></li>
                 <li *ngIf="canShowPostErrand() && !authService.isProfileIncomplete()"><a class="dropdown-item" routerLink="/post-errand" (click)="scrollToTop()">Post Errand</a></li>
                 <li *ngIf="canShowPostErrand() && authService.isProfileIncomplete()"><a class="dropdown-item text-muted" routerLink="/profile" title="Complete your profile to post tasks" (click)="scrollToTop()">Complete Profile to Post Tasks</a></li>
+                <li *ngIf="canShowMyPostedTasks"><a class="dropdown-item" routerLink="/tasks/my-posted" (click)="scrollToTop()">My Posted Tasks</a></li>
+                <li *ngIf="canShowMyActiveTasks"><a class="dropdown-item" routerLink="/tasks/my-active" (click)="scrollToTop()">My Active Tasks</a></li>
                 <li><a class="dropdown-item" routerLink="/profile" (click)="scrollToTop()">My Profile</a></li>
                 <li><a class="dropdown-item" routerLink="/wallet" (click)="scrollToTop()">Wallet</a></li>
                 <li><a class="dropdown-item" routerLink="/notifications" (click)="scrollToTop()">Notifications</a></li>

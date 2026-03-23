@@ -7,7 +7,8 @@ import { AuthService } from '../services/auth.service';
 export class AuthInterceptor implements HttpInterceptor {
   private publicEndpoints = [
     '/tasks/available',
-    '/tasks/filters'
+    '/tasks/filters',
+    '/tasks/payment-success'
   ];
 
   constructor(private authService: AuthService) {}

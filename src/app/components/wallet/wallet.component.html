@@ -1,79 +1,266 @@
-<div class="wallet-container">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-4">
-        <div class="wallet-card text-center">
-          <h2 class="wallet-title">My Wallet</h2>
-          <div class="balance-display">
-            <div class="balance-amount">R{{ balance | number:'1.2-2' }}</div>
-            <div class="balance-label">Available Balance</div>
+<div class="wallet-page">
+  <div class="page-header">
+    <h1><i class="fas fa-wallet"></i> My Wallet</h1>
+  </div>
+
+  <!-- Wallet Summary -->
+  <div class="wallet-summary">
+    <div class="summary-card">
+      <div class="card-icon bg-success"><i class="fas fa-money-bill-wave"></i></div>
+      <div class="card-content">
+        <div class="card-label">Available Balance</div>
+        <div class="card-value">{{ formatCurrency(balance) }}</div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon bg-warning"><i class="fas fa-clock"></i></div>
+      <div class="card-content">
+        <div class="card-label">Pending Payouts</div>
+        <div class="card-value">{{ formatCurrency(pendingPayouts) }}</div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon bg-primary"><i class="fas fa-chart-line"></i></div>
+      <div class="card-content">
+        <div class="card-label">Total Earned</div>
+        <div class="card-value">{{ formatCurrency(totalEarned) }}</div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon bg-secondary"><i class="fas fa-arrow-down"></i></div>
+      <div class="card-content">
+        <div class="card-label">Total Withdrawn</div>
+        <div class="card-value">{{ formatCurrency(totalWithdrawn) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bank Accounts Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2><i class="fas fa-university"></i> Bank Accounts</h2>
+      <button class="btn-primary btn-sm" (click)="showAddBank = true">
+        <i class="fas fa-plus"></i> Add Bank Account
+      </button>
+    </div>
+    
+    <div class="bank-accounts-list" *ngIf="bankAccounts.length > 0">
+      <div *ngFor="let account of bankAccounts" class="bank-account-card" [class.verified]="account.isVerified">
+        <div class="bank-icon"><i class="fas fa-university"></i></div>
+        <div class="bank-details">
+          <div class="bank-name">{{ account.bankName }}</div>
+          <div class="account-info">
+            {{ maskAccountNumber(account.accountNumber) }} • {{ account.accountType }}
           </div>
-          <div class="wallet-actions mt-4">
-            <button 
-              class="btn btn-primary btn-lg w-100" 
-              (click)="showWithdrawModal()"
-              [disabled]="balance < 50">
-              Withdraw Funds
-            </button>
-            <p class="text-muted mt-2 small" *ngIf="balance < 50">
-              Minimum withdrawal amount is R50
-            </p>
+          <div class="account-holder">{{ account.accountHolderName }}</div>
+        </div>
+        <div class="bank-status">
+          <span class="badge" [class.badge-success]="account.isVerified" [class.badge-warning]="!account.isVerified">
+            <i class="fas" [class.fa-check-circle]="account.isVerified" [class.fa-clock]="!account.isVerified"></i>
+            {{ account.isVerified ? 'Verified' : 'Pending' }}
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="empty-state" *ngIf="bankAccounts.length === 0">
+      <i class="fas fa-university"></i>
+      <p>No bank accounts added yet</p>
+    </div>
+  </div>
+
+  <!-- Withdrawal Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2><i class="fas fa-money-bill-wave"></i> Withdraw Funds</h2>
+      <button class="btn-primary" (click)="showWithdrawModal()" [disabled]="!canWithdraw || bankAccounts.length === 0">
+        <i class="fas fa-arrow-down"></i> Withdraw
+      </button>
+    </div>
+    <p class="text-muted" *ngIf="!canWithdraw">Minimum withdrawal amount is R50</p>
+    <p class="text-muted" *ngIf="bankAccounts.length === 0">Add a bank account to withdraw funds</p>
+    
+    <!-- Recent Withdrawals -->
+    <div class="withdrawals-list" *ngIf="withdrawalRequests.length > 0">
+      <h3>Recent Withdrawals</h3>
+      <div *ngFor="let withdrawal of withdrawalRequests" class="withdrawal-card">
+        <div class="withdrawal-info">
+          <div class="withdrawal-amount">{{ formatCurrency(withdrawal.amount) }}</div>
+          <div class="withdrawal-details">
+            <span>Fee: {{ formatCurrency(withdrawal.fee) }}</span>
+            <span>•</span>
+            <span>{{ formatDate(withdrawal.createdAt) }}</span>
           </div>
+          <div class="withdrawal-ref">Ref: {{ withdrawal.reference }}</div>
+        </div>
+        <div class="withdrawal-status">
+          <span class="badge" 
+                [class.badge-warning]="withdrawal.status === 'Pending'"
+                [class.badge-info]="withdrawal.status === 'Processing'"
+                [class.badge-success]="withdrawal.status === 'Completed'"
+                [class.badge-danger]="withdrawal.status === 'Failed'">
+            {{ withdrawal.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2><i class="fas fa-history"></i> Transaction History</h2>
+    </div>
+    
+    <div *ngIf="loadingTransactions" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading transactions...</p>
+    </div>
+
+    <div *ngIf="!loadingTransactions && transactions.length === 0" class="empty-state">
+      <i class="fas fa-receipt"></i>
+      <p>No transactions yet</p>
+    </div>
+
+    <div *ngIf="!loadingTransactions && transactions.length > 0" class="transactions-list">
+      <div *ngFor="let transaction of transactions" class="transaction-card">
+        <div class="transaction-icon" [class.credit]="transaction.amount > 0" [class.debit]="transaction.amount < 0">
+          <i class="fas" [class.fa-arrow-down]="transaction.amount > 0" [class.fa-arrow-up]="transaction.amount < 0"></i>
+        </div>
+        <div class="transaction-details">
+          <div class="transaction-desc">{{ transaction.description }}</div>
+          <div class="transaction-meta">
+            <span>{{ formatDate(transaction.createdAt) }}</span>
+            <span>•</span>
+            <span>Ref: {{ transaction.reference }}</span>
+          </div>
+        </div>
+        <div class="transaction-amount" [class.credit]="transaction.amount > 0" [class.debit]="transaction.amount < 0">
+          {{ transaction.amount > 0 ? '+' : '' }}{{ formatCurrency(transaction.amount) }}
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Withdrawal Modal -->
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Withdraw Funds</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form (ngSubmit)="withdrawFunds()">
-          <div class="mb-3">
-            <label class="form-label">Amount</label>
-            <input 
-              type="number" 
-              class="form-control" 
-              [(ngModel)]="withdrawAmount"
-              name="amount"
-              min="50" 
-              [max]="balance"
-              required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Bank Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              [(ngModel)]="bankName"
-              name="bankName"
-              required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Account Number</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              [(ngModel)]="bankAccount"
-              name="bankAccount"
-              required>
-          </div>
-          <div class="d-grid">
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-              [disabled]="withdrawing">
-              {{ withdrawing ? 'Processing...' : 'Withdraw' }}
-            </button>
-          </div>
-        </form>
-      </div>
+<!-- Add Bank Account Modal -->
+<div class="modal-overlay" *ngIf="showAddBank" (click)="showAddBank = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-university"></i> Add Bank Account</h3>
+      <button class="btn-close" (click)="showAddBank = false"><i class="fas fa-times"></i></button>
     </div>
+    <form [formGroup]="addBankForm" (ngSubmit)="addBankAccount()">
+      <div class="form-group">
+        <label>Bank Name</label>
+        <select formControlName="bankName" class="form-control" (change)="onBankSelected($event)">
+          <option value="">Select Bank</option>
+          <option *ngFor="let bank of supportedBanks" [value]="bank.name">{{ bank.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Account Holder Name</label>
+        <input type="text" formControlName="accountHolderName" class="form-control" placeholder="Full name as per bank">
+      </div>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="text" formControlName="accountNumber" class="form-control" placeholder="10-11 digits">
+      </div>
+      <div class="form-group">
+        <label>Branch Code</label>
+        <input type="text" formControlName="branchCode" class="form-control" placeholder="Auto-filled" readonly>
+        <small class="text-muted">Branch code is automatically set based on selected bank</small>
+      </div>
+      <div class="form-group">
+        <label>Account Type</label>
+        <select formControlName="accountType" class="form-control">
+          <option value="Cheque">Cheque/Current</option>
+          <option value="Savings">Savings</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="showAddBank = false">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="addBankForm.invalid || loading">
+          {{ loading ? 'Adding...' : 'Add Account' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="modal-overlay" *ngIf="showWithdraw" (click)="showWithdraw = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-money-bill-wave"></i> Withdraw Funds</h3>
+      <button class="btn-close" (click)="showWithdraw = false"><i class="fas fa-times"></i></button>
+    </div>
+    <form [formGroup]="withdrawForm" (ngSubmit)="withdrawFunds()">
+      <div class="form-group">
+        <label>Amount (R50 - R10,000)</label>
+        <input type="number" formControlName="amount" class="form-control" (input)="calculateFee()" min="50" max="10000">
+        <small class="text-muted">Available: {{ formatCurrency(balance) }}</small>
+      </div>
+      <div class="form-group">
+        <label>Bank Account</label>
+        <select formControlName="bankAccountId" class="form-control">
+          <option value="">Select Account</option>
+          <option *ngFor="let account of bankAccounts" [value]="account.id">
+            {{ account.bankName }} - {{ maskAccountNumber(account.accountNumber) }}
+          </option>
+        </select>
+      </div>
+      <div class="fee-info" *ngIf="withdrawalFee > 0">
+        <div class="fee-row">
+          <span>Withdrawal Amount:</span>
+          <span>{{ formatCurrency(withdrawForm.get('amount')?.value || 0) }}</span>
+        </div>
+        <div class="fee-row">
+          <span>Processing Fee:</span>
+          <span>{{ formatCurrency(withdrawalFee) }}</span>
+        </div>
+        <div class="fee-row total">
+          <span>You will receive:</span>
+          <span>{{ formatCurrency((withdrawForm.get('amount')?.value || 0) - withdrawalFee) }}</span>
+        </div>
+      </div>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        An OTP will be sent to your registered email/phone for verification.
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="showWithdraw = false">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="withdrawForm.invalid || loading">
+          {{ loading ? 'Processing...' : 'Continue' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- OTP Verification Modal -->
+<div class="modal-overlay" *ngIf="showOtpVerification" (click)="showOtpVerification = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-shield-alt"></i> Verify OTP</h3>
+      <button class="btn-close" (click)="showOtpVerification = false"><i class="fas fa-times"></i></button>
+    </div>
+    <form [formGroup]="otpForm" (ngSubmit)="verifyOtp()">
+      <div class="form-group">
+        <label>Enter 6-digit OTP</label>
+        <input type="text" formControlName="otp" class="form-control otp-input" maxlength="6" placeholder="000000">
+        <small class="text-muted">Check your email/SMS for the OTP code</small>
+      </div>
+      <div class="alert alert-warning">
+        <i class="fas fa-clock"></i>
+        OTP expires in 10 minutes
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="showOtpVerification = false">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="otpForm.invalid || loading">
+          {{ loading ? 'Verifying...' : 'Verify & Withdraw' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

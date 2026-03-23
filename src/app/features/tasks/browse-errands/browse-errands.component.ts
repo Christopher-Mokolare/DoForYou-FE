@@ -217,7 +217,11 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     }
 
     // Call automated API to claim task
-    this.errandsService.claimTask(taskId, currentUser.name, currentUser.contact).subscribe({
+    const helperName = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.name || 'Unknown';
+    const helperContact = currentUser.phoneNumber || currentUser.contact || currentUser.email || 'No contact';
+    
+    console.log('Claiming task with:', { taskId, helperName, helperContact });
+    this.errandsService.claimTask(taskId, helperName, helperContact).subscribe({
       next: () => {
         this.modalService.showAlert('Success', 'Task accepted successfully! You can now start working on it.', 'success');
         this.loadErrands(); // Refresh the list
@@ -227,8 +231,9 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
         }, 2000);
       },
       error: (error) => {
-        console.error('Task claim failed');
-        this.modalService.showAlert('Error', 'Failed to accept task. Please try again.', 'error');
+        console.error('Task claim failed:', error);
+        const errorMessage = error?.error?.title || error?.error?.detail || error?.message || 'Failed to accept task. Please try again.';
+        this.modalService.showAlert('Unable to Accept Task', errorMessage, 'error');
       }
     });
   }
@@ -353,5 +358,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     this.scrollToTop();
   }
 
-
+  getRunnerPayout(budget: number): number {
+    return budget * 0.85;
+  }
 }
