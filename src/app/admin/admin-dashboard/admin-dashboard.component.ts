@@ -81,7 +81,7 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
       <div class="dashboard-content">
         <div class="row">
           <!-- Quick Actions -->
-          <div class="col-md-6">
+          <div class="col-lg-6">
             <div class="card">
               <div class="card-header">
                 <h5>Quick Actions</h5>
@@ -113,7 +113,7 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
           </div>
 
           <!-- Recent Activity -->
-          <div class="col-md-6">
+          <div class="col-lg-6">
             <div class="card">
               <div class="card-header">
                 <h5>Recent Activity</h5>
@@ -149,31 +149,31 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
 
     @media (min-width: 768px) {
       .admin-dashboard {
-        padding: 2rem;
+        padding: 1.5rem;
       }
     }
 
     .dashboard-header {
       margin-bottom: 1.5rem;
-      text-align: center;
-    }
-
-    @media (min-width: 768px) {
-      .dashboard-header {
-        margin-bottom: 2rem;
-        text-align: left;
-      }
+      text-align: left;
     }
 
     .dashboard-header h1 {
       color: #FF6B35;
-      margin-bottom: 0.5rem;
-      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .dashboard-header p {
+      font-size: 0.875rem;
+      margin: 0;
+      color: #6c757d;
     }
 
     @media (min-width: 768px) {
       .dashboard-header h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
       }
     }
 
@@ -181,119 +181,139 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
       display: grid;
       grid-template-columns: 1fr;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     @media (min-width: 576px) {
       .stats-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
+        gap: 1rem;
       }
     }
 
     @media (min-width: 992px) {
       .stats-grid {
         grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+        gap: 1.25rem;
       }
     }
 
     .stat-card {
       background: white;
-      border-radius: 12px;
-      padding: 1.25rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
       display: flex;
       align-items: center;
-      gap: 1rem;
-      transition: transform 0.2s ease;
+      gap: 0.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .stat-card:hover {
       transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
     }
 
     @media (min-width: 768px) {
       .stat-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
+        gap: 1rem;
       }
     }
 
     .stat-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
+      width: 45px;
+      height: 45px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       flex-shrink: 0;
     }
 
     @media (min-width: 768px) {
       .stat-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
       }
     }
 
-    .stat-icon.tasks { background: #FFAB40 !important; }
-    .stat-icon.users { background: #FFD180 !important; }
-    .stat-icon.revenue { background: #FF9E40 !important; }
-    .stat-icon.urgent { background: #FF8A00 !important; }
+    .stat-icon.tasks { background: #FFAB40; }
+    .stat-icon.users { background: #FFD180; }
+    .stat-icon.revenue { background: #FF9E40; }
+    .stat-icon.urgent { background: #FF8A00; }
 
     .stat-content h3 {
-      font-size: 1.5rem;
-      font-weight: bold;
+      font-size: 1.25rem;
+      font-weight: 700;
       margin: 0;
       color: #333;
     }
 
     @media (min-width: 768px) {
       .stat-content h3 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
     }
 
     .stat-content p {
-      margin: 0;
+      margin: 0.25rem 0 0 0;
       color: #666;
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
     }
 
     @media (min-width: 768px) {
       .stat-content p {
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
     }
 
     .stat-content small {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
     }
 
     .dashboard-content .row > div {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 992px) {
+      .dashboard-content .row > div {
+        margin-bottom: 0;
+      }
     }
 
     .quick-actions {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
     .quick-actions .btn {
       justify-content: flex-start;
       text-align: left;
-      padding: 0.75rem 1rem;
+      padding: 0.625rem 0.875rem;
       border-radius: 8px;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (min-width: 768px) {
+      .quick-actions .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
     }
 
     .quick-actions .btn i {
       margin-right: 0.5rem;
       width: 16px;
+      flex-shrink: 0;
     }
 
     .activity-list {
@@ -320,60 +340,60 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
 
     .activity-content {
       flex: 1;
+      min-width: 0;
     }
 
     .activity-content p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      word-break: break-word;
     }
 
     .card {
       border: none;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     .card-header {
       background: #f8f9fa;
       border-bottom: 1px solid #eee;
-      border-radius: 12px 12px 0 0 !important;
-      padding: 1rem 1.25rem;
+      padding: 0.875rem 1rem;
     }
 
     .card-header h5 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 600;
+      color: #333;
+    }
+
+    @media (min-width: 768px) {
+      .card-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .card-header h5 {
+        font-size: 1rem;
+      }
     }
 
     .card-body {
-      padding: 1.25rem;
+      padding: 1rem;
     }
 
-    @media (max-width: 767px) {
-      .card-header {
-        padding: 0.75rem 1rem;
-      }
-      
+    @media (min-width: 768px) {
       .card-body {
-        padding: 1rem;
-      }
-      
-      .quick-actions .btn {
-        font-size: 0.875rem;
-        padding: 0.625rem 0.875rem;
+        padding: 1.25rem;
       }
     }
-
-    .bg-primary { background-color: #FF6B35 !important; }
-    .bg-success { background-color: #28a745 !important; }
-    .bg-warning { background-color: #ffc107 !important; }
-    .bg-danger { background-color: #dc3545 !important; }
 
     .alert {
-      padding: 1rem;
+      padding: 0.875rem 1rem;
       border-radius: 8px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
     }
 
     .alert-danger {
@@ -383,9 +403,24 @@ import { AdminService, AdminDashboard } from '../../services/admin.service';
     }
 
     .spinner-border {
-      width: 3rem;
-      height: 3rem;
-      border-width: 0.3rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-width: 0.25rem;
+    }
+
+    @media (max-width: 575px) {
+      .quick-actions .btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .card-header {
+        padding: 0.75rem 0.875rem;
+      }
+
+      .card-body {
+        padding: 0.875rem;
+      }
     }
   `]
 })

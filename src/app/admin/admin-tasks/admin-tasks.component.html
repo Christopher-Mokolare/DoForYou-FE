@@ -2,11 +2,11 @@
   <div class="page-header">
     <h1 class="page-title">Task Management</h1>
     <div class="header-actions">
-      <button class="btn btn-success btn-sm" (click)="bulkVerifySelected()" 
+      <button class="btn btn-primary btn-sm" (click)="bulkVerifySelected()" 
               [disabled]="selectedTasks.length === 0">
         <i class="fas fa-check-circle"></i>
-        <span class="d-none d-sm-inline ms-1">Verify Selected</span>
-        <span class="badge bg-light text-dark ms-1">{{selectedTasks.length}}</span>
+        <span class="d-none d-sm-inline btn-text">Verify Selected</span>
+        <span class="badge badge-circle">{{selectedTasks.length}}</span>
       </button>
     </div>
   </div>
@@ -56,60 +56,61 @@
         <!-- Mobile Card View -->
         <div class="d-block d-md-none">
           <div class="mobile-task-card" *ngFor="let task of tasks">
-            <div class="card mb-3" [class.border-warning]="task.Priority === 'Urgent'">
+            <div class="card mb-3" [class.border-warning]="task.Priority === 'Urgent' || task.priority === 'Urgent'">
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                  <div>
-                    <h6 class="mb-1">{{task.TaskDescription | slice:0:40}}...</h6>
-                    <code class="small">{{task.TaskId || task.Id}}</code>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">{{(task.TaskDescription || task.taskDescription) | slice:0:40}}...</h6>
+                    <code class="small">{{task.TaskId || task.taskId || task.Id || task.id}}</code>
                   </div>
-                  <span class="badge" [ngClass]="task.Priority === 'Urgent' ? 'bg-danger' : 'bg-secondary'">
-                    {{task.Priority | titlecase}}
+                  <span class="badge ms-2" [ngClass]="(task.Priority || task.priority) === 'Urgent' || (task.Priority || task.priority) === 'urgent' ? 'bg-danger' : 'bg-secondary'">
+                    {{(task.Priority || task.priority) | titlecase}}
                   </span>
                 </div>
                 <div class="row g-2 mb-2">
                   <div class="col-6">
                     <small class="text-muted d-block">Budget</small>
-                    <strong class="text-success">R{{task.Budget | number:'1.2-2'}}</strong>
+                    <strong class="text-primary">R{{(task.Budget || task.budget) | number:'1.2-2'}}</strong>
                   </div>
                   <div class="col-6">
                     <small class="text-muted d-block">Category</small>
-                    <span class="fw-medium">{{task.Category}}</span>
+                    <span class="fw-medium">{{task.Category || task.category}}</span>
                   </div>
                 </div>
                 <div class="row g-2 mb-2">
                   <div class="col-6">
                     <small class="text-muted d-block">Payment</small>
-                    <span class="badge" [ngClass]="getPaymentStatusClass(task.PaymentStatus)">
-                      {{task.PaymentStatus | titlecase}}
+                    <span class="badge" [ngClass]="getPaymentStatusClass(task.PaymentStatus || task.paymentStatus)">
+                      {{(task.PaymentStatus || task.paymentStatus) | titlecase}}
                     </span>
                   </div>
                   <div class="col-6">
                     <small class="text-muted d-block">Status</small>
-                    <span class="badge" [ngClass]="getTaskStatusClass(task.Status)">
-                      {{task.Status | titlecase}}
+                    <span class="badge" [ngClass]="getTaskStatusClass(task.Status || task.status)">
+                      {{(task.Status || task.status) | titlecase}}
                     </span>
                   </div>
                 </div>
-                <div class="d-flex gap-2 flex-wrap">
-                  <button class="btn btn-sm btn-outline-success" 
-                          *ngIf="task.PaymentStatus === 'Pending'"
-                          (click)="verifyPayment(task.TaskId || task.Id)"
-                          [disabled]="verifying.includes(task.TaskId || task.Id)">
-                    <i class="fas fa-check" *ngIf="!verifying.includes(task.TaskId || task.Id)"></i>
-                    <i class="fas fa-spinner fa-spin" *ngIf="verifying.includes(task.TaskId || task.Id)"></i>
-                    Verify
+                <div class="d-flex gap-2 flex-wrap mt-2">
+                  <button class="btn btn-sm btn-outline-success flex-fill" 
+                          *ngIf="(task.PaymentStatus || task.paymentStatus) === 'Pending' || (task.PaymentStatus || task.paymentStatus) === 'pending'"
+                          (click)="verifyPayment(task.TaskId || task.taskId || task.Id || task.id)"
+                          [disabled]="verifying.includes(task.TaskId || task.taskId || task.Id || task.id)">
+                    <i class="fas fa-check" *ngIf="!verifying.includes(task.TaskId || task.taskId || task.Id || task.id)"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="verifying.includes(task.TaskId || task.taskId || task.Id || task.id)"></i>
+                    <span class="ms-1">Verify</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-warning" 
-                          *ngIf="task.PaymentStatus === 'Completed'"
-                          (click)="unverifyPayment(task.TaskId || task.Id)"
-                          [disabled]="verifying.includes(task.TaskId || task.Id)">
-                    <i class="fas fa-times" *ngIf="!verifying.includes(task.TaskId || task.Id)"></i>
-                    <i class="fas fa-spinner fa-spin" *ngIf="verifying.includes(task.TaskId || task.Id)"></i>
-                    Unverify
+                  <button class="btn btn-sm btn-outline-warning flex-fill" 
+                          *ngIf="(task.PaymentStatus || task.paymentStatus) === 'Completed' || (task.PaymentStatus || task.paymentStatus) === 'completed'"
+                          (click)="unverifyPayment(task.TaskId || task.taskId || task.Id || task.id)"
+                          [disabled]="verifying.includes(task.TaskId || task.taskId || task.Id || task.id)">
+                    <i class="fas fa-times" *ngIf="!verifying.includes(task.TaskId || task.taskId || task.Id || task.id)"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="verifying.includes(task.TaskId || task.taskId || task.Id || task.id)"></i>
+                    <span class="ms-1">Unverify</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-primary" (click)="viewTask(task)">
-                    <i class="fas fa-eye"></i> View
+                  <button class="btn btn-sm btn-outline-primary flex-fill" (click)="viewTask(task)">
+                    <i class="fas fa-eye"></i>
+                    <span class="ms-1">View</span>
                   </button>
                 </div>
               </div>
@@ -230,21 +231,21 @@
   </div>
 
   <!-- Task Detail Modal -->
-  <div class="modal fade" [class.show]="showTaskModal" [style.display]="showTaskModal ? 'block' : 'none'" 
-       *ngIf="showTaskModal" (click)="closeTaskModal()">
-    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+  <div class="modal" [class.show]="showTaskModal" [style.display]="showTaskModal ? 'block' : 'none'" 
+       *ngIf="showTaskModal" (click)="closeTaskModal()" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" (click)="$event.stopPropagation()" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Task Details</h5>
-          <button type="button" class="btn-close" (click)="closeTaskModal()"></button>
+          <button type="button" class="btn-close" (click)="closeTaskModal()" aria-label="Close"></button>
         </div>
         <div class="modal-body" *ngIf="selectedTask">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <h6>Task Information</h6>
               <table class="table table-sm">
                 <tr><td><strong>Task ID:</strong></td><td><code>{{selectedTask.taskId || selectedTask.TaskId || selectedTask.id}}</code></td></tr>
-                <tr><td><strong>Budget:</strong></td><td class="text-success"><strong>R{{(selectedTask.budget || selectedTask.Budget) | number:'1.2-2'}}</strong></td></tr>
+                <tr><td><strong>Budget:</strong></td><td class="text-primary"><strong>R{{(selectedTask.budget || selectedTask.Budget) | number:'1.2-2'}}</strong></td></tr>
                 <tr><td><strong>Category:</strong></td><td>{{selectedTask.category || selectedTask.Category}}</td></tr>
                 <tr><td><strong>Priority:</strong></td><td>
                   <span class="badge" [ngClass]="(selectedTask.priority || selectedTask.Priority) === 'Urgent' || (selectedTask.priority || selectedTask.Priority) === 'urgent' ? 'bg-danger' : 'bg-secondary'">
@@ -254,7 +255,7 @@
                 <tr><td><strong>Created:</strong></td><td>{{(selectedTask.createdAt || selectedTask.CreatedAt) | date:'medium'}}</td></tr>
               </table>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <h6>Status Information</h6>
               <table class="table table-sm">
                 <tr><td><strong>Payment Status:</strong></td><td>
@@ -271,7 +272,7 @@
               </table>
             </div>
           </div>
-          <div class="row mt-3">
+          <div class="row">
             <div class="col-12">
               <h6>Task Description</h6>
               <div class="card">
@@ -283,22 +284,22 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-outline-success" 
+          <button class="btn btn-outline" 
                   *ngIf="(selectedTask?.paymentStatus || selectedTask?.PaymentStatus) === 'Pending' || (selectedTask?.paymentStatus || selectedTask?.PaymentStatus) === 'pending'"
                   (click)="verifyPayment(selectedTask.taskId || selectedTask.TaskId || selectedTask.id); closeTaskModal()"
                   [disabled]="verifying.includes(selectedTask.taskId || selectedTask.TaskId || selectedTask.id)">
             <i class="fas fa-check"></i> Verify Payment
           </button>
-          <button class="btn btn-outline-warning" 
+          <button class="btn btn-outline" 
                   *ngIf="(selectedTask?.paymentStatus || selectedTask?.PaymentStatus) === 'Completed' || (selectedTask?.paymentStatus || selectedTask?.PaymentStatus) === 'completed'"
                   (click)="unverifyPayment(selectedTask.taskId || selectedTask.TaskId || selectedTask.id); closeTaskModal()"
                   [disabled]="verifying.includes(selectedTask.taskId || selectedTask.TaskId || selectedTask.id)">
             <i class="fas fa-times"></i> Unverify Payment
           </button>
-          <button type="button" class="btn btn-secondary" (click)="closeTaskModal()">Close</button>
+          <button type="button" class="btn btn-outline" (click)="closeTaskModal()">Close</button>
         </div>
       </div>
     </div>
   </div>
-  <div class="modal-backdrop fade" [class.show]="showTaskModal" *ngIf="showTaskModal"></div>
+  <div class="modal-backdrop" [class.show]="showTaskModal" *ngIf="showTaskModal" (click)="closeTaskModal()"></div>
 </div>

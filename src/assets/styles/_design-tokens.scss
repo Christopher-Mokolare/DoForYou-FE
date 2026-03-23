@@ -4,21 +4,11 @@
 // COLOR PALETTE
 // ============================================
 
-// Primary Colors
+// Primary Colors (Brand Colors - DO NOT CHANGE)
 $primary: #FF8A00;
 $primary-light: #FFE3C2;
 $primary-dark: #E67A00;
 $primary-gradient: linear-gradient(135deg, #FF8A00 0%, #FF6B00 100%);
-
-// Status Colors
-$success: #2ECC71;
-$success-light: #A8E6CF;
-$warning: #FFC107;
-$warning-light: #FFE8A3;
-$danger: #E74C3C;
-$danger-light: #F5B7B1;
-$info: #3498DB;
-$info-light: #AED6F1;
 
 // Neutral Colors
 $text-dark: #1F2937;
@@ -30,14 +20,24 @@ $card: #FFFFFF;
 $border: #E5E7EB;
 $border-light: #F3F4F6;
 
-// Task Status Colors
-$status-posted: #FF8A00;
-$status-claimed: #3498DB;
-$status-in-progress: #FFC107;
-$status-completed: #2ECC71;
-$status-paid: #27AE60;
-$status-cancelled: #E74C3C;
-$status-disputed: #9B59B6;
+// Status Colors (derived from primary)
+$success: $primary;
+$success-light: $primary-light;
+$warning: $primary;
+$warning-light: $primary-light;
+$danger: $primary-dark;
+$danger-light: $primary-light;
+$info: $primary;
+$info-light: $primary-light;
+
+// Task Status Colors (all use primary palette)
+$status-posted: $primary;
+$status-claimed: $primary;
+$status-in-progress: $primary;
+$status-completed: $primary;
+$status-paid: $primary-dark;
+$status-cancelled: $primary-dark;
+$status-disputed: $primary-dark;
 
 // ============================================
 // TYPOGRAPHY

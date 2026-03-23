@@ -1,0 +1,54 @@
+<div class="messages-page">
+  <div class="container py-4">
+    <div class="page-header">
+      <h1><i class="fas fa-comments"></i> Messages</h1>
+      <p class="text-muted">All your task conversations in one place</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading conversations...</p>
+    </div>
+
+    <div class="conversations-list" *ngIf="!loading && conversations.length > 0">
+      <div class="conversation-card" *ngFor="let conversation of conversations" 
+           (click)="openChat(conversation)">
+        <div class="conversation-avatar">
+          {{ conversation.otherUser.initials }}
+        </div>
+        <div class="conversation-content">
+          <div class="conversation-header">
+            <h4>{{ conversation.otherUser.name }}</h4>
+            <span class="badge" [ngClass]="getStatusBadgeClass(conversation.taskStatus)">
+              {{ conversation.taskStatus }}
+            </span>
+          </div>
+          <p class="task-title">{{ conversation.taskTitle }}</p>
+          <small class="text-muted">
+            <i class="fas fa-clock"></i> {{ conversation.lastMessageTime | date:'short' }}
+          </small>
+        </div>
+        <div class="conversation-actions">
+          <i class="fas fa-chevron-right"></i>
+          <span class="unread-badge" *ngIf="conversation.unreadCount > 0">
+            {{ conversation.unreadCount }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && conversations.length === 0">
+      <i class="fas fa-comments"></i>
+      <h3>No conversations yet</h3>
+      <p>Start claiming or posting tasks to begin chatting!</p>
+      <div class="empty-actions">
+        <a routerLink="/tasks/browse" class="btn btn-primary">
+          <i class="fas fa-search"></i> Browse Tasks
+        </a>
+        <a routerLink="/tasks/post" class="btn btn-outline-primary">
+          <i class="fas fa-plus"></i> Post a Task
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

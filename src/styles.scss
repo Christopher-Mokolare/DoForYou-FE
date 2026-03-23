@@ -6,17 +6,19 @@
 
 // Variables
 :root {
-  --primary: #FF6B35;
-  --primary-color: #FFAB40;
-  --secondary: #17a2b8;
+  --primary: #FF8A00;
+  --primary-color: #FF8A00;
+  --primary-light: #FFE3C2;
+  --primary-dark: #E67A00;
+  --secondary: #FF8A00;
   --secondary-color: #f8f9fa;
-  --dark: #292929;
-  --text-color: #212529;
+  --dark: #1F2937;
+  --text-color: #1F2937;
   --light: #f8f9fa;
   --light-color: #ffffff;
-  --dark-color: #343a40;
-  --gray: #6c757d;
-  --orange: #FFAB40;
+  --dark-color: #1F2937;
+  --gray: #6B7280;
+  --orange: #FF8A00;
 }
 
 // Fonts
@@ -24,11 +26,16 @@ $font-family-base: 'Work Sans', sans-serif;
 $font-family-special: 'Special Elite', serif;
 
 // Base styles
+// html, body {
+//   overflow-x: hidden;
+// }
+
 body {
   font-family: $font-family-base;
   color: var(--text-color);
   line-height: 1.6;
   padding-top: 56px; // For fixed navbar
+  // margin: 0;
 }
 
 h1, h2, h3, h4, h5 {

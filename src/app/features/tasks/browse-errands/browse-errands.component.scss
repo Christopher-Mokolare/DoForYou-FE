@@ -1,10 +1,11 @@
+@import 'src/assets/styles/design-tokens';
 .modern-tasks-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .hero-header {
-  background: #FFAB40;
+  background: $primary;
   color: white;
   padding: 60px 0;
   margin-bottom: 40px;
@@ -94,7 +95,7 @@
     .alert-icon {
       width: 64px;
       height: 64px;
-      background: #FFAB40;
+      background: $primary;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -416,7 +417,7 @@
       
       .btn-primary {
         width: 100%;
-        background: #FFAB40;
+        background: $primary;
         border: none;
         color: white;
         padding: 12px 20px;
@@ -622,7 +623,7 @@
   border: none;
   
   &.btn-primary {
-    background: #FFAB40;
+    background: $primary;
     color: white;
     
     &:hover {

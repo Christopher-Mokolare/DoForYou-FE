@@ -1,0 +1,73 @@
+<div class="tasks-container">
+  <div class="container-fluid">
+    <div class="page-header">
+      <h1 class="page-title">My Active Tasks</h1>
+      <p class="page-subtitle">Track and manage your ongoing tasks</p>
+    </div>
+    
+    <div *ngIf="loading$ | async" class="loading-state">
+      <i class="fas fa-spinner fa-spin loading-spinner"></i>
+      <p>Loading your active tasks...</p>
+    </div>
+    
+    <div *ngIf="(loading$ | async) === false && (tasks$ | async) as tasks" class="empty-state" [hidden]="tasks.length > 0">
+      <i class="fas fa-clipboard-list empty-icon"></i>
+      <h3>No Active Tasks</h3>
+      <p>You don't have any active tasks at the moment.</p>
+      <a routerLink="/tasks/browse" class="btn btn-primary">Browse Available Tasks</a>
+    </div>
+    
+    <div *ngIf="(loading$ | async) === false && (tasks$ | async) as tasks" class="tasks-grid" [hidden]="tasks.length === 0">
+      <div *ngFor="let task of tasks; trackBy: trackByTaskId" class="task-card">
+        <div class="task-header">
+          <span class="task-status" [ngClass]="'status-' + getStatusClass(task.status)">
+            {{ task.status | titlecase }}
+          </span>
+          <div class="task-budget">R{{ getRunnerPayout(task.budget) | number:'1.2-2' }}</div>
+        </div>
+        
+        <div class="task-content">
+          <h3 class="task-title">{{ task.title || task.description }}</h3>
+          
+          <div class="task-meta">
+            <div class="meta-item">
+              <i class="fas fa-tag"></i>
+              <span>{{ task.category }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-calendar"></i>
+              <span>{{ task.dueDate | date:'MMM d, y' }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ task.location || 'Not specified' }}</span>
+            </div>
+          </div>
+          
+          <div class="task-creator">
+            <div class="creator-avatar">{{ getInitials(task.creatorName) }}</div>
+            <div class="creator-details">
+              <div class="creator-name">{{ task.creatorName }}</div>
+              <div class="creator-contact">{{ task.creatorContact }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="task-actions">
+          <button (click)="openChat(task)" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-comment"></i> Chat
+          </button>
+          <a [href]="'tel:' + task.creatorContact" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-phone"></i> Call
+          </a>
+          <button (click)="viewTaskDetails(task)" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-info-circle"></i> Details
+          </button>
+          <button (click)="markComplete(task)" class="btn btn-primary btn-sm">
+            <i class="fas fa-check-circle"></i> Complete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

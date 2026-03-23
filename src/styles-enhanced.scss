@@ -198,27 +198,6 @@ a {
   }
 }
 
-// ============================================
-// SCROLLBAR STYLING
-// ============================================
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: $background;
-}
-
-::-webkit-scrollbar-thumb {
-  background: $border;
-  border-radius: $radius-full;
-  
-  &:hover {
-    background: $text-muted;
-  }
-}
 
 // ============================================
 // SELECTION STYLING

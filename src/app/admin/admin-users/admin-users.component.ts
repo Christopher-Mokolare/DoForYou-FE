@@ -14,6 +14,8 @@ export class AdminUsersComponent implements OnInit {
   users: AdminUser[] = [];
   updating: number[] = [];
   loading = true;
+  showUserModal = false;
+  selectedUser: AdminUser | null = null;
   
   filters = {
     role: '',
@@ -53,12 +55,10 @@ export class AdminUsersComponent implements OnInit {
       pageSize: this.pagination.pageSize
     };
 
-    // Only add isVerified if it has a valid value
     if (this.filters.isVerified !== '') {
       query.isVerified = this.filters.isVerified === 'true';
     }
 
-    // Remove undefined values
     Object.keys(query).forEach(key => {
       if (query[key] === undefined || query[key] === '') {
         delete query[key];
@@ -67,7 +67,6 @@ export class AdminUsersComponent implements OnInit {
 
     this.adminService.getUsers(query).subscribe({
       next: (response) => {
-        // Handle nested data structure
         const data = response.data || response;
         this.users = data.users || [];
         this.pagination = {
@@ -148,7 +147,13 @@ export class AdminUsersComponent implements OnInit {
   }
 
   viewUserDetails(user: AdminUser) {
-    console.log('Viewing user details');
+    this.selectedUser = user;
+    this.showUserModal = true;
+  }
+
+  closeUserModal() {
+    this.showUserModal = false;
+    this.selectedUser = null;
   }
 
   getRoleClass(role: string): string {

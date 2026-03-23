@@ -1,3 +1,5 @@
+@import './assets/styles/design-tokens';
+
 /* Global Design System - DoForYou Frontend */
 
 /* Modals - Stunning Glassmorphism Design */
@@ -95,52 +97,52 @@
     }
     
     &.header-info .modal-title i {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: $primary-gradient;
       color: white;
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 8px 24px rgba(255, 138, 0, 0.4);
       
       &::after {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: $primary-gradient;
       }
     }
     
     &.header-success .modal-title i {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      background: $primary-gradient;
       color: white;
-      box-shadow: 0 8px 24px rgba(56, 239, 125, 0.4);
+      box-shadow: 0 8px 24px rgba(255, 138, 0, 0.4);
       
       &::after {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        background: $primary-gradient;
       }
     }
     
     &.header-warning .modal-title i {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: $primary-gradient;
       color: white;
-      box-shadow: 0 8px 24px rgba(245, 87, 108, 0.4);
+      box-shadow: 0 8px 24px rgba(255, 138, 0, 0.4);
       
       &::after {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: $primary-gradient;
       }
     }
     
     &.header-error .modal-title i {
-      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      background: linear-gradient(135deg, $primary-dark 0%, darken($primary-dark, 10%) 100%);
       color: white;
-      box-shadow: 0 8px 24px rgba(235, 51, 73, 0.4);
+      box-shadow: 0 8px 24px rgba(230, 122, 0, 0.4);
       
       &::after {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        background: linear-gradient(135deg, $primary-dark 0%, darken($primary-dark, 10%) 100%);
       }
     }
     
     &.header-confirm .modal-title i {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      background: $primary-gradient;
       color: white;
-      box-shadow: 0 8px 24px rgba(79, 172, 254, 0.4);
+      box-shadow: 0 8px 24px rgba(255, 138, 0, 0.4);
       
       &::after {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background: $primary-gradient;
       }
     }
     
@@ -283,13 +285,13 @@
       }
       
       &.btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: $primary-gradient;
         color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 138, 0, 0.4);
         
         &:hover {
           transform: translateY(-3px);
-          box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+          box-shadow: 0 8px 30px rgba(255, 138, 0, 0.5);
         }
         
         &:active {
@@ -298,13 +300,13 @@
       }
       
       &.btn-success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        background: $primary-gradient;
         color: white;
-        box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 138, 0, 0.4);
         
         &:hover {
           transform: translateY(-3px);
-          box-shadow: 0 8px 30px rgba(56, 239, 125, 0.5);
+          box-shadow: 0 8px 30px rgba(255, 138, 0, 0.5);
         }
         
         &:active {
@@ -313,13 +315,13 @@
       }
       
       &.btn-warning {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: $primary-gradient;
         color: white;
-        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 138, 0, 0.4);
         
         &:hover {
           transform: translateY(-3px);
-          box-shadow: 0 8px 30px rgba(245, 87, 108, 0.5);
+          box-shadow: 0 8px 30px rgba(255, 138, 0, 0.5);
         }
         
         &:active {
@@ -328,13 +330,13 @@
       }
       
       &.btn-danger {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        background: linear-gradient(135deg, $primary-dark 0%, darken($primary-dark, 10%) 100%);
         color: white;
-        box-shadow: 0 4px 15px rgba(235, 51, 73, 0.4);
+        box-shadow: 0 4px 15px rgba(230, 122, 0, 0.4);
         
         &:hover {
           transform: translateY(-3px);
-          box-shadow: 0 8px 30px rgba(235, 51, 73, 0.5);
+          box-shadow: 0 8px 30px rgba(230, 122, 0, 0.5);
         }
         
         &:active {
@@ -343,13 +345,13 @@
       }
       
       &.btn-info {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background: $primary-gradient;
         color: white;
-        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        box-shadow: 0 4px 15px rgba(255, 138, 0, 0.4);
         
         &:hover {
           transform: translateY(-3px);
-          box-shadow: 0 8px 30px rgba(79, 172, 254, 0.5);
+          box-shadow: 0 8px 30px rgba(255, 138, 0, 0.5);
         }
         
         &:active {
@@ -399,7 +401,7 @@
 
 .modal-backdrop {
   z-index: 1040;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+  background: linear-gradient(135deg, rgba(255, 138, 0, 0.4) 0%, rgba(230, 122, 0, 0.4) 100%);
   backdrop-filter: blur(8px);
   animation: backdropFadeIn 0.3s ease-out;
   
@@ -449,10 +451,10 @@
       font-size: 12px;
       font-weight: 500;
       
-      &.total { background-color: #e3f2fd; color: #1976d2; }
-      &.verified, &.success { background-color: #e8f5e8; color: #2e7d32; }
-      &.unverified, &.warning { background-color: #fff3e0; color: #f57c00; }
-      &.error { background-color: #ffebee; color: #c62828; }
+      &.total { background-color: rgba(255, 138, 0, 0.1); color: $primary; }
+      &.verified, &.success { background-color: rgba(255, 138, 0, 0.1); color: $primary; }
+      &.unverified, &.warning { background-color: rgba(255, 138, 0, 0.1); color: $primary; }
+      &.error { background-color: rgba(230, 122, 0, 0.1); color: $primary-dark; }
     }
   }
   
@@ -515,8 +517,8 @@
       
       &:focus {
         outline: none;
-        border-color: #80bdff;
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba(255, 138, 0, 0.25);
       }
     }
   }
@@ -551,7 +553,7 @@
   
   .loading-indicator {
     margin-left: 4px;
-    color: #007bff;
+    color: $primary;
     font-size: 10px;
   }
 }
@@ -561,16 +563,16 @@
   font-size: 10px;
   padding: 3px 6px;
   
-  &.bg-admin { background-color: #dc3545 !important; }
-  &.bg-user { background-color: #0d6efd !important; }
-  &.bg-helper { background-color: #198754 !important; }
-  &.bg-pending { background-color: #ffc107 !important; }
-  &.bg-verified { background-color: #198754 !important; }
-  &.bg-failed { background-color: #dc3545 !important; }
-  &.bg-draft { background-color: #6c757d !important; }
-  &.bg-posted { background-color: #0d6efd !important; }
-  &.bg-claimed { background-color: #fd7e14 !important; }
-  &.bg-completed { background-color: #198754 !important; }
+  &.bg-admin { background-color: $primary-dark !important; }
+  &.bg-user { background-color: $primary !important; }
+  &.bg-helper { background-color: $primary !important; }
+  &.bg-pending { background-color: $primary !important; }
+  &.bg-verified { background-color: $primary !important; }
+  &.bg-failed { background-color: $primary-dark !important; }
+  &.bg-draft { background-color: $text-muted !important; }
+  &.bg-posted { background-color: $primary !important; }
+  &.bg-claimed { background-color: $primary !important; }
+  &.bg-completed { background-color: $primary !important; }
 }
 
 /* Tables */

@@ -1,10 +1,11 @@
+@import 'src/assets/styles/design-tokens';
 .task-tracking {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 
   h2 {
-    color: #FF6B35;
+    color: $primary;
     text-align: center;
     margin-bottom: 2rem;
   }
@@ -22,10 +23,10 @@
 
 .task-section {
   h3 {
-    color: #FF6B35;
+    color: $primary;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #FF6B35;
+    border-bottom: 2px solid $primary;
   }
 }
 
@@ -135,7 +136,7 @@
 }
 
 .btn-primary {
-  background: #FF6B35;
+  background: $primary;
   color: white;
 
   &:hover:not(:disabled) {
@@ -216,7 +217,7 @@
 
     &:focus {
       outline: none;
-      border-color: #FF6B35;
+      border-color: $primary;
       box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
     }
   }

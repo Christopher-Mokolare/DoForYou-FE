@@ -189,7 +189,7 @@
                   <small class="d-block">Posted: {{user.tasksPosted}}</small>
                   <small class="d-block">Completed: {{user.tasksCompleted}}</small>
                   <div class="rating" *ngIf="user.rating > 0">
-                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-primary"></i>
                     <small>{{user.rating | number:'1.1-1'}}</small>
                   </div>
                 </div>
@@ -287,4 +287,60 @@
       </ng-template>
     </div>
   </div>
+
+  <!-- User Detail Modal -->
+  <div class="modal" [class.show]="showUserModal" [style.display]="showUserModal ? 'block' : 'none'" 
+       *ngIf="showUserModal" (click)="closeUserModal()" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" (click)="$event.stopPropagation()" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">User Details</h5>
+          <button type="button" class="btn-close" (click)="closeUserModal()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" *ngIf="selectedUser">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <h6>Personal Information</h6>
+              <table class="table table-sm">
+                <tr><td><strong>Name:</strong></td><td>{{selectedUser.name}}</td></tr>
+                <tr><td><strong>Email:</strong></td><td>{{selectedUser.email}}</td></tr>
+                <tr><td><strong>Contact:</strong></td><td>{{selectedUser.contact}}</td></tr>
+                <tr><td><strong>Role:</strong></td><td>
+                  <span class="badge" [ngClass]="getRoleClass(selectedUser.role)">
+                    {{selectedUser.role}}
+                  </span>
+                </td></tr>
+              </table>
+            </div>
+            <div class="col-md-6 mb-3">
+              <h6>Account Status</h6>
+              <table class="table table-sm">
+                <tr><td><strong>Verification:</strong></td><td>
+                  <span class="badge" [ngClass]="selectedUser.isVerified ? 'bg-success' : 'bg-warning'">
+                    {{selectedUser.isVerified ? 'Verified' : 'Unverified'}}
+                  </span>
+                </td></tr>
+                <tr><td><strong>Tasks Posted:</strong></td><td>{{selectedUser.tasksPosted}}</td></tr>
+                <tr><td><strong>Tasks Completed:</strong></td><td>{{selectedUser.tasksCompleted}}</td></tr>
+                <tr><td><strong>Rating:</strong></td><td>{{selectedUser.rating | number:'1.1-1'}}</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <h6>Dates</h6>
+              <table class="table table-sm">
+                <tr><td><strong>Joined:</strong></td><td>{{selectedUser.createdAt | date:'medium'}}</td></tr>
+                <tr><td><strong>Last Login:</strong></td><td>{{selectedUser.lastLoginAt ? (selectedUser.lastLoginAt | date:'medium') : 'Never'}}</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="closeUserModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" [class.show]="showUserModal" *ngIf="showUserModal" (click)="closeUserModal()"></div>
 </div>

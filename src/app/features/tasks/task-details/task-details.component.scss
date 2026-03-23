@@ -1,3 +1,4 @@
+@import 'src/assets/styles/design-tokens';
 .task-details {
   padding: 2rem;
   max-width: 800px;
@@ -58,7 +59,7 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 
   h3 {
-    color: #FF6B35;
+    color: $primary;
     margin-bottom: 1rem;
   }
 
@@ -88,7 +89,7 @@
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #FF6B35;
+  border-left: 4px solid $primary;
 
   strong {
     color: #333;
@@ -132,7 +133,7 @@
 }
 
 .btn-primary {
-  background: #FF6B35;
+  background: $primary;
   color: white;
 
   &:hover:not(:disabled) {

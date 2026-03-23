@@ -5,7 +5,7 @@
   
   <div class="card-body">
     <div *ngIf="loading" class="loading-state">
-      <div class="spinner-border text-primary"></div>
+      <div class="spinner-border"></div>
       <p>Loading messages...</p>
     </div>
 
@@ -15,19 +15,51 @@
     </div>
 
     <div *ngIf="!loading && messages.length > 0" class="messages-list" #messagesContainer (scroll)="onScroll()">
+      <!-- Spacer to push messages to bottom when there's empty space -->
+      <div class="flex-spacer"></div>
+      
+      <!-- End of history indicator at the TOP (before messages) -->
+      <div *ngIf="!hasMoreMessages && messages.length > 0 && !loadingMore" class="history-end">
+        <span>Beginning of conversation</span>
+      </div>
+      
+      <!-- Loading indicator for older messages at the TOP (before messages) -->
+      <div *ngIf="loadingMore" class="history-loading">
+        <div class="spinner-border spinner-sm"></div>
+        <span>Loading older messages...</span>
+      </div>
+      
+      <!-- Messages come AFTER spacer and history indicators -->
       <div *ngFor="let message of messages" 
-           class="message"
-           [class.message-mine]="isMyMessage(message)"
-           [class.message-theirs]="!isMyMessage(message)">
-        <div class="message-header">
-          <span class="message-sender">{{ message.senderName }}</span>
-          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+           class="message-wrapper"
+           [class.mine]="isMyMessage(message)"
+           [class.theirs]="!isMyMessage(message)">
+        
+        <div *ngIf="!isMyMessage(message)" class="message-avatar">
+          {{ getInitials(message.senderName) }}
         </div>
-        <div class="message-content">{{ message.content }}</div>
+        
+        <div class="message"
+             [class.message-mine]="isMyMessage(message)"
+             [class.message-theirs]="!isMyMessage(message)">
+          <div class="message-bubble">
+            <div class="message-content">
+              <span class="message-text">{{ message.content }}</span>
+              <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+              <span *ngIf="isMyMessage(message)" class="message-status">
+                <i class="fas" [ngClass]="getMessageStatusIcon(message.status)"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="isMyMessage(message)" class="message-avatar mine-avatar">
+          {{ getInitials(message.senderName) }}
+        </div>
       </div>
     </div>
 
-    <button *ngIf="showNewMessageIndicator" class="new-message-indicator" (click)="scrollToBottom()">
+    <button *ngIf="showNewMessageIndicator" class="new-message-indicator" (click)="scrollToBottom(true)">
       <i class="fas fa-arrow-down"></i> New message
     </button>
   </div>
@@ -39,14 +71,16 @@
         class="form-input" 
         [(ngModel)]="newMessage"
         name="message"
-        placeholder="Type your message..."
+        placeholder="Type a message..."
         [disabled]="sending"
+        autocomplete="off"
         required>
       <button 
         type="submit" 
         class="btn-primary"
         [disabled]="!newMessage.trim() || sending">
-        {{ sending ? 'Sending...' : 'Send' }}
+        <i class="fas fa-paper-plane"></i>
+        <span>Send</span>
       </button>
     </form>
   </div>

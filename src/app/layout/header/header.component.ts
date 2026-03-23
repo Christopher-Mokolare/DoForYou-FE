@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnInit, inject } from '@angular/core';
+import { Component, AfterViewInit, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
@@ -17,7 +17,7 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements AfterViewInit, OnInit {
-  isMenuCollapsed = false;
+  isMenuCollapsed = true;
   isLoggedIn = false;
   isAdmin = false;
   currentUser: User | null = null;
@@ -88,6 +88,13 @@ export class HeaderComponent implements AfterViewInit, OnInit {
 
   scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  collapseMenu() {
+    if (!this.isMenuCollapsed) {
+      this.isMenuCollapsed = true;
+      this.animateHamburger();
+    }
   }
 
   initializeHamburger() {
@@ -167,5 +174,21 @@ export class HeaderComponent implements AfterViewInit, OnInit {
     this.authService.logout();
     this.router.navigate(['/']);
     this.scrollToTop();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.navbar') && !this.isMenuCollapsed) {
+      this.isMenuCollapsed = true;
+      this.animateHamburger();
+    }
+    
+    const isDropdownItem = target.closest('.dropdown-item');
+    const isNavLink = target.closest('.nav-link') && !target.closest('.dropdown-toggle');
+    
+    if ((isNavLink || isDropdownItem) && !this.isMenuCollapsed) {
+      this.collapseMenu();
+    }
   }
 }

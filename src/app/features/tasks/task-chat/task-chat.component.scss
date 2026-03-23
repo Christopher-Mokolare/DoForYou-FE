@@ -1,97 +1,420 @@
+@import 'src/assets/styles/design-tokens';
+
 .chat-container {
-  max-width: 800px;
-  margin: 0 auto;
-  height: 70vh;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
   position: relative;
+  
+  @media (min-width: 768px) {
+    height: 80vh;
+    margin: 2rem auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+  }
 }
 
 .card-header {
-  border-bottom: 1px solid var(--border, #E5E7EB);
-}
-
-.card-header .card-title {
-  font-size: 1rem;
-  font-weight: 600;
+  background: white;
+  border-bottom: 1px solid $border;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+  @media (min-width: 768px) {
+    padding: 1rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: $text-dark;
+    
+    @media (min-width: 768px) {
+      font-size: 1.1rem;
+    }
+  }
 }
 
 .card-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
-  background: var(--background, #F9FAFB);
-}
-
-.card-footer {
-  border-top: 1px solid var(--border, #E5E7EB);
-  background: white;
+  overflow-x: hidden;
+  padding: 1rem;
+  background: $background;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+  
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
 }
 
 .messages-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  min-height: 100%;
+  
+  .flex-spacer {
+    flex: 1 1 auto;
+    min-height: 1px;
+  }
+}
+
+.history-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: $text-muted;
+  font-size: 0.85rem;
+  
+  .spinner-border {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 2px;
+  }
+  
+  .spinner-sm {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid $primary;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.history-end {
+  text-align: center;
+  padding: 1rem;
+  color: $text-muted;
+  font-size: 0.75rem;
+  position: relative;
+  margin-bottom: 0.5rem;
+  
+  span {
+    background: $background;
+    padding: 0 0.75rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: $border;
+  }
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  
+  &.mine {
+    flex-direction: row-reverse;
+  }
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: $primary-light;
+  color: $primary-dark;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  
+  &.mine-avatar {
+    background: $primary;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
 }
 
 .message {
-  max-width: 70%;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  word-wrap: break-word;
+  max-width: 85%;
+  position: relative;
+  
+  @media (min-width: 768px) {
+    max-width: 70%;
+  }
 }
 
 .message-mine {
   align-self: flex-end;
-  background: var(--primary, #FF8A00);
-  color: white;
-  border-bottom-right-radius: 0.25rem;
+  
+  .message-bubble {
+    background: $primary-gradient;
+    color: white;
+    border-radius: 20px 20px 4px 20px;
+  }
+  
+  .message-time {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .message-status {
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .message-theirs {
   align-self: flex-start;
-  background: var(--background-dark, #F3F4F6);
-  color: var(--text-dark, #1F2937);
-  border-bottom-left-radius: 0.25rem;
+  
+  .message-bubble {
+    background: white;
+    color: $text-dark;
+    border-radius: 20px 20px 20px 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .message-time {
+    color: rgba(0, 0, 0, 0.45);
+  }
 }
 
-.message-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.75rem;
-  opacity: 0.9;
-  gap: 0.5rem;
-}
-
-.message-sender {
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.message-time {
-  font-size: 0.7rem;
-  flex-shrink: 0;
+.message-bubble {
+  padding: 0.625rem 0.875rem;
+  word-wrap: break-word;
+  position: relative;
+  
+  @media (min-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
 }
 
 .message-content {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1.4;
+  word-break: break-word;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+.message-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-time {
+  font-size: 0.65rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-left: 0.5rem;
+  
+  @media (min-width: 768px) {
+    font-size: 0.7rem;
+  }
+}
+
+.message-status {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  
+  i {
+    font-size: 0.7rem;
+    
+    &.read {
+      color: #34b7f1;
+    }
+  }
+}
+
+.card-footer {
+  background: white;
+  border-top: 1px solid $border;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  
+  @media (min-width: 768px) {
+    padding: 1rem 1.5rem;
+    border-radius: 0 0 12px 12px;
+  }
 }
 
 .message-form {
   display: flex;
+  align-items: flex-end;
   gap: 0.5rem;
+  background: $background;
+  border-radius: 24px;
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  
+  @media (min-width: 768px) {
+    padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  }
+  
+  .form-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.625rem 0;
+    font-size: 16px;
+    max-height: 120px;
+    resize: none;
+    color: $text-dark;
+    
+    @media (min-width: 768px) {
+      padding: 0.75rem 0;
+      font-size: 0.95rem;
+    }
+    
+    &:focus {
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: $text-muted;
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+  
+  .btn-primary {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: $primary;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    
+    @media (min-width: 768px) {
+      width: 44px;
+      height: 44px;
+    }
+    
+    i {
+      font-size: 1.1rem;
+      
+      @media (min-width: 768px) {
+        font-size: 1.2rem;
+      }
+    }
+    
+    &:hover:not(:disabled) {
+      background: $primary-dark;
+      transform: scale(1.05);
+    }
+    
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: $text-muted;
+    }
+    
+    span {
+      display: none;
+    }
+  }
 }
 
-.message-form .form-input {
-  flex: 1;
-}
-
-.message-form .btn-primary {
-  white-space: nowrap;
-  padding: 0.75rem 1.5rem;
+.new-message-indicator {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: $primary;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 20;
+  transition: all 0.2s;
+  animation: slideUp 0.3s ease;
+  
+  @media (min-width: 768px) {
+    bottom: 6rem;
+    padding: 0.625rem 1.25rem;
+  }
+  
+  i {
+    font-size: 0.8rem;
+  }
+  
+  &:hover {
+    background: $primary-dark;
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:active {
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .loading-state,
@@ -100,37 +423,69 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  height: 100%;
+  min-height: 200px;
+  color: $text-muted;
   text-align: center;
 }
 
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
-.new-message-indicator {
-  position: absolute;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--primary, #FF8A00);
-  color: white;
-  border: none;
-  border-radius: 2rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 138, 0, 0.4);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  z-index: 10;
-  transition: all 0.2s;
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  border: 2px solid $primary;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.new-message-indicator:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 138, 0, 0.5);
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  input, button {
+    font-size: 16px;
+  }
+  
+  .btn-primary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .message {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }

@@ -1,3 +1,4 @@
+@import 'src/assets/styles/design-tokens';
 .container {
   min-height: 80vh;
   display: flex;
@@ -25,7 +26,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FF6B35, #FF8A65);
+  background: linear-gradient(135deg, $primary, #FF8A65);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 25px;

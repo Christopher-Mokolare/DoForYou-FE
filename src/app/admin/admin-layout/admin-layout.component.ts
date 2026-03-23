@@ -9,34 +9,37 @@ import { AuthService } from '../../services/auth.service';
   imports: [CommonModule, RouterModule],
   template: `
     <div class="admin-layout">
+      <!-- Backdrop -->
+      <div class="backdrop d-lg-none" [class.show]="sidebarOpen" (click)="toggleSidebar()"></div>
+      
       <!-- Sidebar -->
-      <nav class="admin-sidebar">
+      <nav class="admin-sidebar" [class.show]="sidebarOpen">
         <div class="sidebar-header">
           <h4>DoForYou Admin</h4>
         </div>
         
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active">
+            <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebarOnMobile()">
               <i class="fas fa-tachometer-alt"></i>
               Dashboard
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/admin/tasks" routerLinkActive="active">
+            <a class="nav-link" routerLink="/admin/tasks" routerLinkActive="active" (click)="closeSidebarOnMobile()">
               <i class="fas fa-tasks"></i>
               Tasks
               <span class="badge bg-warning ms-auto" *ngIf="pendingCount > 0">{{pendingCount}}</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/admin/users" routerLinkActive="active">
+            <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebarOnMobile()">
               <i class="fas fa-users"></i>
               Users
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/admin/payments" routerLinkActive="active">
+            <a class="nav-link" routerLink="/admin/payments" routerLinkActive="active" (click)="closeSidebarOnMobile()">
               <i class="fas fa-credit-card"></i>
               Payments
             </a>
@@ -62,18 +65,16 @@ import { AuthService } from '../../services/auth.service';
 
       <!-- Main Content -->
       <main class="admin-main">
-        <!-- Top Bar -->
-        <header class="admin-header">
-          <button class="btn btn-link sidebar-toggle d-lg-none" (click)="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-          </button>
-        </header>
-
         <!-- Page Content -->
         <div class="admin-content">
           <router-outlet></router-outlet>
         </div>
       </main>
+
+      <!-- Sidebar Toggle Button -->
+      <button class="btn btn-link sidebar-toggle-open d-lg-none" (click)="toggleSidebar()" [class.inside]="sidebarOpen">
+        <i [class]="sidebarOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
+      </button>
     </div>
   `,
   styles: [`
@@ -90,14 +91,14 @@ import { AuthService } from '../../services/auth.service';
       flex-direction: column;
       position: fixed;
       height: calc(100vh - 80px);
-      overflow-y: auto;
-      z-index: 999;
+      overflow-y: hidden;
+      z-index: 102;
       left: 0;
       top: 80px;
     }
 
     .sidebar-header {
-      padding: 1.5rem;
+      padding: 1rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
@@ -109,12 +110,14 @@ import { AuthService } from '../../services/auth.service';
 
     .nav {
       flex: 1;
-      padding: 1rem 0;
+      padding: 0.5rem 0;
+      overflow-y: auto;
+      min-height: 0;
     }
 
     .nav-link {
       color: rgba(255, 255, 255, 0.8);
-      padding: 0.75rem 1.5rem;
+      padding: 0.6rem 1.5rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -140,58 +143,97 @@ import { AuthService } from '../../services/auth.service';
     }
 
     .sidebar-footer {
-      padding: 1.5rem;
+      padding: 0.75rem 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
     }
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .user-avatar {
-      width: 40px;
-      height: 40px;
+      width: 35px;
+      height: 35px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 0.9rem;
     }
 
     .user-name {
       font-weight: 600;
       color: white;
+      font-size: 0.9rem;
+    }
+
+    .user-details small {
+      font-size: 0.75rem;
     }
 
     .admin-main {
       flex: 1;
       margin-left: 280px;
-      display: flex;
-      flex-direction: column;
     }
 
-    .admin-header {
-      background: white;
-      border-bottom: 1px solid #eee;
-      padding: .5rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+
 
     .admin-content {
-      flex: 1;
       background: #f8f9fa;
-      min-height: calc(100vh - 80px);
+      min-height: 100vh;
     }
 
-    .sidebar-toggle {
-      color: #FF6B35;
+
+
+    .sidebar-toggle-open {
+      color: white;
+      background: linear-gradient(135deg, #FF6B35, #F7931E);
       font-size: 1.2rem;
+      position: fixed;
+      top: 5.5rem;
+      z-index: 103;
+      transition: all 0.3s ease;
+      border-radius: 0 0.25rem 0.25rem 0;
+      padding: .4rem 0.1rem;
+      left: 0;
+    }
+
+    .sidebar-toggle-open.inside {
+      left: -1.7rem;
+      border-radius: 0.25rem;
+      transform: translateX(0);
+    }
+
+    .backdrop {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 80px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .collapse.navbar-collapse {
+      display: none !important;
+    }
+
+    .collapse.navbar-collapse.show {
+      display: block !important;
     }
 
     @media (min-width: 992px) {
@@ -214,6 +256,10 @@ import { AuthService } from '../../services/auth.service';
         transform: translateX(0);
       }
 
+      .sidebar-toggle-open.inside {
+        transform: translateX(280px);
+      }
+
       .admin-main {
         margin-left: 0;
       }
@@ -224,6 +270,10 @@ import { AuthService } from '../../services/auth.service';
 
       .admin-content {
         padding: 1rem;
+      }
+
+      .collapse.navbar-collapse {
+        display: none !important;
       }
     }
 
@@ -265,9 +315,11 @@ export class AdminLayoutComponent {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
-    const sidebar = document.querySelector('.admin-sidebar');
-    if (sidebar) {
-      sidebar.classList.toggle('show', this.sidebarOpen);
+  }
+
+  closeSidebarOnMobile() {
+    if (window.innerWidth < 992) {
+      this.sidebarOpen = false;
     }
   }
 

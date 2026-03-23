@@ -52,6 +52,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   error?: string;
+  total?: number;
 }
 
 @Injectable({
@@ -108,8 +109,22 @@ export class TaskService {
     });
   }
 
-  getTaskMessages(taskId: string): Observable<ApiResponse<TaskMessage[]>> {
-    return this.http.get<ApiResponse<TaskMessage[]>>(`${this.apiUrl}/${taskId}/messages`);
+  getTaskMessages(taskId: string, params?: { before?: string; limit?: number; page?: number }): Observable<ApiResponse<TaskMessage[]>> {
+    let queryParams = new HttpParams();
+    
+    if (params?.before) {
+      queryParams = queryParams.set('before', params.before);
+    }
+    if (params?.limit) {
+      queryParams = queryParams.set('limit', params.limit.toString());
+    }
+    if (params?.page !== undefined) {
+      queryParams = queryParams.set('page', params.page.toString());
+    }
+    
+    return this.http.get<ApiResponse<TaskMessage[]>>(`${this.apiUrl}/${taskId}/messages`, {
+      params: queryParams
+    });
   }
 
   markMessagesAsRead(taskId: string): Observable<ApiResponse<boolean>> {

@@ -21,54 +21,54 @@ declare var Chart: any;
 
       <!-- Financial Stats -->
       <div class="row mb-4" *ngIf="paymentsData">
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
           <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-dollar-sign fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Platform Revenue</div>
-                <div class="h4 mb-0" style="color: #FFAB40;">R{{paymentsData.totalRevenue | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FFAB40;">R{{paymentsData.totalRevenue | number:'1.2-2'}}</div>
                 <small class="text-muted">15% Commission</small>
               </div>
-              <i class="fas fa-dollar-sign fa-2x text-muted opacity-50"></i>
             </div>
           </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
           <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-clock fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Revenue</div>
-                <div class="h4 mb-0" style="color: #FFD180;">R{{paymentsData.pendingRevenue | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FFD180;">R{{paymentsData.pendingRevenue | number:'1.2-2'}}</div>
                 <small class="text-muted">Awaiting verification</small>
               </div>
-              <i class="fas fa-clock fa-2x text-muted opacity-50"></i>
             </div>
           </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
           <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-hand-holding-usd fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Helper Payouts</div>
-                <div class="h4 mb-0" style="color: #FF9E40;">R{{(paymentsData.totalRevenue * 0.85) | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FF9E40;">R{{(paymentsData.totalRevenue * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">85% to helpers</small>
               </div>
-              <i class="fas fa-hand-holding-usd fa-2x text-muted opacity-50"></i>
             </div>
           </div>
         </div>
         
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
           <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-exclamation-triangle fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Payouts</div>
-                <div class="h4 mb-0" style="color: #FF8A00;">R{{(paymentsData.pendingRevenue * 0.85) | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FF8A00;">R{{(paymentsData.pendingRevenue * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">Tasks awaiting payment</small>
               </div>
-              <i class="fas fa-exclamation-triangle fa-2x text-muted opacity-50"></i>
             </div>
           </div>
         </div>
@@ -77,33 +77,29 @@ declare var Chart: any;
       <!-- Quick Actions -->
       <div class="content-card mb-4">
         <h5 class="mb-3">Quick Actions</h5>
-        <div class="row">
-          <div class="col-md-3 mb-3">
-            <a class="btn w-100" style="background: #FFE57F; color: #333;" routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
-              <i class="fas fa-check-circle me-2"></i>
-              <span class="d-none d-lg-inline">Verify Payments</span>
-              <span class="d-lg-none">Verify</span>
+        <div class="row g-2">
+          <div class="col-md-3 col-6">
+            <a class="btn w-100" style="background: #FFE57F; color: #333; font-size: 0.85rem; padding: 0.625rem;" routerLink="/admin/tasks" [queryParams]="{paymentStatus: 'pending'}">
+              <i class="fas fa-check-circle me-1"></i>
+              <span class="d-none d-lg-inline">Verify</span>
             </a>
           </div>
-          <div class="col-md-3 mb-3">
-            <a class="btn w-100" style="background: #FFAB40; color: white;" routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
-              <i class="fas fa-money-bill-wave me-2"></i>
-              <span class="d-none d-lg-inline">Process Payouts</span>
-              <span class="d-lg-none">Payouts</span>
+          <div class="col-md-3 col-6">
+            <a class="btn w-100" style="background: #FFAB40; color: white; font-size: 0.85rem; padding: 0.625rem;" routerLink="/admin/tasks" [queryParams]="{taskStatus: 'completed'}">
+              <i class="fas fa-money-bill-wave me-1"></i>
+              <span class="d-none d-lg-inline">Payouts</span>
             </a>
           </div>
-          <div class="col-md-3 mb-3">
-            <button class="btn w-100" style="background: #FFD180; color: white;" (click)="exportPaymentReport()">
-              <i class="fas fa-download me-2"></i>
-              <span class="d-none d-lg-inline">Export Report</span>
-              <span class="d-lg-none">Export</span>
+          <div class="col-md-3 col-6">
+            <button class="btn w-100" style="background: #FFD180; color: white; font-size: 0.85rem; padding: 0.625rem;" (click)="exportPaymentReport()">
+              <i class="fas fa-download me-1"></i>
+              <span class="d-none d-lg-inline">Export</span>
             </button>
           </div>
-          <div class="col-md-3 mb-3">
-            <button class="btn w-100" style="background: #FF9E40; color: white;" (click)="refreshData()">
-              <i class="fas fa-sync-alt me-2"></i>
-              <span class="d-none d-lg-inline">Refresh Data</span>
-              <span class="d-lg-none">Refresh</span>
+          <div class="col-md-3 col-6">
+            <button class="btn w-100" style="background: #FF9E40; color: white; font-size: 0.85rem; padding: 0.625rem;" (click)="refreshData()">
+              <i class="fas fa-sync-alt me-1"></i>
+              <span class="d-none d-lg-inline">Refresh</span>
             </button>
           </div>
         </div>
@@ -112,70 +108,69 @@ declare var Chart: any;
       <!-- Payment Flow -->
       <div class="content-card">
         <h5 class="mb-4">Payment Flow</h5>
-        <div class="row">
-          <div class="col-lg mb-4">
-            <div class="text-center p-3 border rounded h-100">
-              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFAB40;">
-                <span class="fw-bold fs-4">1</span>
-              </div>
-              <h6 class="fw-bold">User Payment</h6>
-              <p class="small text-muted mb-2">Customer pays task amount upfront via PayFast</p>
-              <div class="badge" style="background: #FFAB40;">Status: PendingPayment</div>
+        <div class="payment-flow-container">
+          <div class="flow-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <strong>User Payment</strong>
+              <p class="mb-0">Customer pays task amount upfront via PayFast</p>
+              <span class="badge" style="background: #FFAB40;">PendingPayment</span>
             </div>
           </div>
-          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
-            <i class="fas fa-arrow-right fa-2x" style="color: #FFAB40;"></i>
+
+          <div class="flow-arrow">
+            <i class="fas fa-arrow-down"></i>
           </div>
-          <div class="col-lg mb-4">
-            <div class="text-center p-3 border rounded h-100">
-              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFD180;">
-                <span class="fw-bold fs-4">2</span>
-              </div>
-              <h6 class="fw-bold">Auto Verification</h6>
-              <p class="small text-muted mb-2">PayFast ITN webhook confirms payment received</p>
-              <div class="badge" style="background: #FFD180;">Status: Posted</div>
+
+          <div class="flow-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Auto Verification</strong>
+              <p class="mb-0">PayFast ITN webhook confirms payment received</p>
+              <span class="badge" style="background: #FFD180; color: #333;">Posted</span>
             </div>
           </div>
-          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
-            <i class="fas fa-arrow-right fa-2x" style="color: #FFD180;"></i>
+
+          <div class="flow-arrow">
+            <i class="fas fa-arrow-down"></i>
           </div>
-          <div class="col-lg mb-4">
-            <div class="text-center p-3 border rounded h-100">
-              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FFE57F;">
-                <span class="fw-bold fs-4">3</span>
-              </div>
-              <h6 class="fw-bold">Task Completion</h6>
-              <p class="small text-muted mb-2">Helper marks task as complete, funds held in escrow</p>
-              <div class="badge" style="background: #FFE57F; color: #333;">Status: Completed</div>
+
+          <div class="flow-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Task Completion</strong>
+              <p class="mb-0">Helper marks task as complete, funds held in escrow</p>
+              <span class="badge" style="background: #FFE57F; color: #333;">Completed</span>
             </div>
           </div>
-          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
-            <i class="fas fa-arrow-right fa-2x" style="color: #FFE57F;"></i>
+
+          <div class="flow-arrow">
+            <i class="fas fa-arrow-down"></i>
           </div>
-          <div class="col-lg mb-4">
-            <div class="text-center p-3 border rounded h-100">
-              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FF9E40;">
-                <span class="fw-bold fs-4">4</span>
-              </div>
-              <h6 class="fw-bold">48hr Escrow Hold</h6>
-              <p class="small text-muted mb-2">Creator confirms OR auto-release after 48 hours</p>
-              <div class="badge" style="background: #FF9E40;">EscrowReleaseService</div>
+
+          <div class="flow-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>48hr Escrow Hold</strong>
+              <p class="mb-0">Creator confirms OR auto-release after 48 hours</p>
+              <span class="badge" style="background: #FF9E40;">EscrowRelease</span>
             </div>
           </div>
-          <div class="col-auto d-none d-lg-flex align-items-center justify-content-center px-0">
-            <i class="fas fa-arrow-right fa-2x" style="color: #FF9E40;"></i>
+
+          <div class="flow-arrow">
+            <i class="fas fa-arrow-down"></i>
           </div>
-          <div class="col-lg mb-4">
-            <div class="text-center p-3 border rounded h-100">
-              <div class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background: #FF8A00;">
-                <span class="fw-bold fs-4">5</span>
-              </div>
-              <h6 class="fw-bold">Wallet Credit</h6>
-              <p class="small text-muted mb-2">85% credited to helper, 15% platform commission</p>
-              <div class="badge" style="background: #FF8A00;">Status: RunnerPaid</div>
+
+          <div class="flow-step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <strong>Wallet Credit</strong>
+              <p class="mb-0">85% credited to helper, 15% platform commission</p>
+              <span class="badge" style="background: #FF8A00;">RunnerPaid</span>
             </div>
           </div>
         </div>
+
         <div class="alert alert-info mt-4 mb-0">
           <i class="fas fa-info-circle me-2"></i>
           <strong>Protection:</strong> Helpers are guaranteed payment after 48 hours even if creator doesn't respond. Funds remain in helper's wallet until they initiate withdrawal to their bank account.
@@ -185,95 +180,215 @@ declare var Chart: any;
     </div>
   `,
   styles: [`
-    .admin-payments {
-      padding: 2rem;
+    .page-container {
+      padding: 1rem;
     }
 
-    .page-header h1 {
-      color: #FF6B35;
-      margin-bottom: 0.5rem;
+    @media (min-width: 768px) {
+      .page-container {
+        padding: 1.5rem;
+      }
     }
 
-    .stats-grid {
+    .page-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e9ecef;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.25rem;
+      }
+
+      .page-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+
+        @media (min-width: 768px) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .header-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        @media (min-width: 768px) {
+          gap: 0.75rem;
+        }
+
+        .stat-badge {
+          padding: 0.4rem 0.75rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 500;
+
+          @media (min-width: 768px) {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
+    .content-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+      @media (min-width: 768px) {
+        padding: 1.25rem;
+      }
+
+      h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+
+        @media (min-width: 768px) {
+          font-size: 1.1rem;
+        }
+      }
+    }
+
+    .d-flex {
+      display: flex;
+
+      &.align-items-center {
+        align-items: center;
+      }
+
+      &.gap-3 {
+        gap: 0.75rem;
+
+        @media (min-width: 768px) {
+          gap: 1rem;
+        }
+      }
+    }
+
+    .h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+
+      @media (min-width: 768px) {
+        font-size: 1.25rem;
+      }
+    }
+
+    .text-muted {
+      color: #6c757d;
+    }
+
+    .text-uppercase {
+      text-transform: uppercase;
+    }
+
+    .small {
+      font-size: 0.8rem;
+    }
+
+    .mb-0 {
+      margin-bottom: 0;
+    }
+
+    .mb-1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 0.75rem;
+    }
+
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+
+    .mt-4 {
+      margin-top: 1rem;
+    }
+
+    .opacity-50 {
+      opacity: 0.5;
+    }
+
+    .row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
       gap: 1rem;
+
+      &.g-2 {
+        gap: 0.5rem;
+      }
+
+      @media (min-width: 768px) {
+        &.g-2 {
+          gap: 0.75rem;
+        }
+      }
     }
 
-    .stat-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.5rem;
+    .col-md-3 {
+      @media (max-width: 767px) {
+        grid-column: span 1;
+      }
+
+      @media (min-width: 768px) {
+        grid-column: span 3;
+      }
     }
 
-    .revenue .stat-icon { background: #28a745; }
-    .pending .stat-icon { background: #ffc107; }
-    .payouts .stat-icon { background: #17a2b8; }
-    .pending-payouts .stat-icon { background: #dc3545; }
+    .col-md-6 {
+      @media (max-width: 767px) {
+        grid-column: span 1;
+      }
 
-    .stat-content h3 {
-      font-size: 2rem;
-      font-weight: bold;
-      margin: 0;
-      color: #333;
+      @media (min-width: 768px) {
+        grid-column: span 6;
+      }
     }
 
-    .stat-content p {
-      margin: 0;
-      color: #666;
-      font-weight: 500;
+    .col-lg-3 {
+      @media (max-width: 991px) {
+        grid-column: span 6;
+      }
+
+      @media (min-width: 992px) {
+        grid-column: span 3;
+      }
     }
 
-    .card {
+    .btn {
       border: none;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 12px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      i {
+        margin-right: 0.25rem;
+      }
     }
 
-    .card-header {
-      background: #f8f9fa;
-      border-bottom: 1px solid #eee;
-      border-radius: 12px 12px 0 0 !important;
-    }
-
-    .revenue-chart {
-      height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .revenue-chart canvas {
-      max-height: 100%;
-    }
-
-    .quick-actions .btn {
-      justify-content: flex-start;
-      text-align: left;
-    }
-
-    .quick-actions .btn i {
-      margin-right: 0.5rem;
-      width: 16px;
-    }
-
-    .payment-flow {
+    .payment-flow-container {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -281,46 +396,137 @@ declare var Chart: any;
 
     .flow-step {
       display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
       background: #f8f9fa;
       border-radius: 8px;
+      border-left: 4px solid #FFAB40;
+
+      @media (min-width: 768px) {
+        padding: 1.25rem;
+        gap: 1.25rem;
+      }
     }
 
     .step-number {
-      width: 24px;
-      height: 24px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: #FF6B35;
+      background: #FFAB40;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 1rem;
       flex-shrink: 0;
+
+      @media (min-width: 768px) {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+      }
     }
 
     .step-content {
       flex: 1;
-    }
 
-    .step-content strong {
-      display: block;
-      font-size: 0.9rem;
-    }
+      strong {
+        display: block;
+        font-size: 0.95rem;
+        color: #333;
+        margin-bottom: 0.25rem;
 
-    .step-content small {
-      color: #666;
-      font-size: 0.8rem;
+        @media (min-width: 768px) {
+          font-size: 1rem;
+        }
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: #666;
+        margin: 0.25rem 0;
+
+        @media (min-width: 768px) {
+          font-size: 0.9rem;
+        }
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.625rem;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-top: 0.25rem;
+      }
     }
 
     .flow-arrow {
       text-align: center;
-      color: #FF6B35;
+      color: #FFAB40;
       font-size: 1.2rem;
       margin: 0.25rem 0;
+      padding: 0.25rem 0;
+    }
+
+    .alert {
+      padding: 0.875rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #d1ecf1;
+      background-color: #d1ecf1;
+      color: #0c5460;
+      font-size: 0.9rem;
+
+      @media (min-width: 768px) {
+        padding: 1rem 1.25rem;
+        font-size: 0.95rem;
+      }
+
+      i {
+        margin-right: 0.5rem;
+      }
+
+      strong {
+        font-weight: 600;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .page-container {
+        padding: 0.75rem;
+      }
+
+      .page-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .content-card {
+        padding: 0.875rem;
+      }
+
+      .flow-step {
+        padding: 0.875rem;
+        gap: 0.75rem;
+      }
+
+      .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+      }
+
+      .step-content {
+        strong {
+          font-size: 0.9rem;
+        }
+
+        p {
+          font-size: 0.8rem;
+        }
+      }
     }
   `]
 })

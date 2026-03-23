@@ -16,19 +16,19 @@
             </p>
 
             <!-- User Welcome Card -->
-            <div *ngIf="currentUser" class="welcome-card">
+            <div *ngIf="currentUser$ | async as user" class="welcome-card">
               <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
+                {{ getUserInitials(user) }}
               </div>
               <div class="welcome-text">
-                <span class="welcome-name">{{ currentUser.name }}</span>
-                <span class="welcome-contact">{{ currentUser.contact }}</span>
+                <span class="welcome-name">{{ user.name || (user.firstName + ' ' + user.lastName) || 'User' }}</span>
+                <span class="welcome-contact">{{ user.contact || user.phoneNumber || user.email }}</span>
               </div>
             </div>
           </div>
 
           <!-- Unique Task Form -->
-          <div class="unique-form-card" *ngIf="currentUser">
+          <div class="unique-form-card" *ngIf="currentUser$ | async">
             <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
               <!-- Progress Steps -->
               <div class="form-steps">
@@ -370,7 +370,7 @@
   </div>
 
   <!-- Login Required -->
-  <div *ngIf="!currentUser" class="login-required">
+  <div *ngIf="!(currentUser$ | async)" class="login-required">
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-md-6">

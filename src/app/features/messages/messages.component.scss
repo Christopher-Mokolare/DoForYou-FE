@@ -1,0 +1,246 @@
+@import 'src/assets/styles/design-tokens';
+
+.messages-page {
+  min-height: 100vh;
+  background: $background;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: 0.5rem;
+    
+    i {
+      color: $primary;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid $background-dark;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.conversations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.conversation-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+}
+
+.conversation-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: $primary-gradient;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  
+  @media (max-width: 576px) {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
+.conversation-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    @media (max-width: 576px) {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.task-title {
+  font-size: 0.875rem;
+  color: $text-muted;
+  margin: 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @media (max-width: 576px) {
+    font-size: 0.8rem;
+  }
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  
+  &.badge-success {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  &.badge-primary {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
+  
+  &.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  &.badge-secondary {
+    background: $background-dark;
+    color: $text-muted;
+  }
+}
+
+.conversation-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  
+  i {
+    color: $text-muted;
+    font-size: 0.875rem;
+  }
+}
+
+.unread-badge {
+  background: $primary;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  
+  i {
+    font-size: 4rem;
+    color: $text-muted;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: $text-muted;
+    margin-bottom: 2rem;
+  }
+}
+
+.empty-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  
+  &.btn-primary {
+    background: $primary;
+    color: white;
+    border: none;
+    
+    &:hover {
+      background: $primary-dark;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($primary, 0.3);
+    }
+  }
+  
+  &.btn-outline-primary {
+    background: transparent;
+    color: $primary;
+    border: 2px solid $primary;
+    
+    &:hover {
+      background: $primary;
+      color: white;
+    }
+  }
+}

@@ -1,0 +1,54 @@
+@import 'src/assets/styles/design-tokens';
+@import 'src/assets/styles/admin-shared';
+
+.row {
+  @media (max-width: 576px) {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    
+    > [class*='col-'] {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+}
+
+.text-center {
+  i {
+    @media (max-width: 576px) {
+      font-size: 1.5rem !important;
+    }
+  }
+  
+  .h5 {
+    @media (max-width: 576px) {
+      font-size: 1.1rem;
+    }
+  }
+  
+  small {
+    @media (max-width: 576px) {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.bg-primary, .bg-info, .bg-warning, .bg-success {
+  @media (max-width: 576px) {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+h6 {
+  @media (max-width: 576px) {
+    font-size: 0.9rem;
+  }
+}
+
+p.small {
+  @media (max-width: 576px) {
+    font-size: 0.7rem;
+  }
+}

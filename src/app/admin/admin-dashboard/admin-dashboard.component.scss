@@ -1,35 +1,48 @@
-.border-left-primary {
-  border-left: 0.25rem solid #4e73df !important;
+@import 'src/assets/styles/design-tokens';
+@import 'src/assets/styles/admin-shared';
+
+.row {
+  @media (max-width: 576px) {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    
+    > [class*='col-'] {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
 }
 
-.border-left-success {
-  border-left: 0.25rem solid #1cc88a !important;
+.card {
+  i {
+    @media (max-width: 576px) {
+      font-size: 1.5rem !important;
+    }
+  }
+  
+  .h4 {
+    @media (max-width: 576px) {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .small {
+    @media (max-width: 576px) {
+      font-size: 0.75rem;
+    }
+  }
 }
 
-.border-left-info {
-  border-left: 0.25rem solid #36b9cc !important;
-}
-
-.border-left-warning {
-  border-left: 0.25rem solid #f6c23e !important;
-}
-
-.text-xs {
-  font-size: 0.7rem;
-}
-
-.font-weight-bold {
-  font-weight: 700 !important;
-}
-
-.text-gray-800 {
-  color: #5a5c69 !important;
-}
-
-.text-gray-300 {
-  color: #dddfeb !important;
-}
-
-.shadow {
-  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+.btn {
+  i {
+    @media (max-width: 576px) {
+      margin-right: 0.25rem !important;
+    }
+  }
+  
+  .btn-text {
+    @media (max-width: 576px) {
+      font-size: 0.8rem;
+    }
+  }
 }

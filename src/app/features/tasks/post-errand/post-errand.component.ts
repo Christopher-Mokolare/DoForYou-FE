@@ -2,8 +2,10 @@ import { Component, OnInit, ViewChild, ElementRef, NgZone, AfterViewInit } from 
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 import { ErrandsService, CreateTaskData } from '../../../services/errands.service';
 import { AuthService } from '../../../services/auth.service';
+import { User } from '../../../models/auth.models';
 import { GlobalStateService } from '../../../services/global-state.service';
 import { LoadingService } from '../../../services/loading.service';
 import { WalletService } from '../../../services/wallet.service';
@@ -21,7 +23,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
   taskForm: FormGroup;
   isSubmitting = false;
   submitted = false;
-  currentUser: any;
+  currentUser$: Observable<User | null>;
   categoryOptions: any[] = [];
   showCustomCategory = false;
   currentStep = 1;
@@ -44,6 +46,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     private walletService: WalletService
   ) {
     this.taskForm = this.createForm();
+    this.currentUser$ = this.authService.currentUser$;
   }
 
   ngOnInit(): void {
@@ -56,8 +59,11 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
       this.router.navigate(['/admin/dashboard']);
       return;
     }
-
-    this.currentUser = this.authService.getCurrentUser();
+    
+    // Debug: Log current user
+    this.currentUser$.subscribe(user => {
+      console.log('Current user in post-errand:', user);
+    });
     
     // Check for edit mode
     this.taskId = this.route.snapshot.paramMap.get('taskId');
@@ -622,5 +628,18 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     return numBudget;
   }
 
+  getUserInitials(user: User): string {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+    }
+    if (user.name) {
+      const nameParts = user.name.split(' ');
+      if (nameParts.length >= 2) {
+        return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();
+      }
+      return user.name.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  }
 
 }

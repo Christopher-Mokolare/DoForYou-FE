@@ -11,31 +11,31 @@
   <div class="content-card">
     <h5 class="mb-3">Revenue Breakdown</h5>
     <div class="row g-3">
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6 col-6">
         <div class="text-center p-3 border rounded bg-light">
-          <i class="fas fa-money-bill-wave fa-2x text-success mb-2"></i>
-          <div class="h5 text-success mb-1">R{{platformCommission | number:'1.2-2'}}</div>
+          <i class="fas fa-money-bill-wave fa-2x text-primary mb-2"></i>
+          <div class="h5 text-primary mb-1">R{{platformCommission | number:'1.2-2'}}</div>
           <small class="text-muted">Platform Commission (15%)</small>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6 col-6">
         <div class="text-center p-3 border rounded bg-light">
-          <i class="fas fa-hand-holding-usd fa-2x text-info mb-2"></i>
-          <div class="h5 text-info mb-1">R{{helperPayouts | number:'1.2-2'}}</div>
+          <i class="fas fa-hand-holding-usd fa-2x text-primary mb-2"></i>
+          <div class="h5 text-primary mb-1">R{{helperPayouts | number:'1.2-2'}}</div>
           <small class="text-muted">Helper Payouts (85%)</small>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6 col-6">
         <div class="text-center p-3 border rounded bg-light">
-          <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-          <div class="h5 text-warning mb-1">{{pendingTransactions}}</div>
+          <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+          <div class="h5 text-primary mb-1">{{pendingTransactions}}</div>
           <small class="text-muted">Pending Transactions</small>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6 col-6">
         <div class="text-center p-3 border rounded bg-light">
-          <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-          <div class="h5 text-success mb-1">{{completedTransactions}}</div>
+          <i class="fas fa-check-circle fa-2x text-primary mb-2"></i>
+          <div class="h5 text-primary mb-1">{{completedTransactions}}</div>
           <small class="text-muted">Completed Today</small>
         </div>
       </div>
@@ -46,22 +46,22 @@
   <div class="content-card">
     <h5 class="mb-3">Quick Actions</h5>
     <div class="row g-3">
-      <div class="col-md-4">
-        <button class="btn btn-warning w-100 btn-sm" (click)="processPayouts()">
+      <div class="col-md-4 col-sm-6">
+        <button class="btn btn-primary w-100 btn-sm" (click)="processPayouts()">
           <i class="fas fa-play-circle me-1"></i>
           <span class="d-none d-sm-inline">Process Pending Payouts</span>
           <span class="d-sm-none">Process</span>
         </button>
       </div>
-      <div class="col-md-4">
-        <button class="btn btn-info w-100 btn-sm" (click)="downloadReport()">
+      <div class="col-md-4 col-sm-6">
+        <button class="btn btn-primary w-100 btn-sm" (click)="downloadReport()">
           <i class="fas fa-download me-1"></i>
           <span class="d-none d-sm-inline">Download Report</span>
           <span class="d-sm-none">Download</span>
         </button>
       </div>
-      <div class="col-md-4">
-        <button class="btn btn-success w-100 btn-sm" (click)="refreshData()">
+      <div class="col-md-4 col-sm-12">
+        <button class="btn btn-primary w-100 btn-sm" (click)="refreshData()">
           <i class="fas fa-sync-alt me-1"></i>
           <span class="d-none d-sm-inline">Refresh Data</span>
           <span class="d-sm-none">Refresh</span>
@@ -74,28 +74,28 @@
   <div class="content-card">
     <h5 class="mb-4">Payment Flow</h5>
     <div class="row text-center">
-      <div class="col-md-3 mb-3">
+      <div class="col-md-3 col-sm-6 mb-3">
         <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 40px; height: 40px;">
           <span class="fw-bold small">1</span>
         </div>
         <h6 class="mb-1">User Payment</h6>
         <p class="small text-muted mb-0">Customer pays upfront</p>
       </div>
-      <div class="col-md-3 mb-3">
+      <div class="col-md-3 col-sm-6 mb-3">
         <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 40px; height: 40px;">
           <span class="fw-bold small">2</span>
         </div>
         <h6 class="mb-1">Auto Verification</h6>
         <p class="small text-muted mb-0">PayFast ITN confirms payment</p>
       </div>
-      <div class="col-md-3 mb-3">
+      <div class="col-md-3 col-sm-6 mb-3">
         <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 40px; height: 40px;">
           <span class="fw-bold small">3</span>
         </div>
         <h6 class="mb-1">Task Completion</h6>
         <p class="small text-muted mb-0">Helper completes task</p>
       </div>
-      <div class="col-md-3 mb-3">
+      <div class="col-md-3 col-sm-6 mb-3">
         <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 40px; height: 40px;">
           <span class="fw-bold small">4</span>
         </div>

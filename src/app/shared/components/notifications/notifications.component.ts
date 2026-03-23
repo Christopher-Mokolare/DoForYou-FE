@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { environment } from '../../../../environments/environment';
 
@@ -30,7 +31,8 @@ export class NotificationsComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -89,6 +91,29 @@ export class NotificationsComponent implements OnInit {
     });
   }
 
+  handleNotificationClick(notification: Notification): void {
+    console.log('Notification clicked:', notification);
+    console.log('Related Task ID:', notification.relatedTaskId);
+    console.log('Notification Type:', notification.type);
+    
+    this.markAsRead(notification);
+    
+    if (notification.type === 'new_message' || notification.type.includes('message')) {
+      if (notification.relatedTaskId) {
+        console.log('Navigating to chat:', `/tasks/chat/${notification.relatedTaskId}`);
+        this.router.navigate(['/tasks/chat', notification.relatedTaskId]);
+      } else {
+        console.log('No task ID found, trying to extract from message or navigating to messages list');
+        // Try to extract task info from message and navigate to messages list
+        // User can select the conversation from there
+        this.router.navigate(['/messages']);
+      }
+    } else if (notification.relatedTaskId) {
+      console.log('Navigating to task details:', notification.relatedTaskId);
+      this.router.navigate(['/task-details', notification.relatedTaskId]);
+    }
+  }
+
   markAllAsRead(): void {
     this.http.post(`${environment.apiUrl}/notifications/mark-all-read`, {}).subscribe({
       next: (response: any) => {
@@ -131,8 +156,14 @@ export class NotificationsComponent implements OnInit {
   }
 
   viewTask(notification: Notification): void {
-    if (notification.relatedTaskId) {
-      window.location.href = `/task-details/${notification.relatedTaskId}`;
+    if (notification.type === 'new_message' || notification.type.includes('message')) {
+      if (notification.relatedTaskId) {
+        this.router.navigate(['/tasks/chat', notification.relatedTaskId]);
+      } else {
+        this.router.navigate(['/messages']);
+      }
+    } else if (notification.relatedTaskId) {
+      this.router.navigate(['/task-details', notification.relatedTaskId]);
     }
   }
 }

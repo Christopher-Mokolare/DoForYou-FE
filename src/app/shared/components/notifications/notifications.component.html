@@ -20,7 +20,7 @@
   <div class="notification-list" *ngIf="!loading && notifications.length > 0; else noNotifications">
     <div class="notification-card" *ngFor="let notification of notifications" 
          [class.unread]="!notification.isRead"
-         (click)="markAsRead(notification)">
+         (click)="handleNotificationClick(notification)">
       <div class="notification-icon" [ngClass]="getIconBgClass(notification.type)">
         <i class="fas" [ngClass]="getIconClass(notification.type)"></i>
       </div>
@@ -31,8 +31,9 @@
       </div>
       <div class="notification-actions">
         <button class="btn-icon" (click)="viewTask(notification); $event.stopPropagation()" 
-                *ngIf="notification.relatedTaskId" title="View Task">
-          <i class="fas fa-eye"></i>
+                *ngIf="notification.relatedTaskId || notification.type === 'new_message' || notification.type.includes('message')" 
+                [title]="notification.type === 'new_message' || notification.type.includes('message') ? 'View Messages' : 'View Task'">
+          <i class="fas" [ngClass]="notification.type === 'new_message' || notification.type.includes('message') ? 'fa-comments' : 'fa-eye'"></i>
         </button>
         <button class="btn-icon btn-danger" (click)="deleteNotification(notification); $event.stopPropagation()" title="Delete">
           <i class="fas fa-trash"></i>

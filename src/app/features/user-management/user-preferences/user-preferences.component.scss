@@ -1,3 +1,4 @@
+@import 'src/assets/styles/design-tokens';
 .toggle-container {
   display: flex;
   align-items: stretch;
@@ -19,7 +20,7 @@
 }
 
 .role-option.active {
-  border-color: #FF6B35;
+  border-color: $primary;
   background: #fff5f2;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
@@ -91,7 +92,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #FF6B35;
+  background-color: $primary;
   transition: .4s;
   border-radius: 34px;
 }
