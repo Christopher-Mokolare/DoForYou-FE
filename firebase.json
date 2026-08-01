@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/do-for-you/browser",
+    "public": "dist/do-for-you",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
