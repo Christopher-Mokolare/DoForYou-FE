@@ -30,12 +30,6 @@ export class TaskDetailsComponent implements OnInit {
   ngOnInit() {
     this.taskId = this.route.snapshot.params['id'];
     this.loadTaskDetails();
-    
-    // Check for auto-accept parameter
-    const shouldAutoAccept = this.route.snapshot.queryParams['accept'];
-    if (shouldAutoAccept === 'true') {
-      this.autoAcceptTask();
-    }
   }
 
   private loadTaskDetails() {
@@ -43,6 +37,12 @@ export class TaskDetailsComponent implements OnInit {
       next: (response) => {
         this.task = response.data;
         this.updateActionButtons();
+
+        // Auto-accept runs here, after task is loaded
+        const shouldAutoAccept = this.route.snapshot.queryParams['accept'];
+        if (shouldAutoAccept === 'true') {
+          this.autoAcceptTask();
+        }
       },
       error: (error) => {
         console.error('Error loading task:', error);
@@ -53,7 +53,11 @@ export class TaskDetailsComponent implements OnInit {
   private autoAcceptTask() {
     const currentUser = this.authService.getCurrentUser();
     if (currentUser && this.task) {
-      this.errandsService.claimTask(this.taskId, currentUser.name, currentUser.contact).subscribe({
+      const name = currentUser.firstName && currentUser.lastName
+        ? `${currentUser.firstName} ${currentUser.lastName}`
+        : (currentUser as any).name || '';
+      const contact = currentUser.contact || (currentUser as any).phoneNumber || '';
+      this.errandsService.claimTask(this.taskId, name, contact).subscribe({
         next: () => {
           this.modalService.showAlert('Success', 'Task accepted successfully! You can now start working on it.', 'success');
           this.loadTaskDetails(); // Refresh task data
@@ -78,8 +82,11 @@ export class TaskDetailsComponent implements OnInit {
       this.modalService.showAlert('Error', 'Please log in to claim tasks', 'error');
       return;
     }
-
-    this.errandsService.claimTask(this.taskId, currentUser.name, currentUser.contact).subscribe({
+    const name = currentUser.firstName && currentUser.lastName
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : (currentUser as any).name || '';
+    const contact = currentUser.contact || (currentUser as any).phoneNumber || '';
+    this.errandsService.claimTask(this.taskId, name, contact).subscribe({
       next: () => {
         this.modalService.showAlert('Success', 'Task claimed successfully! You can now start working on it.', 'success');
         this.loadTaskDetails(); // Refresh to show updated status

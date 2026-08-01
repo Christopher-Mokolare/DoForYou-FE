@@ -13,7 +13,7 @@ export class PaymentCancelledComponent {
   constructor(private router: Router) {}
 
   tryAgain() {
-    this.router.navigate(['/post-errand']);
+    this.router.navigate(['/tasks/post']);
   }
 
   goHome() {

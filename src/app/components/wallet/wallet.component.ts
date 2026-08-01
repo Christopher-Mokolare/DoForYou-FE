@@ -2,10 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WalletService, WalletTransaction } from '../../services/wallet.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-
-declare var bootstrap: any;
+import { ModalService } from '../../services/modal.service';
 
 interface BankAccount {
   id: number;
@@ -68,8 +65,8 @@ export class WalletComponent implements OnInit {
 
   constructor(
     private walletService: WalletService,
-    private http: HttpClient,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private modalService: ModalService
   ) {
     this.addBankForm = this.fb.group({
       bankName: ['', Validators.required],
@@ -98,126 +95,50 @@ export class WalletComponent implements OnInit {
   }
   
   loadSupportedBanks(): void {
-    this.http.get<any>(`${environment.apiUrl}/banking/banks`).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.supportedBanks = response.data || [];
-        }
-      },
-      error: (error) => console.error('Error loading banks:', error)
-    });
+    this.supportedBanks = [
+      { code: 'FNB', name: 'FNB', branchCode: '250655' },
+      { code: 'STD', name: 'Standard Bank', branchCode: '051001' },
+      { code: 'ABSA', name: 'ABSA', branchCode: '632005' },
+      { code: 'NED', name: 'Nedbank', branchCode: '198765' },
+      { code: 'CAP', name: 'Capitec', branchCode: '470010' },
+      { code: 'AFR', name: 'African Bank', branchCode: '430000' }
+    ];
   }
-  
+
   loadBankAccounts(): void {
-    this.http.get<any>(`${environment.apiUrl}/banking/bank-accounts`).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.bankAccounts = response.data || [];
-        }
-      },
-      error: (error) => console.error('Error loading bank accounts:', error)
-    });
+    // Banking endpoints not yet available — bank accounts managed via profile page
   }
-  
+
   loadWithdrawalRequests(): void {
-    this.http.get<any>(`${environment.apiUrl}/banking/withdrawals`).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.withdrawalRequests = response.data || [];
-        }
-      },
-      error: (error) => console.error('Error loading withdrawals:', error)
-    });
+    // Banking endpoints not yet available
   }
-  
+
   calculateFee(): void {
-    const amount = this.withdrawForm.get('amount')?.value;
-    if (amount) {
-      this.http.get<any>(`${environment.apiUrl}/banking/withdrawal-fee?amount=${amount}`).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.withdrawalFee = response.data;
-          }
-        }
-      });
-    }
+    // Flat fee until banking endpoint is available
+    this.withdrawalFee = 10;
   }
-  
+
   addBankAccount(): void {
-    if (this.addBankForm.invalid) return;
-    
-    this.loading = true;
-    this.http.post<any>(`${environment.apiUrl}/banking/bank-accounts`, this.addBankForm.value).subscribe({
-      next: (response) => {
-        if (response.success) {
-          alert('Bank account added successfully');
-          this.loadBankAccounts();
-          this.addBankForm.reset({ accountType: 'Cheque' });
-          this.showAddBank = false;
-        }
-        this.loading = false;
-      },
-      error: (error) => {
-        alert(error.error?.error || 'Failed to add bank account');
-        this.loading = false;
-      }
-    });
+    this.modalService.showAlert('Coming Soon', 'Bank account management is coming soon. Please update your bank details on the Profile page.', 'info');
   }
-  
-  onBankSelected(event: any): void {
-    const selectedBank = this.supportedBanks.find(b => b.name === event.target.value);
-    if (selectedBank) {
-      this.addBankForm.patchValue({
-        branchCode: selectedBank.branchCode
-      });
-    }
-  }
-  
+
   initiateWithdrawal(): void {
     if (this.withdrawForm.invalid) return;
-    
     this.loading = true;
-    this.http.post<any>(`${environment.apiUrl}/banking/withdraw`, this.withdrawForm.value).subscribe({
-      next: (response) => {
+    this.walletService.requestWithdrawal({ amount: this.withdrawForm.value.amount, paymentMethod: 'bank', accountDetails: {} }).subscribe({
+      next: (response: any) => {
         if (response.success) {
-          this.pendingWithdrawalId = response.data.id;
-          this.showWithdraw = false;
-          this.showOtpVerification = true;
-          alert('OTP sent to your registered email/phone');
-        }
-        this.loading = false;
-      },
-      error: (error) => {
-        alert(error.error?.error || 'Failed to initiate withdrawal');
-        this.loading = false;
-      }
-    });
-  }
-  
-  verifyOtp(): void {
-    if (this.otpForm.invalid || !this.pendingWithdrawalId) return;
-    
-    this.loading = true;
-    const payload = {
-      withdrawalId: this.pendingWithdrawalId,
-      otp: this.otpForm.get('otp')?.value
-    };
-    
-    this.http.post<any>(`${environment.apiUrl}/banking/verify-withdrawal`, payload).subscribe({
-      next: (response) => {
-        if (response.success) {
-          alert('Withdrawal successful! Funds will be transferred within 1-3 business days.');
+          this.modalService.showAlert('Withdrawal Requested', 'Your withdrawal request has been submitted. Funds will be transferred within 1-3 business days.', 'success');
           this.loadWalletBalance();
-          this.loadWithdrawalRequests();
-          this.loadTransactions();
-          this.showOtpVerification = false;
-          this.otpForm.reset();
+          this.showWithdraw = false;
           this.withdrawForm.reset({ amount: 50 });
+        } else {
+          this.modalService.showAlert('Error', response.error || 'Failed to request withdrawal.', 'error');
         }
         this.loading = false;
       },
-      error: (error) => {
-        alert(error.error?.error || 'Invalid OTP');
+      error: (error: any) => {
+        this.modalService.showAlert('Error', error.error?.error || 'Failed to request withdrawal.', 'error');
         this.loading = false;
       }
     });
@@ -262,9 +183,8 @@ export class WalletComponent implements OnInit {
   }
 
   showWithdrawModal(): void {
-    if (this.bankAccounts.length === 0) {
-      alert('Please add a bank account first');
-      this.showAddBank = true;
+    if (this.balance < 50) {
+      this.modalService.showAlert('Insufficient Balance', 'Minimum withdrawal amount is R50.', 'warning');
       return;
     }
     this.showWithdraw = true;

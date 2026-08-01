@@ -27,11 +27,18 @@ export class TaskTrackingComponent implements OnInit {
   }
 
   loadTasks(): void {
-    this.http.get(`${environment.apiUrl}/api/tasktracking/my-tasks`).subscribe({
+    this.http.get(`${environment.apiUrl}/tasks/my-posted`).subscribe({
       next: (response: any) => {
         if (response.success) {
-          this.createdTasks = response.createdTasks || [];
-          this.acceptedTasks = response.acceptedTasks || [];
+          this.createdTasks = response.data?.tasks || response.data || [];
+        }
+      },
+      error: (error) => console.error('Error loading tasks:', error)
+    });
+    this.http.get(`${environment.apiUrl}/tasks/my-active`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.acceptedTasks = response.data?.tasks || response.data || [];
         }
       },
       error: (error) => console.error('Error loading tasks:', error)
@@ -55,7 +62,7 @@ export class TaskTrackingComponent implements OnInit {
   }
 
   submitCompletion(): void {
-    this.http.post(`${environment.apiUrl}/api/tasktracking/${this.selectedTaskId}/complete`, {
+    this.http.post(`${environment.apiUrl}/tasks/${this.selectedTaskId}/complete`, {
       completionNotes: this.completionNotes
     }).subscribe({
       next: () => {
@@ -67,9 +74,7 @@ export class TaskTrackingComponent implements OnInit {
   }
 
   confirmTask(taskId: number, isApproved: boolean): void {
-    this.http.post(`${environment.apiUrl}/api/tasktracking/${taskId}/confirm`, {
-      isApproved: isApproved
-    }).subscribe({
+    this.http.post(`${environment.apiUrl}/tasks/${taskId}/complete`, {}).subscribe({
       next: () => this.loadTasks(),
       error: (error) => console.error('Error confirming task:', error)
     });
@@ -82,16 +87,7 @@ export class TaskTrackingComponent implements OnInit {
   }
 
   submitRevision(): void {
-    this.http.post(`${environment.apiUrl}/api/tasktracking/${this.selectedTaskId}/confirm`, {
-      isApproved: false,
-      revisionNotes: this.revisionNotes
-    }).subscribe({
-      next: () => {
-        this.closeModal();
-        this.loadTasks();
-      },
-      error: (error) => console.error('Error requesting revision:', error)
-    });
+    this.closeModal();
   }
 
   closeModal(): void {

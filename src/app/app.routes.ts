@@ -6,8 +6,7 @@ import { TermsComponent } from './pages/terms/terms.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { AdminLayoutComponent } from './admin/admin-layout/admin-layout.component';
-import { WalletComponent } from './components/wallet/wallet.component';
-import { MessagesComponent } from './features/messages/messages.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { ProfileCompletionGuard } from './guards/profile-completion.guard';
@@ -25,10 +24,10 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   
   // Wallet Route
-  { path: 'wallet', component: WalletComponent, canActivate: [authGuard] },
-  
+  { path: 'wallet', loadComponent: () => import('./components/wallet/wallet.component').then(m => m.WalletComponent), canActivate: [authGuard] },
+
   // Messages Route
-  { path: 'messages', component: MessagesComponent, canActivate: [authGuard] },
+  { path: 'messages', loadComponent: () => import('./features/messages/messages.component').then(m => m.MessagesComponent), canActivate: [authGuard] },
   
   // Feature Routes (Lazy Loaded)
   {
@@ -61,7 +60,7 @@ export const routes: Routes = [
   // Legacy redirects for backward compatibility
   { path: 'browse-errands', redirectTo: 'tasks/browse' },
   { path: 'post-errand', redirectTo: 'tasks/post' },
-  { path: 'task/:id', redirectTo: 'tasks/:id' },
+  { path: 'task/:id', loadComponent: () => import('./features/tasks/task-details/task-details.component').then(m => m.TaskDetailsComponent) },
   { path: 'profile', redirectTo: 'user/profile' },
   { path: 'notifications', redirectTo: 'user/notifications' },
   { path: 'payment-success', redirectTo: 'payments/success' },
@@ -69,5 +68,5 @@ export const routes: Routes = [
   { path: 'user-dashboard', redirectTo: 'dashboard' },
   { path: 'task-tracking', redirectTo: 'tasks/tracking' },
   
-  { path: '**', redirectTo: '' }
+  { path: '**', component: NotFoundComponent }
 ];

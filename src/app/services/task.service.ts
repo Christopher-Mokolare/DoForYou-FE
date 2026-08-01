@@ -97,7 +97,7 @@ export class TaskService {
   }
 
   cancelTask(taskId: string, reason: string): Observable<ApiResponse<boolean>> {
-    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/payment-status`, {
+    return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/payment-status`, {
       paymentStatus: 'Cancelled'
     });
   }
@@ -141,12 +141,12 @@ export class TaskService {
   }
 
   getMyCompletedTasks(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/my-posted`);
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/my-active?status=completed`);
   }
 
   // Dashboard Statistics
   getDashboardStats(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/dashboard/stats`);
+    return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/users/dashboard/stats`);
   }
 
   getRecentActivity(limit: number = 5): Observable<ApiResponse<any[]>> {
@@ -206,16 +206,14 @@ export class TaskService {
   }
 
   // Real-time Updates
-  subscribeToTaskUpdates(taskId: string): void {
-    // This would typically use WebSocket or Server-Sent Events
-    // For now, we'll use polling
-    setInterval(() => {
+  subscribeToTaskUpdates(taskId: string): ReturnType<typeof setInterval> {
+    return setInterval(() => {
       this.getTaskDetail(taskId).subscribe(response => {
         if (response.success) {
           this.taskUpdatesSubject.next(response.data);
         }
       });
-    }, 30000); // Poll every 30 seconds
+    }, 30000);
   }
 
   // Utility Methods

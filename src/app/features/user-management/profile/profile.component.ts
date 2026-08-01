@@ -183,6 +183,17 @@ export class ProfileComponent implements OnInit {
   }
 
   updateProfile() {
+    // Validate address before submitting
+    this.validateAddress();
+    if (this.addressError) {
+      this.modalService.showModal({
+        type: 'error',
+        title: 'Invalid Address',
+        message: this.addressError
+      });
+      return;
+    }
+
     this.updating = true;
     
     const nameParts = this.profile.name.split(' ');
@@ -193,7 +204,7 @@ export class ProfileComponent implements OnInit {
       firstName: firstName,
       lastName: lastName,
       phoneNumber: this.profile.phone,
-      userType: 'both',
+      userType: this.userType,
       username: this.profile.username,
       idNumber: this.profile.idNumber,
       address: this.profile.address,
@@ -204,6 +215,10 @@ export class ProfileComponent implements OnInit {
       next: (response) => {
         this.updating = false;
         if (response.success) {
+          // Save preferences in sync with profile update
+          this.userPreferencesService.saveToLocalStorage(this.preferences);
+          this.userPreferencesService.updatePreferences(this.preferences).subscribe();
+
           // Fetch updated user profile from server
           this.authService.getProfile().subscribe({
             next: (profileResponse: any) => {
@@ -306,7 +321,6 @@ export class ProfileComponent implements OnInit {
       this.preferences.canCreateTasks = true;
       this.preferences.canAcceptTasks = true;
     }
-    this.updatePreferences();
   }
 
   updatePreferences() {

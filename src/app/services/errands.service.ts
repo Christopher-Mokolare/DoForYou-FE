@@ -378,7 +378,7 @@ export class ErrandsService {
     const url = `${this.apiBaseUrl}/tasks/${taskId}/payment-status`;
     console.log('Updating task payment status');
     
-    return this.http.put(url, { paymentStatus: paymentStatus }).pipe(
+    return this.http.patch(url, { paymentStatus: paymentStatus }).pipe(
       tap(() => {
         console.log('Task payment status updated successfully');
         this.clearCache();

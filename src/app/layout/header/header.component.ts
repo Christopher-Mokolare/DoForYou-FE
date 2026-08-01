@@ -142,7 +142,7 @@ export class HeaderComponent implements AfterViewInit, OnInit {
     }
     
     if (!this.globalState.canCreateTasks()) {
-      this.router.navigate(['/profile'], {
+      this.router.navigate(['/user/preferences'], {
         queryParams: { message: 'Enable task creation in your profile to post errands' }
       });
       return;

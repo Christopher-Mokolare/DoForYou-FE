@@ -77,7 +77,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     // Check if user preferences allow task creation using GlobalStateService
     if (!this.isEditMode && !this.globalState.canCreateTasks()) {
       alert('You have selected "Task Runner" mode. To post errands, please update your preferences to "Task Creator" or "Both" in your profile settings.');
-      this.router.navigate(['/profile/preferences']);
+      this.router.navigate(['/user/preferences']);
       return;
     }
 
@@ -386,7 +386,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
       area: ['', [Validators.required]], // Remove custom validator, Google Places ensures valid locations
       priority: ['standard', [Validators.required]],
       dateNeeded: ['', [Validators.required, this.futureDateValidator]],
-      budget: ['', [Validators.required, Validators.min(0)]],
+      budget: ['', [Validators.required, Validators.min(50)]],
       notes: [''],
       termsAccepted: [false, [Validators.requiredTrue]]
     });
@@ -607,7 +607,7 @@ export class PostErrandComponent implements OnInit, AfterViewInit {
     if (errors['maxWords']) return `Maximum ${errors['maxWords'].max} words allowed`;
     if (errors['maxlength']) return `Maximum ${errors['maxlength'].requiredLength} characters allowed`;
     if (errors['minlength']) return `Minimum ${errors['minlength'].requiredLength} characters required`;
-    if (errors['min']) return 'Budget must be at least R0';
+    if (errors['min']) return 'Budget must be at least R50';
     if (errors['futureDate']) return 'Please select a future date';
     if (errors['requiredTrue']) return 'You must accept the terms and conditions';
     

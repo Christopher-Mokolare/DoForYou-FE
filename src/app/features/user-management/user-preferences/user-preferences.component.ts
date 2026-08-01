@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserPreferencesService, UserPreferences } from '../../../services/user-preferences.service';
 import { AuthService } from '../../../services/auth.service';
+import { ModalService } from '../../../services/modal.service';
 
 @Component({
   selector: 'app-user-preferences',
@@ -27,7 +28,8 @@ export class UserPreferencesComponent implements OnInit {
   constructor(
     private preferencesService: UserPreferencesService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
@@ -71,12 +73,11 @@ export class UserPreferencesComponent implements OnInit {
         }
         
         const roleMessage = this.preferences.canCreateTasks ? 'Task Creator' : 'Task Runner';
-        alert(`Preferences saved! You are now set as: ${roleMessage}`);
+        this.modalService.showAlert('Preferences Saved', `You are now set as: ${roleMessage}`, 'success');
         // Remove window.location.reload() - let reactive updates handle UI changes
       },
       error: () => {
-        console.error('Error saving preferences');
-        alert('Error saving preferences. Please try again.');
+        this.modalService.showAlert('Error', 'Error saving preferences. Please try again.', 'error');
       },
       complete: () => this.saving = false
     });

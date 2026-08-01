@@ -70,7 +70,7 @@ export class PaymentSuccessComponent implements OnInit {
 
   goToDashboard() {
     if (this.isAuthenticated) {
-      this.router.navigate(['/user-dashboard']);
+      this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/login']);
     }
