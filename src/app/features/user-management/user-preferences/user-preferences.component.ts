@@ -58,6 +58,14 @@ export class UserPreferencesComponent implements OnInit {
         if (currentUser) {
           currentUser.canCreateTasks = this.preferences.canCreateTasks;
           currentUser.canAcceptTasks = this.preferences.canAcceptTasks;
+          // Keep userType in sync so canAcceptTasks() check works correctly
+          if (this.preferences.canCreateTasks && this.preferences.canAcceptTasks) {
+            currentUser.userType = 'both';
+          } else if (this.preferences.canCreateTasks) {
+            currentUser.userType = 'creator';
+          } else {
+            currentUser.userType = 'runner';
+          }
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
           this.authService.refreshCurrentUser();
         }
