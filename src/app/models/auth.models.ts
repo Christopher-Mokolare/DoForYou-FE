@@ -28,12 +28,13 @@ export interface User {
   userType?: string;
   isVerified: boolean;
   profileCompleted: boolean;
+  profileCompletion?: number;
   rating: number;
   completedTasks: number;
   createdAt: string;
   lastLoginAt?: string;
-
-  roles?: string[];
+  roles?: string;        // BE returns as comma-separated string e.g. "User" or "Admin"
+  rolesArray?: string[]; // BE also returns parsed array
   isAdmin?: boolean;
   canCreateTasks?: boolean;
   canAcceptTasks?: boolean;

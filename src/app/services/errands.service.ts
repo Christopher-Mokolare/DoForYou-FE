@@ -141,8 +141,8 @@ export class ErrandsService {
     console.log('ClaimTask called with:', { taskId, helperName, helperContact });
     
     const claimData = {
-      HelperName: helperName,
-      HelperContact: helperContact
+      helperName: helperName,
+      helperContact: helperContact
     };
     
     console.log('Sending claim data:', claimData);
@@ -378,7 +378,7 @@ export class ErrandsService {
     const url = `${this.apiBaseUrl}/tasks/${taskId}/payment-status`;
     console.log('Updating task payment status');
     
-    return this.http.put(url, { status: paymentStatus }).pipe(
+    return this.http.put(url, { paymentStatus: paymentStatus }).pipe(
       tap(() => {
         console.log('Task payment status updated successfully');
         this.clearCache();

@@ -103,12 +103,10 @@ login(loginData: LoginModel): Observable<AuthResponse> {
 
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    // Check the IsAdmin flag first (from API response)
-    if (typeof (user as any)?.isAdmin === 'boolean') {
-      return (user as any).isAdmin;
-    }
-    // Fallback to checking roles
-    return user?.roles?.includes('Admin') || false;
+    if (typeof (user as any)?.isAdmin === 'boolean') return (user as any).isAdmin;
+    return typeof user?.roles === 'string'
+      ? user.roles.includes('Admin')
+      : (user?.rolesArray?.includes('Admin') ?? false);
   }
 
   canPostErrands(): boolean {

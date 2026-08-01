@@ -69,7 +69,7 @@ export class TaskService {
 
   // Get detailed task information
   getTaskDetail(taskId: string): Observable<ApiResponse<TaskDetail>> {
-    return this.http.get<ApiResponse<TaskDetail>>(`${this.apiUrl}/${taskId}/detail`);
+    return this.http.get<ApiResponse<TaskDetail>>(`${this.apiUrl}/${taskId}`);
   }
 
   // Progress Management
@@ -97,8 +97,8 @@ export class TaskService {
   }
 
   cancelTask(taskId: string, reason: string): Observable<ApiResponse<boolean>> {
-    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/cancel`, {
-      reason: reason
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/${taskId}/payment-status`, {
+      paymentStatus: 'Cancelled'
     });
   }
 
@@ -140,8 +140,8 @@ export class TaskService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/my-posted`);
   }
 
-  getMyCompletedTasks(): Observable<ApiResponse<TaskDetail[]>> {
-    return this.http.get<ApiResponse<TaskDetail[]>>(`${this.apiUrl}/my-completed`);
+  getMyCompletedTasks(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/my-posted`);
   }
 
   // Dashboard Statistics
@@ -155,27 +155,23 @@ export class TaskService {
   }
 
   // Task Search and Filtering
-  searchTasks(query: string, filters?: any): Observable<ApiResponse<TaskDetail[]>> {
+  searchTasks(query: string, filters?: any): Observable<ApiResponse<any>> {
     let params = new HttpParams().set('search', query);
-    
     if (filters) {
       Object.keys(filters).forEach(key => {
-        if (filters[key]) {
-          params = params.set(key, filters[key]);
-        }
+        if (filters[key]) params = params.set(key, filters[key]);
       });
     }
-    
-    return this.http.get<ApiResponse<TaskDetail[]>>(`${this.apiUrl}/search`, { params });
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/available`, { params });
   }
 
   // Notifications
   getUnreadNotifications(): Observable<ApiResponse<any[]>> {
-    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/notifications/unread`);
+    return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/notifications/unread`);
   }
 
   markNotificationAsRead(notificationId: string): Observable<ApiResponse<boolean>> {
-    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/notifications/${notificationId}/read`, {});
+    return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/notifications/${notificationId}/read`, {});
   }
 
   // Task Rating and Reviews

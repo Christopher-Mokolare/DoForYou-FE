@@ -51,7 +51,7 @@ export class RealtimeService {
     this.connectionStateSubject.next('connecting');
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/hubs/chat`, {
+      .withUrl(`${environment.signalRUrl}`, {
         accessTokenFactory: () => token,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets
@@ -133,7 +133,7 @@ export class RealtimeService {
     });
 
     // Receive notification
-    this.hubConnection.on('ReceiveNotification', (notification: Notification) => {
+    this.hubConnection.on('NewNotification', (notification: Notification) => {
       const currentNotifications = this.notificationsSubject.value;
       this.notificationsSubject.next([notification, ...currentNotifications]);
       
