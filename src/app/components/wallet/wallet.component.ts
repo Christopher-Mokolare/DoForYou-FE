@@ -199,6 +199,18 @@ export class WalletComponent implements OnInit {
     this.withdrawForm.reset({ amount: 50 });
   }
 
+  onBankSelected(event: Event): void {
+    const bankName = (event.target as HTMLSelectElement).value;
+    const bank = this.supportedBanks.find(b => b.name === bankName);
+    if (bank) this.addBankForm.patchValue({ branchCode: bank.branchCode });
+  }
+
+  verifyOtp(): void {
+    if (this.otpForm.invalid) return;
+    this.modalService.showAlert('Coming Soon', 'OTP verification is coming soon.', 'info');
+    this.showOtpVerification = false;
+  }
+
   getTransactionIcon(type: string): string {
     return type === 'debit' ? 'fa-arrow-up' : 'fa-arrow-down';
   }
