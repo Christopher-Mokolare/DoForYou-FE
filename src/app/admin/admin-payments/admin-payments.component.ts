@@ -14,8 +14,8 @@ declare var Chart: any;
       <div class="page-header">
         <h1 class="page-title">Payment Overview</h1>
         <div class="header-stats">
-          <span class="stat-badge" style="background: #FFAB40; color: white;">Revenue: R{{paymentsData?.totalRevenue | number:'1.2-2'}}</span>
-          <span class="stat-badge" style="background: #FFD180; color: white;">Pending: R{{paymentsData?.pendingRevenue | number:'1.2-2'}}</span>
+          <span class="stat-badge" style="background: #FFAB40; color: white;">Revenue: R{{(paymentsData?.platformEarnings ?? paymentsData?.totalRevenue ?? 0) | number:'1.2-2'}}</span>
+          <span class="stat-badge" style="background: #FFD180; color: white;">Pending: R{{(paymentsData?.pendingCommission ?? paymentsData?.pendingRevenue ?? 0) | number:'1.2-2'}}</span>
         </div>
       </div>
 
@@ -27,7 +27,7 @@ declare var Chart: any;
               <i class="fas fa-dollar-sign fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Platform Revenue</div>
-                <div class="h5 mb-0" style="color: #FFAB40;">R{{paymentsData.totalRevenue | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FFAB40;">R{{(paymentsData.platformEarnings ?? paymentsData.totalRevenue ?? 0) | number:'1.2-2'}}</div>
                 <small class="text-muted">15% Commission</small>
               </div>
             </div>
@@ -40,7 +40,7 @@ declare var Chart: any;
               <i class="fas fa-clock fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Revenue</div>
-                <div class="h5 mb-0" style="color: #FFD180;">R{{paymentsData.pendingRevenue | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FFD180;">R{{(paymentsData.pendingCommission ?? paymentsData.pendingRevenue ?? 0) | number:'1.2-2'}}</div>
                 <small class="text-muted">Awaiting verification</small>
               </div>
             </div>
@@ -53,7 +53,7 @@ declare var Chart: any;
               <i class="fas fa-hand-holding-usd fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Helper Payouts</div>
-                <div class="h5 mb-0" style="color: #FF9E40;">R{{(paymentsData.totalRevenue * 0.85) | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FF9E40;">R{{((paymentsData.platformEarnings ?? paymentsData.totalRevenue ?? 0) / 0.15 * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">85% to helpers</small>
               </div>
             </div>
@@ -66,7 +66,7 @@ declare var Chart: any;
               <i class="fas fa-exclamation-triangle fa-2x text-muted opacity-50"></i>
               <div>
                 <div class="text-muted text-uppercase small mb-1">Pending Payouts</div>
-                <div class="h5 mb-0" style="color: #FF8A00;">R{{(paymentsData.pendingRevenue * 0.85) | number:'1.2-2'}}</div>
+                <div class="h5 mb-0" style="color: #FF8A00;">R{{((paymentsData.pendingCommission ?? paymentsData.pendingRevenue ?? 0) / 0.15 * 0.85) | number:'1.2-2'}}</div>
                 <small class="text-muted">Tasks awaiting payment</small>
               </div>
             </div>
@@ -595,7 +595,9 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
       return numValue.toFixed(2);
     };
     
-    return `Date,Total Revenue,Pending Revenue,Runner Payouts,Pending Payouts\n${date},${sanitizeValue(this.paymentsData?.totalRevenue)},${sanitizeValue(this.paymentsData?.pendingRevenue)},${sanitizeValue(this.paymentsData?.totalRevenue * 0.85)},${sanitizeValue(this.paymentsData?.pendingRevenue * 0.85)}`;
+    const revenue = this.paymentsData?.platformEarnings ?? this.paymentsData?.totalRevenue ?? 0;
+    const pending = this.paymentsData?.pendingCommission ?? this.paymentsData?.pendingRevenue ?? 0;
+    return `Date,Total Revenue,Pending Revenue,Runner Payouts,Pending Payouts\n${date},${sanitizeValue(revenue)},${sanitizeValue(pending)},${sanitizeValue(revenue / 0.15 * 0.85)},${sanitizeValue(pending / 0.15 * 0.85)}`;
   }
 
   private loadChartScript() {
@@ -639,8 +641,8 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
   private updateChart() {
     if (this.chart && this.paymentsData) {
       this.chart.data.datasets[0].data = [
-        this.paymentsData.totalRevenue * 0.15,
-        this.paymentsData.totalRevenue * 0.85
+        (this.paymentsData.platformEarnings ?? this.paymentsData.totalRevenue ?? 0) * 1,
+        (this.paymentsData.platformEarnings ?? this.paymentsData.totalRevenue ?? 0) / 0.15 * 0.85
       ];
       this.chart.update();
     }
