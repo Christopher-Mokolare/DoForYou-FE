@@ -2,33 +2,44 @@ name: Build and Deploy
 
 on:
   push:
-    branches:
-      - main-dev
-      - main-qa
-      - main
+    branches: [main, main-qa, main-dev]
 
 jobs:
-  build:
-    name: Build
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
-      - name: Install Dependencies
-        run: npm install
-      
-      - name: Build Project
+
+      - run: npm install
+
+      - name: Build
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main-dev" ]]; then
-            npm run build:dev
-          elif [[ "${{ github.ref }}" == "refs/heads/main-qa" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main-qa" ]]; then
             npm run build:qa
+          elif [[ "${{ github.ref }}" == "refs/heads/main-dev" ]]; then
+            npm run build:dev
           else
             npm run build:prod
           fi
+
+      - name: Deploy to Firebase (PROD - live channel)
+        if: github.ref == 'refs/heads/main'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: doforyou-eae6a
+
+      - name: Deploy to Firebase (QA - preview channel)
+        if: github.ref == 'refs/heads/main-qa'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: qa
+          projectId: doforyou-eae6a
