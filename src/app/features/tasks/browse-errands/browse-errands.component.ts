@@ -29,6 +29,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   searchSubject = new Subject<string>();
   searchSubscription?: Subscription;
   isLoggedIn = false;
+  canAcceptTasks = false;
 
   // Pagination properties
   currentPage = 1;
@@ -69,9 +70,8 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     // Check authentication status
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
-      // Authentication status updated
-      
-      // Auto-accept task if returning from auth
+      this.canAcceptTasks = this.authService.canAcceptTasks();
+
       if (this.isLoggedIn) {
         this.checkAutoAccept();
       }
@@ -189,7 +189,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
     }
 
     // Check if user can accept tasks based on preferences
-    if (!this.authService.canAcceptTasks()) {
+    if (!this.canAcceptTasks) {
       this.modalService.showAlert(
         'Permission Required', 
         'You have selected "Task Creator" mode. To accept tasks, please update your preferences to "Task Runner" or "Both" in your profile settings.',
@@ -317,7 +317,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
 
   getButtonText(errand: Errand): string {
     if (!this.isLoggedIn) return 'Login to Accept';
-    if (!this.authService.canAcceptTasks()) return 'Task Creator Mode';
+    if (!this.canAcceptTasks) return 'Task Creator Mode';
     
     const status = errand.taskStatus || errand.status || '';
     const contact = errand.userContact || errand.contact_number;
@@ -330,7 +330,7 @@ export class BrowseErrandsComponent implements OnInit, OnDestroy {
   }
 
   getButtonTooltip(errand: Errand): string {
-    if (!this.authService.canAcceptTasks()) return 'You are in Task Creator mode. Change to Task Runner mode to accept tasks.';
+    if (!this.canAcceptTasks) return 'You are in Task Creator mode. Change to Task Runner mode to accept tasks.';
     
     const status = errand.taskStatus || errand.status || '';
     const contact = errand.userContact || errand.contact_number;

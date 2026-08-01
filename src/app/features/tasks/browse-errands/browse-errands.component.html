@@ -165,7 +165,7 @@
             <div class="task-footer">
               <button (click)="acceptErrand(errand)" 
                       class="btn-primary btn-block"
-                      [disabled]="isLoggedIn && (!authService.canAcceptTasks() || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING'))"
+                      [disabled]="isLoggedIn && (!canAcceptTasks || !errand.contact_number || errand.status?.toUpperCase()?.includes('PENDING'))"
                       [title]="getButtonTooltip(errand)">
                 <i class="fas fa-handshake"></i>
                 <span>{{ getButtonText(errand) }}</span>
